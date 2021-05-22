@@ -4,22 +4,19 @@ on:
   release:
     types: [created]
 
-# Note: "GITHUB_REF" environment variable will contain the tag of the release
-# see https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release
-
+env:
+  RELEASE_TAG: ${{ github.event.release.tag_name }}
+  
 jobs:
   jar:
     runs-on: ubuntu-latest
     steps:
-      - name: debug
-        run: |
-          echo 'action=${{ github.event.action }}'
-          echo 'release=${{ github.event.release }}'
 
-      # Automagically checks out the tag in GITHUB_REF
       - name: Checkout the released code
         uses: actions/checkout@v2
-
+        with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
+          
       - name: Configure Git
         run: |
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -44,7 +41,7 @@ jobs:
       # The POM version is usually a -SNAPSHOT at this point, we set it to the requested tag because it will be
       # present inside the JAR so should reflect the actual release tag.
       - name: Set POM version
-        run: mvn --batch-mode versions:set '-DnewVersion=${{ github.event.release.tag_name }}'
+        run: mvn --batch-mode versions:set "-DnewVersion=${RELEASE_TAG}"
 
       # We are not skipping tests here.  They are half redundant because tests also run in the CI build
       # but it's possible for a release to be accidentally created from a commit where tests do not pass so
@@ -61,20 +58,8 @@ jobs:
           upload_url="$(echo '${{ github.event.release.upload_url }}' | sed 's/\\.*//' )"
           curl \
             --silent \
-            --url "${upload_url}" \
+            --url "${upload_url}?name=plantuml-${RELEASE_TAG}.jar&label=JAR" \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
             --header 'Content-Type: application/java-archive' \
-            --data-binary "@target/plantuml-${GITHUB_REF}.jar"
-
-      # See https://docs.github.com/en/rest/reference/repos#update-a-release-asset
-      - name: Publish the Release
-        run: |
-          release_url="$(echo '${{ github.event.release.url }}' | sed 's/\\.*//' )"
-          curl \
-            --silent \
-            --request PATCH \
-            --url "${release_url}" \
-            --header 'Accept: application/vnd.github.v3+json' \
-            --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
-            --data '{"draft":"false"}'
+            --data-binary "@target/plantuml-${RELEASE_TAG}.jar"
