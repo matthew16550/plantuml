@@ -1,4 +1,4 @@
-name: Build Release Artifacts
+name: Release Artifacts
 
 on:
   release:
