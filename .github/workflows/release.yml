@@ -56,7 +56,7 @@ jobs:
           upload_url="$(echo '${{ github.event.release.upload_url }}' | sed 's/{.*//' )"
           
           response_code=$(curl \
-            --url "${upload_url}?nameX=plantuml-${RELEASE_TAG}.jar" \
+            --url "${upload_url}?name=plantuml-${RELEASE_TAG}.jar" \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
             --header 'Content-Type: application/java-archive' \
