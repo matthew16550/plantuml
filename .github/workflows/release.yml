@@ -27,12 +27,19 @@ jobs:
         with:
           java-version: 8
 
+      # Caching currently doesn't achieve anything here, I think because we have a tag checked out.
+      # Hopefully someone at GitHub will fix it then caching will magically start working for us!
+      # https://github.com/actions/cache/issues/556
       - name: Cache Maven packages
         uses: actions/cache@v2
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-release-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven-release
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+        
+      # Downloading all the dependencies is very log spammy so we do this in its own step
+      - name: Download Maven Dependencies
+        run: mvn --batch-mode dependency:go-offline
         
       # The POM version is usually a -SNAPSHOT at this point, we set it to the requested tag because it will be
       # present inside the JAR so should reflect the actual release tag.
