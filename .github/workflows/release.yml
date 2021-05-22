@@ -61,12 +61,14 @@ jobs:
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
             --header 'Content-Type: application/java-archive' \
             --data-binary "@target/plantuml-${RELEASE_TAG}.jar" \
+            --silent \
             --output target/response.json \
             --write-out '%{http_code}')
             
           cat target/response.json
+          echo
           
           if [ ${response_code} -ne 200 ]; then
-            echo "Server returned status code ${response_code}"
+            echo "\nServer returned status code ${response_code}"
             exit 1
           fi
