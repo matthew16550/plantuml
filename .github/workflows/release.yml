@@ -8,10 +8,9 @@ env:
   RELEASE_TAG: ${{ github.event.release.tag_name }}
   
 jobs:
-  jar:
+  build_and_upload_jar:
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout the released code
         uses: actions/checkout@v2
         with:
@@ -37,16 +36,14 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
         
-      # The POM version is usually a -SNAPSHOT at this point, we set it to the requested tag because it will be
-      # present inside the JAR so should reflect the actual release tag.
+      # The POM version is usually a -SNAPSHOT at this point so we set it to RELEASE_TAG
       - name: Set POM version
         run: mvn --batch-mode versions:set "-DnewVersion=${RELEASE_TAG}"
 
       # We are not skipping tests here.  They are half redundant because tests also run in the CI build
       # but it's possible for a release to be accidentally created from a commit where tests do not pass so
-      # running them again here is useful (they do not take up much time).
-      #
-      # This is a code smell suggesting the CI / Release process can be simplified.  But as a first attempt it is good enough :-)
+      # running them again here is useful (they do not take up much time).  This is a code smell suggesting
+      # the CI / Release process can be simplified.  But as a first attempt it is good enough :-)
       - name: Build JAR
         run: mvn --batch-mode -Dmaven.javadoc.skip=true -Dmaven.source.skip=true package
 
@@ -55,7 +52,7 @@ jobs:
         run: |
           upload_url="$(echo '${{ github.event.release.upload_url }}' | sed 's/{.*//' )"
           
-          response_code=$(curl \
+          http_code=$(curl \
             --url "${upload_url}?name=plantuml-${RELEASE_TAG}.jar" \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
@@ -65,7 +62,7 @@ jobs:
             --output target/response.json \
             --write-out '%{http_code}')
           
-          echo "Server response ${response_code}:"
+          echo "Server response ${http_code}:"
           cat target/response.json
           
-          [ ${response_code} -eq 201 ] || exit 1
+          [ ${http_code} -eq 201 ] || exit 1
