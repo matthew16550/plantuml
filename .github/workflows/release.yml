@@ -1,8 +1,6 @@
 name: Release Artifacts
 
-on:
-  release:
-    types: [created]
+on: release
 
 # Note: "GITHUB_REF" environment variable will contain the tag of the release
 # see https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release
@@ -12,6 +10,9 @@ jobs:
     # if: github.event.release.draft
     runs-on: ubuntu-latest
     steps:
+      - name: debug
+        run: echo '${{ github.event.action }}'
+        
       - name: Configure Git
         run: |
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
