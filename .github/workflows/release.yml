@@ -52,10 +52,9 @@ jobs:
         run: mvn --batch-mode -Dmaven.javadoc.skip=true -Dmaven.source.skip=true package
 
       # See https://docs.github.com/en/rest/reference/repos#upload-a-release-asset
-      # TODO name param & label
       - name: Upload JAR
         run: |
-          upload_url="$(echo '${{ github.event.release.upload_url }}' | sed 's/\\.*//' )"
+          upload_url="$(echo '${{ github.event.release.upload_url }}' | sed 's/{.*//' )"
           curl \
             --silent \
             --url "${upload_url}?name=plantuml-${RELEASE_TAG}.jar&label=JAR" \
