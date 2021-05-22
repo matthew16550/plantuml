@@ -1,6 +1,8 @@
 name: Release Artifacts
 
-on: release
+on:
+  release:
+    types: [created, edited]
 
 # Note: "GITHUB_REF" environment variable will contain the tag of the release
 # see https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release
@@ -35,10 +37,14 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      # Downloading all the dependencies is very log spammy so we do this in its own step
+      - name: Download Maven dependencies
+        run: mvn --batch-mode dependency:go-offline
+        
       # The POM version is usually a -SNAPSHOT at this point, we set it to the requested tag because it will be
       # present inside the JAR so should reflect the actual release tag.
       - name: Set POM version
-        run: mvn --batch-mode versions:set "-DnewVersion=${GITHUB_REF}"
+        run: mvn --batch-mode versions:set '-DnewVersion=${{ github.event.release.tag_name }}'
 
       # We are not skipping tests here.  They are half redundant because tests also run in the CI build
       # but it's possible for a release to be accidentally created from a commit where tests do not pass so
