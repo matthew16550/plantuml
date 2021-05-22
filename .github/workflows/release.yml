@@ -1,0 +1,67 @@
+name: Build Release Artifacts
+
+on:
+  release:
+    types: [ created, edited ]
+
+# Note: "GITHUB_REF" environment variable will contain the tag of the release
+# see https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release
+
+jobs:
+  jar:
+    if: github.event.release.draft
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure Git
+        run: |
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config user.name  'github-actions[bot]'
+
+      # Automagically checks out the tag in GITHUB_REF
+      - name: Checkout the released code
+        uses: actions/checkout@v2
+
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      # The POM version is usually a -SNAPSHOT at this point, we set it to the requested tag because it will be
+      # present inside the JAR so should reflect the actual release tag.
+      - name: Set POM version
+        run: mvn --batch-mode versions:set '-DnewVersion=${{ GITHUB_REF }}'
+
+      # We are not skipping tests here.  They are half redundant because tests also run in the CI build
+      # but it's possible for a release to be accidentally created from a commit where tests do not pass so
+      # running them again here is useful (they do not take up much time).
+      #
+      # This is a code smell suggesting the CI / Release process can be simplified.  But as a first attempt it is good enough :-)
+      - name: Build JAR
+        run: mvn --batch-mode -Dmaven.javadoc.skip=true -Dmaven.source.skip=true package
+
+      # See https://docs.github.com/en/rest/reference/repos#upload-a-release-asset
+      # TODO name param & label
+      - name: Upload JAR
+        run: |
+          curl -v \
+            --url '${{ github.event.release.upload_url }}' \
+            --header 'Accept: application/vnd.github.v3+json' \
+            --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+            --header 'Content-Type: application/java-archive' \
+            --data-binary '@target/plantuml-${{ GITHUB_REF }}.jar'
+
+      # See https://docs.github.com/en/rest/reference/repos#update-a-release-asset
+      - name: Publish the Release
+        run: |
+          curl -v -X PATCH \
+            --url '${{ github.event.release.url }}' \
+            --header 'Accept: application/vnd.github.v3+json' \
+            --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+            --data '{"draft":"false"}'
