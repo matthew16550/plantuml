@@ -2,7 +2,7 @@ name: Release Artifacts
 
 on:
   release:
-    types: [ created, edited ]
+    types: [created]
 
 # Note: "GITHUB_REF" environment variable will contain the tag of the release
 # see https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release
