@@ -64,11 +64,8 @@ jobs:
             --silent \
             --output target/response.json \
             --write-out '%{http_code}')
-            
-          cat target/response.json
-          echo
           
-          if [ ${response_code} -ne 200 ]; then
-            echo "\nServer returned status code ${response_code}"
-            exit 1
-          fi
+          echo "Server response ${response_code}:"
+          cat target/response.json
+          
+          [ ${response_code} -eq 200 ] || exit 1
