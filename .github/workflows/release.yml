@@ -30,13 +30,9 @@ jobs:
       - name: Cache Maven packages
         uses: actions/cache@v2
         with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      # Downloading all the dependencies is very log spammy so we do this in its own step
-      - name: Download Maven dependencies
-        run: mvn --batch-mode dependency:go-offline
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-release-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-release
         
       # The POM version is usually a -SNAPSHOT at this point, we set it to the requested tag because it will be
       # present inside the JAR so should reflect the actual release tag.
@@ -57,7 +53,7 @@ jobs:
           upload_url="$(echo '${{ github.event.release.upload_url }}' | sed 's/{.*//' )"
           curl \
             --silent \
-            --url "${upload_url}?name=plantuml-${RELEASE_TAG}.jar&label=JAR" \
+            --url "${upload_url}?name=plantuml-${RELEASE_TAG}.jar" \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
             --header 'Content-Type: application/java-archive' \
