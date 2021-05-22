@@ -27,19 +27,15 @@ jobs:
         with:
           java-version: 8
 
-      # Caching currently doesn't achieve anything here, I think because we have a tag checked out.
-      # Hopefully someone at GitHub will fix it then caching will magically start working for us!
-      # https://github.com/actions/cache/issues/556
-      - name: Cache Maven packages
+      # If this run stores a new cache then the next run will not be able to use it because this is a tag checkout :-(
+      # But a cache already created on the default branch (by the CI workflow) will be loaded here.
+      # See https://github.com/actions/cache/issues/344
+      - name: Reuse Maven package cache created by CI workflow
         uses: actions/cache@v2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-        
-      # Downloading all the dependencies is very log spammy so we do this in its own step
-      - name: Download Maven Dependencies
-        run: mvn --batch-mode dependency:go-offline
         
       # The POM version is usually a -SNAPSHOT at this point, we set it to the requested tag because it will be
       # present inside the JAR so should reflect the actual release tag.
@@ -60,8 +56,9 @@ jobs:
           upload_url="$(echo '${{ github.event.release.upload_url }}' | sed 's/{.*//' )"
           curl \
             --silent \
-            --url "${upload_url}?name=plantuml-${RELEASE_TAG}.jar" \
+            --url "${upload_url}X?name=plantuml-${RELEASE_TAG}.jar" \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
             --header 'Content-Type: application/java-archive' \
             --data-binary "@target/plantuml-${RELEASE_TAG}.jar"
+
