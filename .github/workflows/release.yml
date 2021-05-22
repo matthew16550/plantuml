@@ -54,8 +54,8 @@ jobs:
       - name: Upload JAR
         run: |
           upload_url="$(echo '${{ github.event.release.upload_url }}' | sed 's/{.*//' )"
-          curl -v --fail --progress-bar \
-            --url "${upload_url}X?name=plantuml-${RELEASE_TAG}.jar" \
+          curl --fail --silent --show-error \
+            --url "${upload_url}?nameX=plantuml-${RELEASE_TAG}.jar" \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
             --header 'Content-Type: application/java-archive' \
