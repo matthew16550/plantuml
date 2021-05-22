@@ -7,7 +7,6 @@ on: release
 
 jobs:
   jar:
-    # if: github.event.release.draft
     runs-on: ubuntu-latest
     steps:
       - name: debug
