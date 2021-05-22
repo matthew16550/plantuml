@@ -54,9 +54,19 @@ jobs:
       - name: Upload JAR
         run: |
           upload_url="$(echo '${{ github.event.release.upload_url }}' | sed 's/{.*//' )"
-          curl -v \
+          
+          response_code=$(curl \
             --url "${upload_url}?nameX=plantuml-${RELEASE_TAG}.jar" \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
             --header 'Content-Type: application/java-archive' \
-            --data-binary "@target/plantuml-${RELEASE_TAG}.jar"
+            --data-binary "@target/plantuml-${RELEASE_TAG}.jar" \
+            --output target/response.json \
+            --write-out '%{http_code}')
+            
+          cat target/response.json
+          
+          if [ ${response_code} -ne 200 ]; then
+            echo "Server returned status code ${response_code}"
+            exit 1
+          fi
