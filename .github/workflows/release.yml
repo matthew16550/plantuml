@@ -10,7 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: debug
-        run: echo '${{ github.event.action }}'
+        run: |
+          echo 'action=${{ github.event.action }}'
+          echo 'release=${{ github.event.release }}'
 
       # Automagically checks out the tag in GITHUB_REF
       - name: Checkout the released code
@@ -50,8 +52,10 @@ jobs:
       # TODO name param & label
       - name: Upload JAR
         run: |
-          curl -v \
-            --url '${{ github.event.release.upload_url }}' \
+          upload_url="$(echo '${{ github.event.release.upload_url }}' | sed 's/\\.*//' )"
+          curl \
+            --silent \
+            --url "${upload_url}" \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
             --header 'Content-Type: application/java-archive' \
@@ -60,8 +64,11 @@ jobs:
       # See https://docs.github.com/en/rest/reference/repos#update-a-release-asset
       - name: Publish the Release
         run: |
-          curl -v -X PATCH \
-            --url '${{ github.event.release.url }}' \
+          release_url="$(echo '${{ github.event.release.url }}' | sed 's/\\.*//' )"
+          curl \
+            --silent \
+            --request PATCH \
+            --url "${release_url}" \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
             --data '{"draft":"false"}'
