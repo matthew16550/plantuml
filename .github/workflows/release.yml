@@ -60,7 +60,8 @@ jobs:
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
             --header 'Content-Type: application/java-archive' \
-            --data-binary "@target/plantuml-${RELEASE_TAG}.jar"
+            --data-binary "@target/plantuml-${RELEASE_TAG}.jar" \
+            --fail-with-body
 
           curl \
             -v \
