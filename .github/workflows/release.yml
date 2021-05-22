@@ -9,7 +9,7 @@ on:
 
 jobs:
   jar:
-    if: github.event.release.draft
+    # if: github.event.release.draft
     runs-on: ubuntu-latest
     steps:
       - name: Configure Git
