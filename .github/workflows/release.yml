@@ -30,7 +30,7 @@ jobs:
       # If this run stores a new cache then the next run will not be able to use it because this is a tag checkout :-(
       # But a cache already created on the default branch (by the CI workflow) will be loaded here.
       # See https://github.com/actions/cache/issues/344
-      - name: Reuse Maven package cache created by CI workflow
+      - name: Load Maven cache
         uses: actions/cache@v2
         with:
           path: ~/.m2
@@ -55,7 +55,7 @@ jobs:
         run: |
           upload_url="$(echo '${{ github.event.release.upload_url }}' | sed 's/{.*//' )"
           curl \
-            --silent \
+            -v \
             --url "${upload_url}X?name=plantuml-${RELEASE_TAG}.jar" \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
