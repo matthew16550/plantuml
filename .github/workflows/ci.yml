@@ -31,7 +31,9 @@ jobs:
       # Also the cache is reused by the "release" workflow but the workflow here does not use all
       # dependencies so without the priming step the cache will be missing some things.
       - name: Prime Maven cache
-        run: mvn --batch-mode dependency:go-offline
+        run: |
+          mvn --batch-mode dependency:go-offline
+          mvn --batch-mode org.apache.maven.plugins:maven-surefire-plugin:help
         
       - name: Run tests with Maven
         run: mvn -B test --file pom.xml
