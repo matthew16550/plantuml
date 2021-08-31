@@ -8,6 +8,7 @@ on:
       - master
     tags:
       - .*
+    workflow_dispatch:
 
 env:
   DO_RELEASE: startsWith(github.ref, 'refs/tags/v')
