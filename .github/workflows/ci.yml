@@ -1,4 +1,4 @@
-name: tests
+name: CI
 
 on:
   pull_request:
@@ -6,15 +6,27 @@ on:
   push:
     branches:
       - master
+    tags:
+      - .*
+
+env:
+  DO_RELEASE: startsWith(github.ref, 'refs/tags/v')
 
 jobs:
-  run_tests:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
-      - name: Set up JDK 8
+      # GitHub will show this as the user if the workflow uploads any release assets or makes pushes etc.
+      # See https://github.com/actions/checkout/issues/13#issuecomment-724415212
+      - name: Configure Git User
+        run: |
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config user.name  'github-actions[bot]'
+          
+      - name: Set up Java
         uses: actions/setup-java@v2.2.0
         with:
           java-version: 8
@@ -28,11 +40,31 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # Downloading all the dependencies is very log spammy so we do this in its own step.
-      # Also the cache is reused by the "release" workflow but the workflow here does not use all
-      # dependencies so without the priming step the cache will be missing some things.
+      # Downloading all the dependencies is very log spammy, so we do this in its own step.
       - name: Prime Maven cache
         run: mvn --batch-mode dependency:go-offline
 
-      - name: Run tests with Maven
-        run: mvn -B test --file pom.xml
+        # The POM version is usually a -SNAPSHOT at this point, if this is a release then we set the version from the tag
+      - name: Set POM version
+        if: env.DO_RELEASE == 'true'
+        run: |
+          POM_VERSION="$(echo '${{ github.ref }}' | cut -c 12-)"
+          mvn --batch-mode versions:set "-DnewVersion=${POM_VERSION}"
+          echo "::set-env name=POM_VERSION::${POM_VERSION}"
+
+      - name: Run tests
+        run: mvn --batch-mode test
+
+      - name: Build JARs
+        run: mvn --batch-mode -Dmaven.test.skip=true package
+  
+      - name: Create release in GitHub
+        uses: softprops/action-gh-release@2d72d869af3bf23602f9593a1e3fd739b80ac1eb  # v0.1.12
+        if: env.DO_RELEASE == 'true'
+        with:
+          discussion_category_name: Announcements
+          fail_on_unmatched_files: true
+          files: |
+            target/plantuml-${POM_VERSION}.jar
+            target/plantuml-${POM_VERSION}-javadoc.jar
+            target/plantuml-${POM_VERSION}-sources.jar
