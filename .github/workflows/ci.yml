@@ -19,6 +19,7 @@ jobs:
       - name: Workflow debug info
         run: |
           # github.event=${{ github.event }}
+          # github.event.id=${{ github.event.id }}
           # github.event.type=${{ github.event.type }}
           # github.event.payload.action=${{ github.event.payload.action }}
           # github.ref=${{ github.ref }}
@@ -69,6 +70,6 @@ jobs:
           discussion_category_name: Announcements
           fail_on_unmatched_files: true
           files: |
-            target/plantuml-${POM_VERSION}.jar
-            target/plantuml-${POM_VERSION}-javadoc.jar
-            target/plantuml-${POM_VERSION}-sources.jar
+            target/plantuml-${env.POM_VERSION}.jar
+            target/plantuml-${env.POM_VERSION}-javadoc.jar
+            target/plantuml-${env.POM_VERSION}-sources.jar
