@@ -19,7 +19,7 @@ jobs:
       - name: Workflow debug info
         run: |
           # github.event_name   : ${{ github.event_name }}
-          # github.event.action : ${{ github.event.payload.action }}
+          # github.event.action : ${{ github.event.action }}
           # github.ref          : ${{ github.ref }}
 
       - name: Checkout the repository
