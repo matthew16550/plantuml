@@ -18,12 +18,9 @@ jobs:
     steps:
       - name: Workflow debug info
         run: |
-          # github.event=${{ github.event }}
-          # github.event.id             : ${{ github.event.id }}
-          # github.event.type           : ${{ github.event.type }}
-          # github.event.payload.action : ${{ github.event.payload.action }}
-          # github.ref                    ${{ github.ref }}
-          # ${{ toJson(github) }}
+          # github.event_name   : ${{ github.event_name }}
+          # github.event.action : ${{ github.event.payload.action }}
+          # github.ref          : ${{ github.ref }}
 
       - name: Checkout the repository
         uses: actions/checkout@v2
