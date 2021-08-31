@@ -16,6 +16,12 @@ jobs:
   CI:
     runs-on: ubuntu-latest
     steps:
+      - name: Workflow debug info
+        run: |
+          echo "github.event.type=${{ github.event.type }}"
+          echo "github.event.payload.action=${{ github.event.payload.action }}"
+          echo "github.ref=${{ github.ref }}"
+
       - name: Checkout the repository
         uses: actions/checkout@v2
 
@@ -43,7 +49,7 @@ jobs:
         run: |
           POM_VERSION="$(echo '${{ github.ref }}' | cut -c 12-)"
           mvn --batch-mode versions:set "-DnewVersion=${POM_VERSION}"
-          echo "::set-env name=POM_VERSION::${POM_VERSION}"
+          echo "POM_VERSION=${POM_VERSION}" >> $GITHUB_ENV
 
         # Compile / Test / Package are separate steps so the reason for any build failure is more obvious in GitHub UI
       - name: Compile
