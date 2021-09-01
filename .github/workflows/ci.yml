@@ -18,9 +18,10 @@ jobs:
         run: |
           cat <<-EOF
             ::group::Debug Info
-            github.event_name   : ${{ github.event_name }}
-            github.event.action : ${{ github.event.action }}
-            github.ref          : ${{ github.ref }}
+            GITHUB_ACTOR        : '${GITHUB_ACTOR}'
+            GITHUB_REF          : '${GITHUB_REF}'
+            github.event_name   : '${{ github.event_name }}'
+            github.event.action : '${{ github.event.action }}'
             ::endgroup::
           EOF
           
