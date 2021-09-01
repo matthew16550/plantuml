@@ -25,7 +25,7 @@ jobs:
             ::endgroup::
           EOF
           
-          if [[ '${GITHUB_ACTOR}' == 'matthew16550' ]] && [[ '${GITHUB_REF}' == refs/tags/v* ]]; then
+          if [[ '${GITHUB_ACTOR}' == 'matthew16550' && '${GITHUB_REF}' == refs/tags/v* ]]; then
             echo "📣 This is a release build"
             echo "::set-output name=do_release::true"
             echo "::set-output name=pom_version::${GITHUB_REF#refs/tags/v}"
