@@ -9,18 +9,26 @@ on:
       - master
   workflow_dispatch:
 
-env:
-  DO_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
-
 jobs:
   CI:
     runs-on: ubuntu-latest
     steps:
-      - name: Workflow debug info
+      - name: Configure job
+        id: config
         run: |
+          # Debug Info
+          # ==========
+          # github.actor.id     : ${{ github.actor.id }}
           # github.event_name   : ${{ github.event_name }}
           # github.event.action : ${{ github.event.action }}
           # github.ref          : ${{ github.ref }}
+          
+          env
+          
+          if [[ '${{ github.ref }}' == refs/tags/v* ]]; then
+            echo "::set-output name=do_release::true"
+            echo "::set-output name=pom_version::$(echo '${{ github.ref }}' | cut -c 12-)"
+          fi
 
       - name: Checkout the repository
         uses: actions/checkout@v2
@@ -43,15 +51,13 @@ jobs:
       - name: Prime maven cache
         run: mvn --batch-mode dependency:go-offline
 
-        # The POM version is usually a -SNAPSHOT at this point, if this is a release then we set the version from the tag
+      # POM version is usually a -SNAPSHOT at this point, if this is a release then we set the version from the tag
       - name: Set POM version
-        if: env.DO_RELEASE == 'true'
+        if: steps.config.outputs.do_release == 'true'
         run: |
-          POM_VERSION="$(echo '${{ github.ref }}' | cut -c 12-)"
-          mvn --batch-mode versions:set "-DnewVersion=${POM_VERSION}"
-          echo "POM_VERSION=${POM_VERSION}" >> $GITHUB_ENV
+          mvn --batch-mode versions:set '-DnewVersion=${{ steps.config.outputs.pom_version }}'
 
-        # Compile / Test / Package are separate steps so the reason for any build failure is more obvious in GitHub UI
+      # Compile / Test / Package are separate steps so the reason for any build failure is more obvious in GitHub UI
       - name: Compile
         run: mvn --batch-mode compile
 
@@ -63,11 +69,11 @@ jobs:
   
       - name: Create release in GitHub
         uses: softprops/action-gh-release@2d72d869af3bf23602f9593a1e3fd739b80ac1eb  # v0.1.12
-        if: env.DO_RELEASE == 'true'
+        if: steps.config.outputs.do_release == 'true'
         with:
           discussion_category_name: Announcements
           fail_on_unmatched_files: true
           files: |
-            target/plantuml-${{ env.POM_VERSION }}.jar
-            target/plantuml-${{ env.POM_VERSION }}-javadoc.jar
-            target/plantuml-${{ env.POM_VERSION }}-sources.jar
+            target/plantuml-${{ steps.config.outputs.pom_version }}.jar
+            target/plantuml-${{ steps.config.outputs.pom_version }}-javadoc.jar
+            target/plantuml-${{ steps.config.outputs.pom_version }}-sources.jar
