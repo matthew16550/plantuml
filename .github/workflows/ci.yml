@@ -17,7 +17,7 @@ jobs:
         id: config
         run: |
           cat <<-EOF
-          Debug Info
+            Debug Info
             ============
             github.event_name   : ${{ github.event_name }}
             github.event.action : ${{ github.event.action }}
