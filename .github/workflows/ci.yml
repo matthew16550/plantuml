@@ -16,18 +16,23 @@ jobs:
       - name: Configure job
         id: config
         run: |
-          # Debug Info
-          # ==========
-          # github.actor.id     : ${{ github.actor.id }}
-          # github.event_name   : ${{ github.event_name }}
-          # github.event.action : ${{ github.event.action }}
-          # github.ref          : ${{ github.ref }}
+          echo <<EOF
+          ::group::Debug Info
+          github.actor.id     : ${{ github.actor.id }}
+          github.event_name   : ${{ github.event_name }}
+          github.event.action : ${{ github.event.action }}
+          github.ref          : ${{ github.ref }}
+          ${{ toJson(github) }}
+          ::endgroup::
+          EOF
           
           env
           
-          if [[ '${{ github.ref }}' == refs/tags/v* ]]; then
+          if [[ '${GITHUB_ACTOR}' == 'matthew16550' ]] && [[ '${GITHUB_REF}' == refs/tags/v* ]]; then
             echo "::set-output name=do_release::true"
-            echo "::set-output name=pom_version::$(echo '${{ github.ref }}' | cut -c 12-)"
+          
+            # (pom_version is GITHUB_REF without the 'refs/tags/v' prefix)
+            echo "::set-output name=pom_version::${GITHUB_REF#refs/tags/v}"
           fi
 
       - name: Checkout the repository
