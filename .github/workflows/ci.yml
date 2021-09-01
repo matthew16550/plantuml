@@ -17,12 +17,11 @@ jobs:
         id: config
         run: |
           cat <<-EOF
-            Debug Info
-            ==========
+            ::group::Debug Info
             github.event_name   : ${{ github.event_name }}
             github.event.action : ${{ github.event.action }}
             github.ref          : ${{ github.ref }}
-            ==========
+            ::endgroup::
           EOF
           
           if [[ '${GITHUB_ACTOR}' == 'matthew16550' ]] && [[ '${GITHUB_REF}' == refs/tags/v* ]]; then
