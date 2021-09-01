@@ -24,6 +24,7 @@ jobs:
             github.event.action : "${{ github.event.action }}"
             ::endgroup::
           EOF
+          git config -l
           
           if [[ "${GITHUB_ACTOR}" == "matthew16550" && "${GITHUB_REF}" == refs/tags/v* ]]; then
             echo "📣 This is a release build"
@@ -38,11 +39,11 @@ jobs:
 
       # GitHub will show this as the user if the workflow uploads any release assets or makes pushes etc.
       # See https://github.com/actions/checkout/issues/13#issuecomment-724415212
-      - name: Configure git user
-        run: |
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git config user.name  'github-actions[bot]'
-          
+#      - name: Configure git user
+#        run: |
+#          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+#          git config user.name  'github-actions[bot]'
+#          
       - name: Set up java
         uses: actions/setup-java@v2.3.0
         with:
