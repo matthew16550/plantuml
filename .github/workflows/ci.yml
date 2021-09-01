@@ -26,11 +26,12 @@ jobs:
           EOF
           
           if [[ "${GITHUB_ACTOR}" == "matthew16550" && "${GITHUB_REF}" == refs/tags/v* ]]; then
-            echo "📣 This is a release build"
+            pom_version="${GITHUB_REF#refs/tags/v}"    # pom_version is the tag without the 'v' prefix
+            echo "📣 This run will release version ${pom_version}"
             echo "::set-output name=do_release::true"
-            echo "::set-output name=pom_version::${GITHUB_REF#refs/tags/v}"
+            echo "::set-output name=pom_version::${pom_version}"
           else
-            echo "This is NOT a release build"
+            echo "This run will NOT make a release"
           fi
 
       - name: Checkout the repository
