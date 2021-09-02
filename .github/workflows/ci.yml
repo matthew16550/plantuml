@@ -18,11 +18,11 @@ jobs:
         run: |
           cat <<-EOF
             ::group::Debug Info
-            GITHUB_REF              : "${GITHUB_REF}"
-            github.actor            : "${{ github.actor }}"
-            github.event_name       : "${{ github.event_name }}"
-            github.event.action     : "${{ github.event.action }}"
-            github.repository_owner : "${{ github.repository_owner }}"
+            GITHUB_REF              : '${GITHUB_REF}'
+            github.actor            : '${{ github.actor }}'
+            github.event_name       : '${{ github.event_name }}'
+            github.event.action     : '${{ github.event.action }}'
+            github.repository_owner : '${{ github.repository_owner }}'
             ::endgroup::
           EOF
           
@@ -34,7 +34,7 @@ jobs:
                 && ( "${{ github.actor }}" == "${{ github.repository_owner }}" || "${{ github.actor }}" == "arnaudroques" ) \
              ]]; then
             pom_version="${GITHUB_REF#refs/tags/v}"    # pom_version is the tag without the 'v' prefix
-            echo "📣 This run will release version ${pom_version}"
+            echo "📣 This run will release version '${pom_version}'"
             echo "::set-output name=do_release::true"
             echo "::set-output name=pom_version::${pom_version}"
           else
