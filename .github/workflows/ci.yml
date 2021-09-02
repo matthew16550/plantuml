@@ -91,5 +91,4 @@ jobs:
             --discussion-category Announcements \
             'target/plantuml-${{ steps.config.outputs.pom_version }}.jar' \
             'target/plantuml-${{ steps.config.outputs.pom_version }}-javadoc.jar' \
-            'target/plantuml-${{ steps.config.outputs.pom_version }}-sources.jar' \
-            'no-such-file'
+            'target/plantuml-${{ steps.config.outputs.pom_version }}-sources.jar'
