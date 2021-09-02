@@ -28,7 +28,7 @@ jobs:
 
           # Do a release when a git tag starting with 'v' has been created by a suitable user.
           # (We match against github.repository_owner as a kludge so that forked repos can release themselves when testing the workflow)
-          
+
           if [[ "${{ github.event_name }}" == "create" \
                 && "${GITHUB_REF}" == refs/tags/v* \
                 && "${{ github.actor }}" =~ arnaudroques|${{ github.repository_owner }} \
@@ -70,7 +70,12 @@ jobs:
 
       - name: Package
         run: mvn --batch-mode -Dmaven.test.skip=true package
-  
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: target/*.jar
+
       - name: Create release in GitHub
         if: steps.config.outputs.do_release == 'true'
         env:
