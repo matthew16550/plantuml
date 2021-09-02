@@ -74,7 +74,7 @@ jobs:
       - name: Upload jar artifact
         uses: actions/upload-artifact@v2
         with:
-          name: 'plantuml-${{ steps.config.outputs.pom_version }}.jar'
+          name: '${{ github.run_id }}-plantuml-${{ steps.config.outputs.pom_version }}.jar'
           path: 'target/plantuml-${{ steps.config.outputs.pom_version }}.jar'
 
       - name: Create release in GitHub
