@@ -69,9 +69,10 @@ jobs:
         run: mvn --batch-mode test
 
       - name: Package
-        run: mvn --batch-mode -Dmaven.test.skip=true package
+        run: Xmvn --batch-mode -Dmaven.test.skip=true package
 
       - name: Upload jar artifacts
+        if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ github.run_number }}-jars
