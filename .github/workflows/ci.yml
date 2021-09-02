@@ -25,7 +25,6 @@ jobs:
             github.repository_owner : '${{ github.repository_owner }}'
             ::endgroup::
           EOF
-          gh version
 
           # Do a release when a git tag starting with 'v' has been created by a suitable user.
           # (We match against github.repository_owner as a kludge so that forked repos can release themselves when testing the workflow)
@@ -72,20 +71,12 @@ jobs:
       - name: Package
         run: mvn --batch-mode -Dmaven.test.skip=true package
   
-#      - name: Create release in GitHub
-#        uses: softprops/action-gh-release@2d72d869af3bf23602f9593a1e3fd739b80ac1eb  # v0.1.12
-#        if: steps.config.outputs.do_release == 'true'
-#        with:
-#          discussion_category_name: Announcements
-
-      - name: gh
+      - name: Create release in GitHub
         if: steps.config.outputs.do_release == 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           gh release create 'v${{ steps.config.outputs.pom_version }}' \
-            --discussion-category Announcements \
-            --notes "some notes" \
             'target/plantuml-${{ steps.config.outputs.pom_version }}.jar' \
             'target/plantuml-${{ steps.config.outputs.pom_version }}-javadoc.jar' \
             'target/plantuml-${{ steps.config.outputs.pom_version }}-sources.jar'
