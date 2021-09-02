@@ -25,6 +25,7 @@ jobs:
             github.repository_owner : '${{ github.repository_owner }}'
             ::endgroup::
           EOF
+          gh version
 
           # Do a release when a git tag starting with 'v' has been created by a suitable user.
           # (We match against github.repository_owner as a kludge so that forked repos can release themselves when testing the workflow)
