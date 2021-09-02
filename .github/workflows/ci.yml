@@ -31,7 +31,7 @@ jobs:
           
           if [[ "${{ github.event_name }}" == "create" \
                 && "${GITHUB_REF}" == refs/tags/v* \
-                && ( "${{ github.actor }}" == "${{ github.repository_owner }}" || "${{ github.actor }}" == "arnaudroques" ) \
+                && "${{ github.actor }}" =~ arnaudroques|${{ github.repository_owner }} \
              ]]; then
             pom_version="${GITHUB_REF#refs/tags/v}"    # pom_version is the tag without the 'v' prefix
             echo "📣 This run will release version '${pom_version}'"
