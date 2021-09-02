@@ -8,7 +8,7 @@ Tags [cannot][3] be part of a pull request, so you need to push directly to the 
 	git tag -a v1.2021.1 -m "version 1.2021.1"
 	git push origin v1.2021.1
 
-As an extra precaution, the release will only happen if the username making the push is matched in the CI `Configure job` step.
+The release will only happen if the username making the push is matched in the CI `Configure job` step.
 
 # Releases Elsewhere 
 
