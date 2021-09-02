@@ -77,11 +77,6 @@ jobs:
 #        if: steps.config.outputs.do_release == 'true'
 #        with:
 #          discussion_category_name: Announcements
-#          fail_on_unmatched_files: true
-#          files: |
-#            target/plantuml-${{ steps.config.outputs.pom_version }}.jar
-#            target/plantuml-${{ steps.config.outputs.pom_version }}-javadoc.jar
-#            target/plantuml-${{ steps.config.outputs.pom_version }}-sources.jar
 
       - name: gh
         if: steps.config.outputs.do_release == 'true'
@@ -90,6 +85,7 @@ jobs:
         run: |
           gh release create 'v${{ steps.config.outputs.pom_version }}' \
             --discussion-category Announcements \
+            --notes "some notes" \
             'target/plantuml-${{ steps.config.outputs.pom_version }}.jar' \
             'target/plantuml-${{ steps.config.outputs.pom_version }}-javadoc.jar' \
             'target/plantuml-${{ steps.config.outputs.pom_version }}-sources.jar'
