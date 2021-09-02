@@ -74,7 +74,7 @@ jobs:
       - name: Upload jar artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ github.run_id }}-jars
+          name: ${{ github.run_number }}-jars
           path: target/*.jar
 
       - name: Create release in GitHub
