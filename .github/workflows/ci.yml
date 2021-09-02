@@ -2,7 +2,6 @@ name: CI
 
 on:
   create:
-  delete:
   pull_request:
     types: [ opened, synchronize, reopened ]
   push:
@@ -27,7 +26,11 @@ jobs:
             ::endgroup::
           EOF
           
-          if [[ "${{ github.actor }}" == "${{ github.repository_owner }}" && "${GITHUB_REF}" == refs/tags/v* ]]; then
+          # We match against github.repository_owner as a kludge so that forked repos can release themselves
+          if [[ "${{ github.event_name }}" == "create" \
+                && "${GITHUB_REF}" == refs/tags/v* \
+                && ( "${{ github.actor }}" == "${{ github.repository_owner }}" || "${{ github.actor }}" == "arnaudroques" ) \
+             ]]; then
             pom_version="${GITHUB_REF#refs/tags/v}"    # pom_version is the git tag without the 'v' prefix
             echo "📣 This run will release version ${pom_version}"
             echo "::set-output name=do_release::true"
