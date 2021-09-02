@@ -71,10 +71,11 @@ jobs:
       - name: Package
         run: mvn --batch-mode -Dmaven.test.skip=true package
 
-      - name: Upload artifacts
+      - name: Upload jar artifact
         uses: actions/upload-artifact@v2
         with:
-          path: target/*.jar
+          name: 'plantuml-${{ steps.config.outputs.pom_version }}.jar'
+          path: 'target/plantuml-${{ steps.config.outputs.pom_version }}.jar'
 
       - name: Create release in GitHub
         if: steps.config.outputs.do_release == 'true'
