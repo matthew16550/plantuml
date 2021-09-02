@@ -83,6 +83,13 @@ jobs:
 #            target/plantuml-${{ steps.config.outputs.pom_version }}-sources.jar
 
       - name: gh
-        run: gh release list
+        if: steps.config.outputs.do_release == 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release create 'v${{ steps.config.outputs.pom_version }}' \
+            --discussion-category Announcements \
+            'target/plantuml-${{ steps.config.outputs.pom_version }}.jar' \
+            'target/plantuml-${{ steps.config.outputs.pom_version }}-javadoc.jar' \
+            'target/plantuml-${{ steps.config.outputs.pom_version }}-sources.jar' \
+            'no-such-file'
