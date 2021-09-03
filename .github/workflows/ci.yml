@@ -16,36 +16,35 @@ jobs:
       - name: Configure job
         id: config
         env:
-          TAG: ${{ github.event.ref }}
+          ACTOR: ${{ github.actor }}
+          EVENT_ACTION: ${{ github.event.action }}
+          REF_TYPE: ${{ github.event.ref_type }}
+          REF: ${{ github.event.ref }}
         run: |
           cat <<-EOF
             ::group::Debug Info
-            github.actor            : '${{ github.actor }}'
-            github.event_name       : '${{ github.event_name }}'
-            github.event.action     : '${{ github.event.action }}'
-            github.event.ref        : '${{ github.event.ref }}'
-            github.event.ref_type   : '${{ github.event.ref_type }}'
-            github.repository_owner : '${{ github.repository_owner }}'
-            
-            ${{ toJson(github) }}
+            GITHUB_EVENT_NAME       : '${GITHUB_EVENT_NAME}'
+            EVENT_ACTION            : '${EVENT_ACTION}'
+            REF_TYPE                : '${REF_TYPE}'
+            REF                     : '${REF}'
+            ACTOR                   : '${ACTOR}'
+            GITHUB_REPOSITORY_OWNER : '${GITHUB_REPOSITORY_OWNER}'
             ::endgroup::
           EOF
 
-          env
           # Do a release when a git tag starting with 'v' has been created by a suitable user.
           # (We match against github.repository_owner as a kludge so that forked repos can release themselves when testing the workflow)
 
-          if [[ '${{ github.event_name }}' == 'create' && \
-                '${{ github.event.ref_type }}' == 'tag' && \
-                "${TAG}" == v* && \
-                '${{ github.actor }}' =~ arnaudroques|${{ github.repository_owner }} \
+          if [[ "${GITHUB_EVENT_NAME}" == "create" && \
+                "${REF_TYPE}" == "tag" && \
+                "${REF}" == v* && \
+                "${ACTOR}" =~ arnaudroques|${GITHUB_REPOSITORY_OWNER} \
              ]]; then
-            echo "📣 This run will release '${TAG}'"
+            echo "📣 This run will release '${REF}'"
             echo "::set-output name=do_release::true"
-            echo "::set-output name=pom_version::${TAG#v}"  # pom_version is the tag without the 'v' prefix
-            echo "::set-output name=tag::${TAG}"
+            echo "::set-output name=pom_version::${REF#v}"  # pom_version is the tag without the 'v' prefix
           else
-            echo 'This run will NOT make a release'
+            echo "This run will NOT make a release"
           fi
 
       - name: Checkout the repository
@@ -65,8 +64,10 @@ jobs:
       # POM version is usually a -SNAPSHOT at this point, if this is a release then we use the version derived from the tag
       - name: Set POM version
         if: steps.config.outputs.do_release == 'true'
+        env:
+          POM_VERSION: ${{ steps.config.outputs.pom_version }}
         run: |
-          mvn --batch-mode versions:set '-DnewVersion=${{ steps.config.outputs.pom_version }}'
+          mvn --batch-mode versions:set "-DnewVersion=${POM_VERSION}"
 
       # Compile / Test / Package are separate steps so the reason for any failure is more obvious in GitHub UI
       - name: Compile
@@ -90,8 +91,10 @@ jobs:
         if: steps.config.outputs.do_release == 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          POM_VERSION: ${{ steps.config.outputs.pom_version }}
+          TAG: ${{ github.event.ref }}
         run: |
-          gh release create '${{ steps.config.outputs.tag }}' \
-            'target/plantuml-${{ steps.config.outputs.pom_version }}.jar' \
-            'target/plantuml-${{ steps.config.outputs.pom_version }}-javadoc.jar' \
-            'target/plantuml-${{ steps.config.outputs.pom_version }}-sources.jar'
+          gh release create "${TAG}" \
+            "target/plantuml-${POM_VERSION}.jar" \
+            "target/plantuml-${POM_VERSION}-javadoc.jar" \
+            "target/plantuml-${POM_VERSION}-sources.jar"
