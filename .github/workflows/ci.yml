@@ -15,32 +15,37 @@ jobs:
     steps:
       - name: Configure job
         id: config
+        env:
+          TAG: ${{ github.event.ref }}
         run: |
           cat <<-EOF
             ::group::Debug Info
-            GITHUB_REF              : '${GITHUB_REF}'
             github.actor            : '${{ github.actor }}'
             github.event_name       : '${{ github.event_name }}'
             github.event.action     : '${{ github.event.action }}'
+            github.event.ref        : '${{ github.event.ref }}'
+            github.event.ref_type   : '${{ github.event.ref_type }}'
             github.repository_owner : '${{ github.repository_owner }}'
-          
+            
             ${{ toJson(github) }}
             ::endgroup::
           EOF
 
+          env
           # Do a release when a git tag starting with 'v' has been created by a suitable user.
           # (We match against github.repository_owner as a kludge so that forked repos can release themselves when testing the workflow)
 
-          if [[ "${{ github.event_name }}" == "create" \
-                && "${GITHUB_REF}" == refs/tags/v* \
-                && "${{ github.actor }}" =~ arnaudroques|${{ github.repository_owner }} \
+          if [[ '${{ github.event_name }}' == 'create' && \
+                '${{ github.event.ref_type }}' == 'tag' && \
+                "${TAG}" == v* && \
+                '${{ github.actor }}' =~ arnaudroques|${{ github.repository_owner }} \
              ]]; then
-            pom_version="${GITHUB_REF#refs/tags/v}"    # pom_version is the tag without the 'v' prefix
-            echo "📣 This run will release version '${pom_version}'"
+            echo "📣 This run will release '${TAG}'"
             echo "::set-output name=do_release::true"
-            echo "::set-output name=pom_version::${pom_version}"
+            echo "::set-output name=pom_version::${TAG#v}"  # pom_version is the tag without the 'v' prefix
+            echo "::set-output name=tag::${TAG}"
           else
-            echo "This run will NOT make a release"
+            echo 'This run will NOT make a release'
           fi
 
       - name: Checkout the repository
@@ -86,7 +91,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh release create 'v${{ steps.config.outputs.pom_version }}' \
+          gh release create '${{ steps.config.outputs.tag }}' \
             'target/plantuml-${{ steps.config.outputs.pom_version }}.jar' \
             'target/plantuml-${{ steps.config.outputs.pom_version }}-javadoc.jar' \
             'target/plantuml-${{ steps.config.outputs.pom_version }}-sources.jar'
