@@ -24,7 +24,7 @@ jobs:
             github.event.action     : '${{ github.event.action }}'
             github.repository_owner : '${{ github.repository_owner }}'
           
-            toJson(github)
+            ${{ toJson(github) }}
             ::endgroup::
           EOF
 
