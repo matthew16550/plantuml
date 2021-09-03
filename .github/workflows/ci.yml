@@ -38,7 +38,7 @@ jobs:
           if [[ "${GITHUB_EVENT_NAME}" == "create" && \
                 "${REF_TYPE}" == "tag" && \
                 "${REF}" == v* && \
-                "${ACTOR}" =~ arnaudroques|${GITHUB_REPOSITORY_OWNER} \
+                ( "${ACTOR}" == "arnaudroques" || "${ACTOR}" == "${GITHUB_REPOSITORY_OWNER}" ) \
              ]]; then
             echo "📣 This run will release '${REF}'"
             echo "::set-output name=do_release::true"
