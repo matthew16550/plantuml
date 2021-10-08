@@ -16,7 +16,7 @@ public class Assertions {
 		assertImagesEqual(expected, actual, COMPARE_PIXEL_EXACT, 0);
 	}
 
-	public static void assertImagesEqual(BufferedImage expected, BufferedImage actual, Comparator<ColorHSB> comparator, int maxDifferentPixels) {
+	public static void assertImagesSameSize(BufferedImage expected, BufferedImage actual) {
 		Objects.requireNonNull(expected);
 		Objects.requireNonNull(actual);
 
@@ -32,11 +32,18 @@ public class Assertions {
 					String.format("[width=%d height=%d]", actualWidth, actualHeight)
 			);
 		}
+	}
+
+	public static void assertImagesEqual(BufferedImage expected, BufferedImage actual, Comparator<ColorHSB> comparator, int maxDifferentPixels) {
+		assertImagesSameSize(expected, actual);
+
+		final int height = expected.getHeight();
+		final int width = expected.getWidth();
 
 		int differentCount = 0;
-		
-		for (int x = 0; x < expectedWidth; x++) {
-			for (int y = 0; y < expectedHeight; y++) {
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
 				final ColorHSB expectedColor = new ColorHSB(expected.getRGB(x, y));
 				final ColorHSB actualColor = new ColorHSB(actual.getRGB(x, y));
 				if (comparator.compare(expectedColor, actualColor) != 0) {
