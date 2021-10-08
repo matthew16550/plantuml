@@ -41,21 +41,14 @@ jobs:
     steps:
       - name: Temp
         run: |
-          echo "::error file=pom.xml,line=1,endLine=1::message0"
-          echo "::error file=.github/workflows/experiment.yml,line=43,endLine=43::message1"
-          echo "::error file=.github/workflows/experiment.yml,line=43,endLine=43,title=the-title::message2"
-          echo "::error file=.github/workflows/experiment.yml,line=43,endLine=43,col=1,endColumn=7::message3"
-          echo "::error ::message5"
-          echo "::error file=pom.xml::message6"
-          echo "::error file=pom.xml,line=1,endLine=1::message0"
-
-          echo "::warning file=pom.xml,line=1,endLine=1::message0"
-          echo "::warning file=.github/workflows/experiment.yml,line=43,endLine=43::message1"
-          echo "::warning file=.github/workflows/experiment.yml,line=43,endLine=43,title=the-title::message2"
-          echo "::warning file=.github/workflows/experiment.yml,line=43,endLine=43,col=1,endColumn=7::message3"
-          echo "::warning ::message5"
-          echo "::warning file=pom.xml::message6"
-          echo "::warning file=pom.xml,line=1,endLine=1::message0"
+          echo "::debug file=.github/workflows/experiment.yml,line=43,title=the-title::debug1"
+          echo "::debug file=.github/workflows/experiment.yml,line=43,endLine=43,title=the-title::debug2"
+          echo "::error file=.github/workflows/experiment.yml,line=43,title=the-title::error1"
+          echo "::error file=.github/workflows/experiment.yml,line=43,endLine=44,title=the-title::error2"
+          echo "::notice file=.github/workflows/experiment.yml,line=43,title=the-title::notice1"
+          echo "::notice file=.github/workflows/experiment.yml,line=43,endLine=45,title=the-title::notice2"
+          echo "::warning file=.github/workflows/experiment.yml,line=43,title=the-title::warning1"
+          echo "::warning file=.github/workflows/experiment.yml,line=43,endLine=46,title=the-title::warning1"
       
       - name: Checkout the repository
         uses: actions/checkout@v2
