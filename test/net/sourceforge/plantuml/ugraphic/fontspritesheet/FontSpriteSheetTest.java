@@ -40,6 +40,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -339,12 +340,11 @@ class FontSpriteSheetTest {
 		}
 
 		final float percent = ((float) pixelDiffCount) / (width * height) * 100;
-		
+
 		if (percent >= 10) {
-			GithubWorkflowCommands.notice("diff % " + percent);
-			
+			notice = true;
 			System.out.format(
-					"%13s %s size=%02d backAlpha=%03d diffPercent=%1.2f DiffCount[pixel=%d a=%d h=%d s=%d b=%d] MaxDiff[a=%d h=%f s=%f b=%f]\n",
+					"%-13s %-7s size=%02d backAlpha=%03d diffPercent=%1.2f DiffCount[pixel=%d a=%d h=%d s=%d b=%d] MaxDiff[a=%d h=%f s=%f b=%f]\n",
 					text, fgColor, size, backAlpha, percent,
 					pixelDiffCount, aDiffCount, hDiffCount, sDiffCount, bDiffCount,
 					aDiffMax, hDiffMax, sDiffMax, bDiffMax
@@ -454,5 +454,12 @@ class FontSpriteSheetTest {
 					})
 					.rethrow(e);
 		}
+	}
+
+	private static boolean notice = false;
+
+	@AfterAll
+	static void afterAll() {
+		if (notice) GithubWorkflowCommands.notice("pixel diff");
 	}
 }
