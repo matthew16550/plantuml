@@ -40,7 +40,14 @@ jobs:
         shell: bash
     steps:
       - name: Temp
-        run: echo "::notice file=.github/workflows/experiment.yml,line=43,col=1,endColumn=7::the message"
+        run: |
+          echo "::notice file=pom.xml,line=1,endLine=1::message0"
+          echo "::notice file=.github/workflows/experiment.yml,line=43,endLine=43::message1"
+          echo "::notice file=.github/workflows/experiment.yml,line=43,endLine=43,title=the-title::message2"
+          echo "::notice file=.github/workflows/experiment.yml,line=43,endLine=43,col=1,endColumn=7::message3"
+          echo "::notice message4"
+          echo "::notice ::message5"
+          echo "::notice file=pom.xml::message6"
 # todo title
       
       - name: Checkout the repository
@@ -57,27 +64,27 @@ jobs:
       - name: Prime maven cache
         run: mvn --batch-mode dependency:go-offline
 
-      - name: Compile
-        run: mvn --batch-mode compile resources:testResources compiler:testCompile
-
-      - name: Test
-        run: |
-          if [[ "${{ matrix.java_version }}" != 8* ]]; then
-            export MAVEN_OPTS=" \
-              --add-exports java.desktop/sun.java2d.marlin=ALL-UNNAMED \
-              --add-exports java.desktop/sun.java2d.pipe=ALL-UNNAMED \
-            "
-          fi
-
-          mvn --batch-mode exec:java \
-             -Dexec.mainClass=org.junit.platform.console.ConsoleLauncher \
-             -Dexec.classpathScope=test \
-             -Dexec.args=" \
-                 --disable-ansi-colors \
-                 --select-class net.sourceforge.plantuml.approvaltesting.ApprovalTestingTest \
-                 --select-class net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetTest
-             " \
-             -Dsun.java2d.renderer.log=true 
+#      - name: Compile
+#        run: mvn --batch-mode compile resources:testResources compiler:testCompile
+#
+#      - name: Test
+#        run: |
+#          if [[ "${{ matrix.java_version }}" != 8* ]]; then
+#            export MAVEN_OPTS=" \
+#              --add-exports java.desktop/sun.java2d.marlin=ALL-UNNAMED \
+#              --add-exports java.desktop/sun.java2d.pipe=ALL-UNNAMED \
+#            "
+#          fi
+#
+#          mvn --batch-mode exec:java \
+#             -Dexec.mainClass=org.junit.platform.console.ConsoleLauncher \
+#             -Dexec.classpathScope=test \
+#             -Dexec.args=" \
+#                 --disable-ansi-colors \
+#                 --select-class net.sourceforge.plantuml.approvaltesting.ApprovalTestingTest \
+#                 --select-class net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetTest
+#             " \
+#             -Dsun.java2d.renderer.log=true 
 
       - name: Upload approval test failures
         if: ${{ always() }}
