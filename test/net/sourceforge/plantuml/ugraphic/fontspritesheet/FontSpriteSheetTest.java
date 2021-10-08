@@ -341,12 +341,14 @@ class FontSpriteSheetTest {
 		final float percent = ((float) pixelDiffCount) / (width * height) * 100;
 		
 		if (percent >= 10) {
-			GithubWorkflowCommands.notice("test_plantuml_draws_same_with_font_and_sprite", String.format(
-					"%13s %s size=%02d backAlpha=%03d diffPercent=%1.2f DiffCount[pixel=%d a=%d h=%d s=%d b=%d] MaxDiff[a=%d h=%f s=%f b=%f]",
+			GithubWorkflowCommands.notice("diff % " + percent);
+			
+			System.out.format(
+					"%13s %s size=%02d backAlpha=%03d diffPercent=%1.2f DiffCount[pixel=%d a=%d h=%d s=%d b=%d] MaxDiff[a=%d h=%f s=%f b=%f]\n",
 					text, fgColor, size, backAlpha, percent,
 					pixelDiffCount, aDiffCount, hDiffCount, sDiffCount, bDiffCount,
 					aDiffMax, hDiffMax, sDiffMax, bDiffMax
-			));
+			);
 		}
 //		
 //		try {
