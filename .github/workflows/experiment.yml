@@ -41,14 +41,21 @@ jobs:
     steps:
       - name: Temp
         run: |
-          echo "::notice file=pom.xml,line=1,endLine=1::message0"
-          echo "::notice file=.github/workflows/experiment.yml,line=43,endLine=43::message1"
-          echo "::notice file=.github/workflows/experiment.yml,line=43,endLine=43,title=the-title::message2"
-          echo "::notice file=.github/workflows/experiment.yml,line=43,endLine=43,col=1,endColumn=7::message3"
-          echo "::notice message4"
-          echo "::notice ::message5"
-          echo "::notice file=pom.xml::message6"
-# todo title
+          echo "::error file=pom.xml,line=1,endLine=1::message0"
+          echo "::error file=.github/workflows/experiment.yml,line=43,endLine=43::message1"
+          echo "::error file=.github/workflows/experiment.yml,line=43,endLine=43,title=the-title::message2"
+          echo "::error file=.github/workflows/experiment.yml,line=43,endLine=43,col=1,endColumn=7::message3"
+          echo "::error ::message5"
+          echo "::error file=pom.xml::message6"
+          echo "::error file=pom.xml,line=1,endLine=1::message0"
+
+          echo "::warning file=pom.xml,line=1,endLine=1::message0"
+          echo "::warning file=.github/workflows/experiment.yml,line=43,endLine=43::message1"
+          echo "::warning file=.github/workflows/experiment.yml,line=43,endLine=43,title=the-title::message2"
+          echo "::warning file=.github/workflows/experiment.yml,line=43,endLine=43,col=1,endColumn=7::message3"
+          echo "::warning ::message5"
+          echo "::warning file=pom.xml::message6"
+          echo "::warning file=pom.xml,line=1,endLine=1::message0"
       
       - name: Checkout the repository
         uses: actions/checkout@v2
