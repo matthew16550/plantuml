@@ -324,7 +324,7 @@ class FontSpriteSheetTest {
 				final float sDiff = abs(fontColor.getSaturation() - spriteColor.getSaturation());
 				final float bDiff = abs(fontColor.getBrightness() - spriteColor.getBrightness());
 
-				if (aDiff != 0 || hDiff != 0 || sDiff != 0 || bDiff != 0) pixelDiffCount++;
+				if (hDiff != 0 || sDiff != 0 || bDiff != 0) pixelDiffCount++;
 
 				if (aDiff != 0) aDiffCount++;
 				if (hDiff != 0) hDiffCount++;
