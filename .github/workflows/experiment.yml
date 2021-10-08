@@ -41,7 +41,7 @@ jobs:
     steps:
       - name: Temp
         run: |
-          echo "::debug file=.github/workflows/experiment.yml,line=43,title=the-title::debug"
+          echo "::debug::debug"
           echo "::error file=.github/workflows/experiment.yml,line=43,title=the-title::error"
           echo "::notice file=.github/workflows/experiment.yml,line=43,title=the-title::notice"
           echo "::warning file=.github/workflows/experiment.yml,line=43,title=the-title::warning"
