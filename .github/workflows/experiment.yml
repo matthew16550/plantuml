@@ -41,14 +41,10 @@ jobs:
     steps:
       - name: Temp
         run: |
-          echo "::debug file=.github/workflows/experiment.yml,line=43,title=the-title::debug1"
-          echo "::debug file=.github/workflows/experiment.yml,line=43,endLine=43,title=the-title::debug2"
-          echo "::error file=.github/workflows/experiment.yml,line=43,title=the-title::error1"
-          echo "::error file=.github/workflows/experiment.yml,line=43,endLine=44,title=the-title::error2"
-          echo "::notice file=.github/workflows/experiment.yml,line=43,title=the-title::notice1"
-          echo "::notice file=.github/workflows/experiment.yml,line=43,endLine=45,title=the-title::notice2"
-          echo "::warning file=.github/workflows/experiment.yml,line=43,title=the-title::warning1"
-          echo "::warning file=.github/workflows/experiment.yml,line=43,endLine=46,title=the-title::warning1"
+          echo "::debug file=.github/workflows/experiment.yml,line=43,title=the-title::debug"
+          echo "::error file=.github/workflows/experiment.yml,line=43,title=the-title::error"
+          echo "::notice file=.github/workflows/experiment.yml,line=43,title=the-title::notice"
+          echo "::warning file=.github/workflows/experiment.yml,line=43,title=the-title::warning"
       
       - name: Checkout the repository
         uses: actions/checkout@v2
