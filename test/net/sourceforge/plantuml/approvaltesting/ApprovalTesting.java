@@ -14,11 +14,13 @@ public interface ApprovalTesting {
 
 	ApprovalTesting test(Callback callback);
 
+	ApprovalTesting withDir(Path dir);
+	
+	ApprovalTesting withDuplicateFiles();
+	
 	ApprovalTesting withExtension(String extensionWithDot);
 
 	ApprovalTesting withFileSpamLimit(int limit);
-
-	ApprovalTesting withLabel(String label);
 
 	ApprovalTesting withOutput(String name, String extensionWithDot, SingleCallback<Path> callback);
 }

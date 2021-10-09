@@ -7,19 +7,18 @@ import static net.sourceforge.plantuml.test.TestUtils.renderAsImage;
 import java.awt.image.BufferedImage;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.approvaltesting.ApprovalTesting;
-import net.sourceforge.plantuml.approvaltesting.ApprovalTestingJUnitExtension;
+import net.sourceforge.plantuml.approvaltesting.ApprovalTestingImpl;
 
-@ExtendWith(ApprovalTestingJUnitExtension.class)
 public class Example {
 
-	@SuppressWarnings("unused")  // injected by ApprovalTestingJUnitExtension
-	private ApprovalTesting approvalTesting;
+	@RegisterExtension
+	private ApprovalTesting approvalTesting = new ApprovalTestingImpl();
 
 	private static final String SOURCE = "" +
 			"@startuml\n" +

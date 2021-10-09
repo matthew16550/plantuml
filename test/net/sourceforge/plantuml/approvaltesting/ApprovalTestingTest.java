@@ -16,7 +16,7 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -24,7 +24,6 @@ import org.junitpioneer.jupiter.CartesianProductTest;
 
 import net.sourceforge.plantuml.test.TestUtils;
 
-@ExtendWith(ApprovalTestingJUnitExtension.class)
 class ApprovalTestingTest {
 
 	//
@@ -44,7 +43,7 @@ class ApprovalTestingTest {
 //		assertThat(filesInDir())
 //				.containsExactly("ApprovalTestingTest.test_approve_image.bmp.approved.bmp");
 
-		assertThat(dir.resolve("ApprovalTestingTest.test_approve_image.bmp.approved.bmp"))
+		assertThat(dir.resolve("ApprovalTestingTest.test_approve_image_bmp.approved.bmp"))
 				.hasBinaryContent(imageToBytes(image, "bmp"));
 
 		// Fail the changed value
@@ -67,8 +66,8 @@ class ApprovalTestingTest {
 //						"ApprovalTestingTest.test_approve_image.bmp.failed.bmp"
 //				);
 
-		assertThat(dir.resolve("ApprovalTestingTest.test_approve_image.bmp.failed.bmp"))
-				.hasBinaryContent(imageToBytes(image, "bpm"));
+		assertThat(dir.resolve("ApprovalTestingTest.test_approve_image_bmp.failed.bmp"))
+				.hasBinaryContent(imageToBytes(image, "bmp"));
 
 	}
 
@@ -129,11 +128,6 @@ class ApprovalTestingTest {
 	}
 
 	@Test
-	void test_withLabel() {
-		approvalTesting.withLabel("LABEL").approve("bar");
-	}
-
-	@Test
 	void test_withOutput() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() ->
@@ -143,20 +137,6 @@ class ApprovalTestingTest {
 				);
 
 		assertThat(dir.resolve("ApprovalTestingTest.test_withOutput.OUTPUT.failed.txt"))
-				.hasContent("123");
-	}
-
-	@Test
-	void test_withOutput_and_withLabel() {
-		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() ->
-						approvalTesting
-								.withLabel("LABEL")
-								.withOutput("OUTPUT", ".txt", path -> TestUtils.writeUtf8File(path, "123"))
-								.approve("bar")
-				);
-
-		assertThat(dir.resolve("ApprovalTestingTest.test_withOutput_and_withLabel.LABEL.OUTPUT.failed.txt"))
 				.hasContent("123");
 	}
 
@@ -175,7 +155,7 @@ class ApprovalTestingTest {
 			"!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~} x !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~} y !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~}  D  x_y",
 	})
 	void test_simplifyTestName(String input, String output) {
-		assertThat(ApprovalTestingImpl.simplifyTestName(input))
+		assertThat(ApprovalTestingImpl.simplifyName(input))
 				.isEqualTo(output);
 	}
 
@@ -185,13 +165,14 @@ class ApprovalTestingTest {
 
 	private static final String EOL = System.getProperty("line.separator");
 
-	private ApprovalTestingImpl approvalTesting;
+	@RegisterExtension
+	private static final ApprovalTesting approvalTesting = new ApprovalTestingImpl()
+			.withDuplicateFiles();
 
 	private Path dir;
 
 	@BeforeEach
 	void beforeEach(@TempDir Path tempDir, TestInfo testInfo) {
-		ApprovalTestingImpl.allowDuplicateFileUse = true;
 		dir = Paths.get("test").resolve("net").resolve("sourceforge").resolve("plantuml").resolve("approvaltesting");
 	}
 

@@ -42,7 +42,7 @@ import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junitpioneer.jupiter.CartesianEnumSource;
 import org.junitpioneer.jupiter.CartesianProductTest;
@@ -51,13 +51,12 @@ import org.junitpioneer.jupiter.params.IntRangeSource;
 
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.approvaltesting.ApprovalTesting;
-import net.sourceforge.plantuml.approvaltesting.ApprovalTestingJUnitExtension;
+import net.sourceforge.plantuml.approvaltesting.ApprovalTestingImpl;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.color.ColorHSB;
 import net.sourceforge.plantuml.test.github.GithubWorkflowCommands;
 import net.sourceforge.plantuml.ugraphic.UFont;
 
-@ExtendWith(ApprovalTestingJUnitExtension.class)
 class FontSpriteSheetTest {
 
 	@BeforeAll
@@ -391,8 +390,8 @@ class FontSpriteSheetTest {
 		}
 	}
 
-	@SuppressWarnings("unused")  // injected by ApprovalTestingJUnitExtension
-	private ApprovalTesting approvalTesting;
+	@RegisterExtension
+	private final ApprovalTesting approvalTesting = new ApprovalTestingImpl();
 
 	private static class CheckOptions {
 		Color color = BLACK;
