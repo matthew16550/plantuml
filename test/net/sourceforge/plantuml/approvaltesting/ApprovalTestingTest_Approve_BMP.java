@@ -15,7 +15,7 @@ import org.junit.jupiter.api.io.TempDir;
 class ApprovalTestingTest_Approve_BMP {
 
 	@RegisterExtension
-	static ApprovalTestingImpl approvalTesting = new ApprovalTestingImpl()
+	static ApprovalTesting approvalTesting = new ApprovalTesting()
 			.withDuplicateFiles(true);
 
 	@TempDir

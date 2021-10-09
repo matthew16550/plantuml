@@ -34,7 +34,7 @@ import net.sourceforge.plantuml.utils.functional.BiCallback;
 import net.sourceforge.plantuml.utils.functional.Callback;
 import net.sourceforge.plantuml.utils.functional.SingleCallback;
 
-public class ApprovalTestingImpl implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
+public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
 
 	private static class OutputCallbackRecord {
 		final Path path;
@@ -58,12 +58,12 @@ public class ApprovalTestingImpl implements BeforeAllCallback, BeforeEachCallbac
 	private String label;
 	private String methodName;
 
-	public ApprovalTestingImpl() {
+	public ApprovalTesting() {
 		failuresPerMethod = new HashMap<>();
 		filesUsed = new HashSet<>();
 	}
 
-	private ApprovalTestingImpl(ApprovalTestingImpl other) {
+	private ApprovalTesting(ApprovalTesting other) {
 		this.className = other.className;
 		this.dir = other.dir;
 		this.duplicateFiles = other.duplicateFiles;
@@ -80,7 +80,7 @@ public class ApprovalTestingImpl implements BeforeAllCallback, BeforeEachCallbac
 	// Public API
 	//
 
-	public ApprovalTestingImpl approve(BufferedImage value) {
+	public ApprovalTesting approve(BufferedImage value) {
 		approve(value, ".png", TestUtils::writeImageFile, path -> {
 			final BufferedImage approved = readImageFile(path);
 			assertImagesEqual(approved, value);
@@ -88,7 +88,7 @@ public class ApprovalTestingImpl implements BeforeAllCallback, BeforeEachCallbac
 		return this;
 	}
 
-	public ApprovalTestingImpl approve(String value) {
+	public ApprovalTesting approve(String value) {
 		approve(value, ".txt", TestUtils::writeUtf8File, path -> {
 			final String approved = readUtf8File(path);
 			assertThat(value).isEqualTo(approved);
@@ -96,7 +96,7 @@ public class ApprovalTestingImpl implements BeforeAllCallback, BeforeEachCallbac
 		return this;
 	}
 
-	public ApprovalTestingImpl test(Callback callback) {
+	public ApprovalTesting test(Callback callback) {
 		try {
 			callback.call();
 		} catch (Throwable t) {
@@ -116,33 +116,33 @@ public class ApprovalTestingImpl implements BeforeAllCallback, BeforeEachCallbac
 		return this;
 	}
 
-	public ApprovalTestingImpl withDir(Path dir) {
-		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
+	public ApprovalTesting withDir(Path dir) {
+		final ApprovalTesting copy = new ApprovalTesting(this);
 		copy.dir = dir;
 		return copy;
 	}
 
-	public ApprovalTestingImpl withDuplicateFiles(boolean duplicateFiles) {
-		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
+	public ApprovalTesting withDuplicateFiles(boolean duplicateFiles) {
+		final ApprovalTesting copy = new ApprovalTesting(this);
 		copy.duplicateFiles = duplicateFiles;
 		return copy;
 	}
 
-	public ApprovalTestingImpl withExtension(String extensionWithDot) {
-		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
+	public ApprovalTesting withExtension(String extensionWithDot) {
+		final ApprovalTesting copy = new ApprovalTesting(this);
 		copy.extensionWithDot = extensionWithDot;
 		return copy;
 	}
 
-	public ApprovalTestingImpl withFileSpamLimit(int fileSpamLimit) {
-		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
+	public ApprovalTesting withFileSpamLimit(int fileSpamLimit) {
+		final ApprovalTesting copy = new ApprovalTesting(this);
 		copy.fileSpamLimit = fileSpamLimit;
 		return copy;
 	}
 
-	public ApprovalTestingImpl withOutput(String name, String extensionWithDot, SingleCallback<Path> callback) {
+	public ApprovalTesting withOutput(String name, String extensionWithDot, SingleCallback<Path> callback) {
 		final Path path = registerFile(StringUtils.isEmpty(name) ? "failed" : name + ".failed", extensionWithDot);
-		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
+		final ApprovalTesting copy = new ApprovalTesting(this);
 		copy.outputCallbacks.add(new OutputCallbackRecord(path, callback));
 		return copy;
 	}

@@ -13,7 +13,7 @@ import org.junitpioneer.jupiter.CartesianProductTest;
 class ApprovalTestingTest_Cartesian {
 
 	@RegisterExtension
-	static ApprovalTestingImpl approvalTesting = new ApprovalTestingImpl();
+	static ApprovalTesting approvalTesting = new ApprovalTesting();
 
 	@TempDir
 	static Path dir;

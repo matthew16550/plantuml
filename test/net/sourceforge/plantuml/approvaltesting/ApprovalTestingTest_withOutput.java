@@ -16,7 +16,7 @@ import net.sourceforge.plantuml.utils.functional.SingleCallback;
 class ApprovalTestingTest_withOutput {
 
 	@RegisterExtension
-	static ApprovalTestingImpl approvalTesting = new ApprovalTestingImpl()
+	static ApprovalTesting approvalTesting = new ApprovalTesting()
 			.withDuplicateFiles(true);
 
 	@TempDir

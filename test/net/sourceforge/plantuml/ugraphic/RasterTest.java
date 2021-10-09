@@ -18,7 +18,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.sourceforge.plantuml.approvaltesting.ApprovalTestingImpl;
+import net.sourceforge.plantuml.approvaltesting.ApprovalTesting;
 import sun.java2d.pipe.RenderingEngine;
 
 class RasterTest {
@@ -98,7 +98,7 @@ class RasterTest {
 	//
 
 	@RegisterExtension
-	static final ApprovalTestingImpl approvalTesting = new ApprovalTestingImpl();
+	static final ApprovalTesting approvalTesting = new ApprovalTesting();
 
 	private static final List<Object> ANTIALIAS_OPTIONS = unmodifiableList(asList(
 			VALUE_ANTIALIAS_OFF, VALUE_ANTIALIAS_ON

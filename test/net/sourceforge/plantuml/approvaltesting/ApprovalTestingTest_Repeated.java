@@ -13,7 +13,7 @@ import org.junit.jupiter.api.io.TempDir;
 class ApprovalTestingTest_Repeated {
 
 	@RegisterExtension
-	static ApprovalTestingImpl approvalTesting = new ApprovalTestingImpl();
+	static ApprovalTesting approvalTesting = new ApprovalTesting();
 
 	@TempDir
 	static Path dir;

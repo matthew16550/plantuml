@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 class ApprovalTestingTest_Parameterized {
 
 	@RegisterExtension
-	static ApprovalTestingImpl approvalTesting = new ApprovalTestingImpl();
+	static ApprovalTesting approvalTesting = new ApprovalTesting();
 
 	@TempDir
 	static Path dir;
