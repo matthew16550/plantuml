@@ -16,7 +16,7 @@ public interface ApprovalTesting {
 
 	ApprovalTesting withDir(Path dir);
 	
-	ApprovalTesting withDuplicateFiles();
+	ApprovalTesting withDuplicateFiles(boolean duplicateFiles);
 	
 	ApprovalTesting withExtension(String extensionWithDot);
 

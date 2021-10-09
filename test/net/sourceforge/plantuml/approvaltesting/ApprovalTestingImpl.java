@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.awt.image.BufferedImage;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -32,16 +34,7 @@ import net.sourceforge.plantuml.utils.functional.BiCallback;
 import net.sourceforge.plantuml.utils.functional.Callback;
 import net.sourceforge.plantuml.utils.functional.SingleCallback;
 
-public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, BeforeEachCallback {
-
-	private static class SharedState {
-		final Set<String> filesUsed = new HashSet<>();
-		final Map<String, Integer> failuresPerMethod = new HashMap<>();
-
-		int bumpFailureCount(String methodName) {
-			return failuresPerMethod.compute(methodName, (k, v) -> (v == null) ? 1 : v + 1);
-		}
-	}
+public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
 
 	private static class OutputCallbackRecord {
 		final Path path;
@@ -53,8 +46,9 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 		}
 	}
 
+	private final Map<String, Integer> failuresPerMethod;
+	private final Set<String> filesUsed;
 	private final List<OutputCallbackRecord> outputCallbacks = new ArrayList<>();
-	private final SharedState sharedState;
 
 	private String className;
 	private Path dir;
@@ -65,7 +59,8 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 	private String methodName;
 
 	public ApprovalTestingImpl() {
-		this.sharedState = new SharedState();
+		failuresPerMethod = new HashMap<>();
+		filesUsed = new HashSet<>();
 	}
 
 	private ApprovalTestingImpl(ApprovalTestingImpl other) {
@@ -73,11 +68,12 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 		this.dir = other.dir;
 		this.duplicateFiles = other.duplicateFiles;
 		this.extensionWithDot = other.extensionWithDot;
+		this.failuresPerMethod = other.failuresPerMethod;
+		this.filesUsed = other.filesUsed;
 		this.fileSpamLimit = other.fileSpamLimit;
 		this.label = other.label;
 		this.methodName = other.methodName;
 		this.outputCallbacks.addAll(other.outputCallbacks);
-		this.sharedState = other.sharedState;
 	}
 
 	//
@@ -107,7 +103,7 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 		try {
 			callback.call();
 		} catch (Throwable t) {
-			final int failureCount = sharedState.bumpFailureCount(methodName);
+			final int failureCount = failuresPerMethod.compute(methodName, (k, v) -> (v == null) ? 1 : v + 1);
 			if (failureCount > fileSpamLimit) {
 				final String message = String.format(
 						"** APPROVAL FAILURE FILES WERE SUPPRESSED (test has failed %d times) ** %s",
@@ -131,9 +127,9 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 	}
 
 	@Override
-	public ApprovalTestingImpl withDuplicateFiles() {
+	public ApprovalTestingImpl withDuplicateFiles(boolean duplicateFiles) {
 		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
-		copy.duplicateFiles = true;
+		copy.duplicateFiles = duplicateFiles;
 		return copy;
 	}
 
@@ -163,29 +159,28 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 	// Internals
 	//
 
+	private static final String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
+
 	@Override
 	public void beforeAll(ExtensionContext context) {
 		final String classNameWithPackage = context.getRequiredTestClass().getName();
-		this.className = simplifyName(substringAfterLast(classNameWithPackage, '.'));
+		className = simplifyName(substringAfterLast(classNameWithPackage, '.'));
 		if (dir == null) {
-			dir = Paths.get("test", classNameWithPackage.split("\\.")).getParent();
+			dir = Paths.get("test").resolve(classNameWithPackage.replaceAll("\\.", FILE_SEPARATOR)).getParent();
 		}
 	}
 
 	@Override
 	public void beforeEach(ExtensionContext context) {
-		ensureInitialized();
 		final String displayName = context.getDisplayName();
 		final String methodName = context.getRequiredTestMethod().getName();
 		this.methodName = simplifyName(methodName);
 		this.label = displayName.equals(methodName + "()") ? null : simplifyName(displayName);
 	}
 
-	private void ensureInitialized() {
-		if (className == null) {
-			throw new RuntimeException(
-					"beforeAll() was not called. The ApprovalTesting field must be static and annotated with @RegisterExtension.");
-		}
+	@Override
+	public void afterEach(ExtensionContext context) {
+		outputCallbacks.clear();
 	}
 
 	private <T> void approve(T value, String defaultExtension, BiCallback<Path, T> write, SingleCallback<Path> compare) {
@@ -206,7 +201,10 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 	}
 
 	private Path registerFile(String name, String extensionWithDot) {
-		ensureInitialized();
+		if (className == null) {
+			throw new RuntimeException(
+					"beforeAll() was not called. The ApprovalTesting field must be static and annotated with @RegisterExtension.");
+		}
 		StringBuilder b = new StringBuilder(className).append('.');
 		if (methodName != null) b.append(methodName).append('.');
 		if (label != null) b.append(label).append('.');
@@ -214,7 +212,7 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 		b.append(extensionWithDot);
 
 		final Path path = dir.resolve(b.toString());
-		if (!sharedState.filesUsed.add(path.toString()) && !duplicateFiles) {
+		if (!filesUsed.add(path.toString()) && !duplicateFiles) {
 			throw new RuntimeException(String.format("The file has already been used: '%s'", path));
 		}
 		return path;
@@ -257,7 +255,7 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 				.replaceAll("(^_+|_+$)", "");
 	}
 
-	private void logError(Exception e, String message, Object... args) {
+	private static void logError(Exception e, String message, Object... args) {
 		System.err.printf((message) + "%n", args);
 		System.err.println();
 		e.printStackTrace();
