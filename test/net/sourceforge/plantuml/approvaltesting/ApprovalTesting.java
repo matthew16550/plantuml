@@ -18,7 +18,7 @@ public interface ApprovalTesting {
 
 	ApprovalTesting withFileSpamLimit(int limit);
 
-	ApprovalTesting withOutput(String extraSuffix, String extensionWithDot, SingleCallback<Path> callback);
+	ApprovalTesting withLabel(String label);
 
-	ApprovalTesting withSuffix(String suffix);
+	ApprovalTesting withOutput(String name, String extensionWithDot, SingleCallback<Path> callback);
 }

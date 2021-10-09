@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.opentest4j.AssertionFailedError;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.test.TestUtils;
 import net.sourceforge.plantuml.utils.annotations.VisibleForTesting;
 import net.sourceforge.plantuml.utils.functional.BiCallback;
@@ -54,45 +54,32 @@ class ApprovalTestingImpl implements ApprovalTesting {
 
 	private final String className;
 	private final Path dir;
-	private String displayName;
-	private String extensionWithDot;
-	private int fileSpamLimit;
-	private String methodName;
 	private final List<OutputCallbackRecord> outputCallbacks = new ArrayList<>();
 	private final SharedState sharedState;
-	private String suffix;
 
-	// Computed state
-	private String baseName;
+	private String extensionWithDot;
+	private int fileSpamLimit;
+	private String label;
+	private String methodName;
 
-	ApprovalTestingImpl(Path baseDir, String className) {
-		this.className = className;
-		this.dir = baseDir.resolve(className.replaceAll("\\.", PATH_SEPARATOR)).getParent();
+	ApprovalTestingImpl(Path baseDir, String classNameWithPackage) {
+		this.className = simplifyTestName(substringAfterLast(classNameWithPackage, '.'));
+		this.dir = baseDir.resolve(classNameWithPackage.replaceAll("\\.", PATH_SEPARATOR)).getParent();
 		this.fileSpamLimit = 10;
+		this.label = null;
+		this.methodName = null;
 		this.sharedState = new SharedState();
-		this.suffix = "";
 	}
 
 	private ApprovalTestingImpl(ApprovalTestingImpl other) {
 		this.className = other.className;
 		this.dir = other.dir;
-		this.displayName = other.displayName;
 		this.extensionWithDot = other.extensionWithDot;
 		this.fileSpamLimit = other.fileSpamLimit;
+		this.label = other.label;
 		this.methodName = other.methodName;
 		this.outputCallbacks.addAll(other.outputCallbacks);
 		this.sharedState = other.sharedState;
-		this.suffix = other.suffix;
-
-		// nulling computed state here to avoid lint warnings
-		this.baseName = null;
-	}
-
-	ApprovalTestingImpl forExtensionContext(ExtensionContext context) {
-		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
-		copy.displayName = context.getDisplayName();
-		copy.methodName = context.getRequiredTestMethod().getName();
-		return copy;
 	}
 
 	//
@@ -153,17 +140,17 @@ class ApprovalTestingImpl implements ApprovalTesting {
 	}
 
 	@Override
-	public ApprovalTestingImpl withOutput(String extraSuffix, String extensionWithDot, SingleCallback<Path> callback) {
-		final Path path = registerFile(extraSuffix + ".failed" + extensionWithDot);
+	public ApprovalTestingImpl withLabel(String label) {
 		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
-		copy.outputCallbacks.add(new OutputCallbackRecord(path, callback));
+		copy.label = simplifyTestName(label);
 		return copy;
 	}
 
 	@Override
-	public ApprovalTestingImpl withSuffix(String suffix) {
+	public ApprovalTestingImpl withOutput(String name, String extensionWithDot, SingleCallback<Path> callback) {
+		final Path path = registerFile(StringUtils.isEmpty(name) ? "failed" : name + ".failed", extensionWithDot);
 		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
-		copy.suffix = suffix;
+		copy.outputCallbacks.add(new OutputCallbackRecord(path, callback));
 		return copy;
 	}
 
@@ -171,12 +158,18 @@ class ApprovalTestingImpl implements ApprovalTesting {
 	// Internals
 	//
 
+	ApprovalTestingImpl forMethod(String methodName) {
+		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
+		copy.methodName = simplifyTestName(methodName);
+		return copy;
+	}
+
 	private <T> void approve(T value, String defaultExtension, BiCallback<Path, T> write, SingleCallback<Path> compare) {
 		final String extension = extensionWithDot == null ? defaultExtension : extensionWithDot;
-		final Path approvedFile = registerFile(".approved" + extension);
+		final Path approvedFile = registerFile("approved", extension);
 
 		this
-				.withOutput("", extension, path -> write.call(path, value))
+				.withOutput(null, extension, path -> write.call(path, value))
 				.test(() -> {
 					if (notExists(approvedFile)) {
 						createDirectories(approvedFile.getParent());
@@ -188,30 +181,19 @@ class ApprovalTestingImpl implements ApprovalTesting {
 				});
 	}
 
-	private String getBaseName() {
-		if (baseName == null) {
-			final StringBuilder b = new StringBuilder()
-					.append(simplifyTestName(substringAfterLast(className, '.')))
-					.append('.')
-					.append(simplifyTestName(methodName));
-
-			if (!displayName.equals(methodName + "()")) {
-				b.append('.').append(simplifyTestName(displayName));
-			}
-
-			b.append(suffix);
-			baseName = b.toString();
-		}
-		return baseName;
-	}
-
 	@VisibleForTesting
 	Path getDir() {
 		return dir;
 	}
 
-	private Path registerFile(String name) {
-		final Path path = getDir().resolve(getBaseName() + name);
+	private Path registerFile(String name, String extensionWithDot) {
+		StringBuilder b = new StringBuilder(className).append('.');
+		if (methodName != null) b.append(methodName).append('.');
+		if (label != null) b.append(label).append('.');
+		b.append(name);
+		b.append(extensionWithDot);
+		
+		final Path path = getDir().resolve(b.toString());
 		if (!sharedState.filesUsed.add(path.toString())) {
 			throw new RuntimeException(String.format("The file has already been used: '%s'", path));
 		}

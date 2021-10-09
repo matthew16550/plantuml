@@ -14,11 +14,11 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class ApprovalTestingJUnitExtension implements BeforeAllCallback, BeforeEachCallback {
 
-	private ApprovalTestingImpl approvalTestingImpl;
+	private ApprovalTestingImpl root;
 
 	@Override
 	public void beforeAll(ExtensionContext context) {
-		approvalTestingImpl = new ApprovalTestingImpl(Paths.get("test"), context.getRequiredTestClass().getName());
+		root = new ApprovalTestingImpl(Paths.get("test"), context.getRequiredTestClass().getName());
 	}
 
 	/**
@@ -26,13 +26,19 @@ public class ApprovalTestingJUnitExtension implements BeforeAllCallback, BeforeE
 	 */
 	@Override
 	public void beforeEach(ExtensionContext context) {
+		final String displayName = context.getDisplayName();
+		final String methodName = context.getRequiredTestMethod().getName();
+
+		final ApprovalTesting approvalTesting = displayName.equals(methodName + "()")
+				? root.forMethod(methodName)
+				: root.forMethod(methodName).withLabel('.' + displayName);
 
 		final Predicate<Field> filter = field -> ApprovalTesting.class.isAssignableFrom(field.getType());
 
 		findFields(context.getRequiredTestClass(), filter, TOP_DOWN).forEach(field -> {
 			try {
 				makeAccessible(field)
-						.set(context.getRequiredTestInstance(), approvalTestingImpl.forExtensionContext(context));
+						.set(context.getRequiredTestInstance(), approvalTesting);
 			} catch (Throwable t) {
 				throw new RuntimeException(t);
 			}

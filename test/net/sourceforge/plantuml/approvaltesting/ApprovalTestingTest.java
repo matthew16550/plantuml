@@ -89,21 +89,35 @@ class ApprovalTestingTest {
 	}
 
 	@Test
+	void test_withLabel() {
+		approvalTesting.withLabel("LABEL").approve("bar");
+	}
+
+	@Test
 	void test_withOutput() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() ->
 						approvalTesting
-								.withOutput("-extra", ".txt", path -> TestUtils.writeUtf8File(path, "123"))
-								.approve("bar ")
+								.withOutput("OUTPUT", ".txt", path -> TestUtils.writeUtf8File(path, "123"))
+								.approve("bar")
 				);
 
-		assertThat(approvalTesting.getDir().resolve("ApprovalTestingTest.test_withOutput-extra.failed.txt"))
+		assertThat(approvalTesting.getDir().resolve("ApprovalTestingTest.test_withOutput.OUTPUT.failed.txt"))
 				.hasContent("123");
 	}
 
 	@Test
-	void test_withSuffix() {
-		approvalTesting.withSuffix("-bar").approve("foo");
+	void test_withOutput_and_withLabel() {
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() ->
+						approvalTesting
+								.withLabel("LABEL")
+								.withOutput("OUTPUT", ".txt", path -> TestUtils.writeUtf8File(path, "123"))
+								.approve("bar")
+				);
+
+		assertThat(approvalTesting.getDir().resolve("ApprovalTestingTest.test_withOutput_and_withLabel.LABEL.OUTPUT.failed.txt"))
+				.hasContent("123");
 	}
 
 	@ParameterizedTest
