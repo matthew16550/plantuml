@@ -5,32 +5,57 @@ import static java.nio.file.Files.deleteIfExists;
 import static java.nio.file.Files.notExists;
 import static net.sourceforge.plantuml.StringUtils.substringAfterLast;
 import static net.sourceforge.plantuml.test.Assertions.assertImagesEqual;
+import static net.sourceforge.plantuml.test.TestUtils.readImageFile;
 import static net.sourceforge.plantuml.test.TestUtils.readUtf8File;
-import static net.sourceforge.plantuml.test.TestUtils.writeUtf8File;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.opentest4j.AssertionFailedError;
 
+import net.sourceforge.plantuml.test.TestUtils;
+import net.sourceforge.plantuml.utils.annotations.VisibleForTesting;
+import net.sourceforge.plantuml.utils.functional.BiCallback;
+import net.sourceforge.plantuml.utils.functional.Callback;
+import net.sourceforge.plantuml.utils.functional.SingleCallback;
+
 class ApprovalTestingImpl implements ApprovalTesting {
+
+	private static class SharedState {
+		final Set<String> filesUsed = new HashSet<>();
+		final Map<String, Integer> failuresPerMethod = new HashMap<>();
+
+		int bumpFailureCount(String methodName) {
+			return failuresPerMethod.compute(methodName, (k, v) -> (v == null) ? 1 : v + 1);
+		}
+	}
+
+	private static class OutputCallbackRecord {
+		final Path path;
+		final SingleCallback<Path> callback;
+
+		OutputCallbackRecord(Path path, SingleCallback<Path> callback) {
+			this.path = path;
+			this.callback = callback;
+		}
+	}
 
 	private String className;
 	private String displayName;
 	private String extensionWithDot;
-	private int maxFailures;
+	private int fileSpamLimit;
 	private String methodName;
+	private final List<OutputCallbackRecord> outputCallbacks = new ArrayList<>();
 	private final SharedState sharedState;
 	private String suffix;
 
@@ -38,21 +63,8 @@ class ApprovalTestingImpl implements ApprovalTesting {
 	private Path dir;
 	private String baseName;
 
-	private static class SharedState {
-		final Set<String> approvedFilesUsed = new HashSet<>();
-		final Map<String, Integer> failuresPerMethod = new HashMap<>();
-
-		int getFailureCount(String methodName) {
-			return failuresPerMethod.getOrDefault(methodName, 0);
-		}
-
-		int bumpFailureCount(String methodName) {
-			return failuresPerMethod.compute(methodName, (k, v) -> (v == null) ? 1 : v + 1);
-		}
-	}
-
 	ApprovalTestingImpl() {
-		this.maxFailures = 10;
+		this.fileSpamLimit = 10;
 		this.sharedState = new SharedState();
 		this.suffix = "";
 	}
@@ -61,8 +73,9 @@ class ApprovalTestingImpl implements ApprovalTesting {
 		this.className = other.className;
 		this.displayName = other.displayName;
 		this.extensionWithDot = other.extensionWithDot;
-		this.maxFailures = other.maxFailures;
+		this.fileSpamLimit = other.fileSpamLimit;
 		this.methodName = other.methodName;
+		this.outputCallbacks.addAll(other.outputCallbacks);
 		this.sharedState = other.sharedState;
 		this.suffix = other.suffix;
 
@@ -85,60 +98,41 @@ class ApprovalTestingImpl implements ApprovalTesting {
 
 	@Override
 	public ApprovalTestingImpl approve(BufferedImage value) {
-		approve(BUFFERED_IMAGE_STRATEGY, value);
+		approve(value, ".png", TestUtils::writeImageFile, path -> {
+			final BufferedImage approved = readImageFile(path);
+			assertImagesEqual(approved, value);
+		});
 		return this;
 	}
 
 	@Override
 	public ApprovalTestingImpl approve(String value) {
-		approve(STRING_STRATEGY, value);
+		approve(value, ".txt", TestUtils::writeUtf8File, path -> {
+			final String approved = readUtf8File(path);
+			assertThat(value).isEqualTo(approved);
+		});
 		return this;
 	}
 
 	@Override
-	public ApprovalTesting fail(FailCallback callback) {
-		if (sharedState.bumpFailureCount(methodName) <= maxFailures) {
-			try {
-				callback.call(this);
-			} catch (Exception e) {
-				throwAsUncheckedException(e);
+	public ApprovalTestingImpl test(Callback callback) {
+		try {
+			callback.call();
+		} catch (Throwable t) {
+			final int failureCount = sharedState.bumpFailureCount(methodName);
+			if (failureCount > fileSpamLimit) {
+				final String message = String.format(
+						"** APPROVAL FAILURE FILES WERE SUPPRESSED (test has failed %d times) ** %s",
+						failureCount, t.getMessage()
+				);
+				rethrowWithMessage(t, message);
+			} else {
+				runOutputCallbacks();
+				throwAsUncheckedException(t);
 			}
 		}
+		removeOutputFiles();
 		return this;
-	}
-
-	@Override
-	public void rethrow(Throwable t) {
-		if (sharedState.getFailureCount(methodName) <= maxFailures) {
-			throwAsUncheckedException(t);
-		}
-
-		final String message = "** APPROVAL FAILURE FILE(S) WERE SUPPRESSED ** " + t.getMessage();
-
-		if (t instanceof AssertionFailedError) {
-			final AssertionFailedError assertionFailedError = (AssertionFailedError) t;
-			throw new AssertionFailedError(message, assertionFailedError.getExpected(), assertionFailedError.getActual(), t);
-		}
-
-		throwAsUncheckedException(new Throwable(message, t));
-	}
-
-	@Override
-	public Path getDir() {
-		if (dir == null) {
-			dir = Paths.get("test", className.split("\\.")).getParent();
-		}
-		return dir;
-	}
-
-	@Override
-	public Path getPathForApproved(String extraSuffix, String extensionWithDot) {
-		return getDir().resolve(getBaseName() + extraSuffix + ".approved" + extensionWithDot);
-	}
-
-	@Override
-	public Path getPathForFailed(String extraSuffix, String extensionWithDot) {
-		return getDir().resolve(getBaseName() + extraSuffix + ".failed" + extensionWithDot);
 	}
 
 	@Override
@@ -149,9 +143,17 @@ class ApprovalTestingImpl implements ApprovalTesting {
 	}
 
 	@Override
-	public ApprovalTesting withMaxFailures(int maxFailures) {
+	public ApprovalTestingImpl withFileSpamLimit(int fileSpamLimit) {
 		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
-		copy.maxFailures = maxFailures;
+		copy.fileSpamLimit = fileSpamLimit;
+		return copy;
+	}
+
+	@Override
+	public ApprovalTestingImpl withOutput(String extraSuffix, String extensionWithDot, SingleCallback<Path> callback) {
+		final Path path = registerFile(extraSuffix + ".failed" + extensionWithDot);
+		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
+		copy.outputCallbacks.add(new OutputCallbackRecord(path, callback));
 		return copy;
 	}
 
@@ -166,40 +168,21 @@ class ApprovalTestingImpl implements ApprovalTesting {
 	// Internals
 	//
 
-	private <T> void approve(Strategy<T> strategy, T value) {
-		final String extension = extensionWithDot != null ? extensionWithDot : strategy.defaultExtensionWithDot();
-		final Path approvedFile = getPathForApproved("", extension);
-		final Path failedFile = getPathForFailed("", extension);
+	private <T> void approve(T value, String defaultExtension, BiCallback<Path, T> write, SingleCallback<Path> compare) {
+		final String extension = extensionWithDot == null ? defaultExtension : extensionWithDot;
+		final Path approvedFile = registerFile(".approved" + extension);
 
-		final String approvedFilename = approvedFile.getFileName().toString();
+		this
+				.withOutput("", extension, path -> write.call(path, value))
+				.test(() -> {
+					if (notExists(approvedFile)) {
+						createDirectories(approvedFile.getParent());
+						write.call(approvedFile, value);
+						return;
+					}
 
-		if (!sharedState.approvedFilesUsed.add(approvedFilename)) {
-			throw new AssertionError(String.format(
-					"The file '%s' is already used by this test class, please use withSuffix() to make a unique approval",
-					approvedFilename
-			));
-		}
-
-		try {
-			if (notExists(approvedFile)) {
-				createDirectories(approvedFile.getParent());
-				strategy.writeFile(value, approvedFile);
-				return;
-			}
-
-			try {
-				strategy.compare(value, approvedFile);
-				deleteIfExists(failedFile);
-			} catch (Throwable t) {
-				fail(unused -> {
-					createDirectories(failedFile.getParent());
-					strategy.writeFile(value, failedFile);
+					compare.call(approvedFile);
 				});
-				rethrow(t);
-			}
-		} catch (IOException e) {
-			throwAsUncheckedException(e);
-		}
 	}
 
 	private String getBaseName() {
@@ -219,63 +202,62 @@ class ApprovalTestingImpl implements ApprovalTesting {
 		return baseName;
 	}
 
-	// Visible for testing
+	@VisibleForTesting
+	Path getDir() {
+		if (dir == null) {
+			dir = Paths.get("test", className.split("\\.")).getParent();
+		}
+		return dir;
+	}
+
+	private Path registerFile(String name) {
+		final Path path = getDir().resolve(getBaseName() + name);
+		if (!sharedState.filesUsed.add(path.toString())) {
+			throw new RuntimeException(String.format("The file has already been used: '%s'", path));
+		}
+		return path;
+	}
+
+	private void rethrowWithMessage(Throwable t, String message) {
+		if (t instanceof AssertionFailedError) {
+			final AssertionFailedError assertionFailedError = (AssertionFailedError) t;
+			throw new AssertionFailedError(message, assertionFailedError.getExpected(), assertionFailedError.getActual(), t);
+		}
+
+		throwAsUncheckedException(new Throwable(message, t));
+	}
+
+	private void runOutputCallbacks() {
+		for (OutputCallbackRecord o : outputCallbacks) {
+			try {
+				createDirectories(o.path.getParent());
+				o.callback.call(o.path);
+			} catch (Exception e) {
+				logError(e, "Error creating output file '%s' : %s", o.path, e.getMessage());
+			}
+		}
+	}
+
+	private void removeOutputFiles() {
+		for (OutputCallbackRecord o : outputCallbacks) {
+			try {
+				deleteIfExists(o.path);
+			} catch (Exception e) {
+				logError(e, "Error deleting output file '%s' : %s", o.path, e.getMessage());
+			}
+		}
+	}
+
+	@VisibleForTesting
 	static String simplifyTestName(String name) {
 		return name
 				.replaceAll("[^A-Za-z0-9]+", "_")
 				.replaceAll("(^_+|_+$)", "");
 	}
 
-	//
-	// Strategies
-	//
-
-	private interface Strategy<T> {
-		void compare(T value, Path approvedFile) throws IOException, AssertionError;
-
-		String defaultExtensionWithDot();
-
-		void writeFile(T value, Path path) throws IOException;
+	private void logError(Exception e, String message, Object... args) {
+		System.err.printf((message) + "%n", args);
+		System.err.println();
+		e.printStackTrace();
 	}
-
-	private static final Strategy<BufferedImage> BUFFERED_IMAGE_STRATEGY = new Strategy<BufferedImage>() {
-
-		@Override
-		public void compare(BufferedImage value, Path approvedFile) throws IOException, AssertionError {
-			final BufferedImage expected = ImageIO.read(approvedFile.toFile());
-			assertImagesEqual(expected, value);
-		}
-
-		@Override
-		public String defaultExtensionWithDot() {
-			return ".png";
-		}
-
-		@Override
-		public void writeFile(BufferedImage value, Path path) throws IOException {
-			final String format = substringAfterLast(path.toString(), '.');
-			boolean failed = !ImageIO.write(value, format, path.toFile());
-			if (failed) throw new RuntimeException(String.format("Failed to write image file '%s'", path));
-		}
-	};
-
-	private static final Strategy<String> STRING_STRATEGY = new Strategy<String>() {
-
-		@Override
-		public void compare(String value, Path approvedFile) throws IOException, AssertionError {
-			final String approved = readUtf8File(approvedFile);
-			assertThat(value)
-					.isEqualTo(approved);
-		}
-
-		@Override
-		public String defaultExtensionWithDot() {
-			return ".txt";
-		}
-
-		@Override
-		public void writeFile(String value, Path path) throws IOException {
-			writeUtf8File(path, value);
-		}
-	};
 }

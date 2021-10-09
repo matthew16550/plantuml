@@ -3,29 +3,22 @@ package net.sourceforge.plantuml.approvaltesting;
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
 
-public interface ApprovalTesting {
+import net.sourceforge.plantuml.utils.functional.Callback;
+import net.sourceforge.plantuml.utils.functional.SingleCallback;
 
-	interface FailCallback {
-		void call(ApprovalTesting approvalTesting) throws Exception;
-	}
+public interface ApprovalTesting {
 
 	ApprovalTesting approve(BufferedImage value);
 
 	ApprovalTesting approve(String value);
 
-	ApprovalTesting fail(FailCallback callback);
-
-	void rethrow(Throwable t);
-
-	Path getDir();
-
-	Path getPathForApproved(String extraSuffix, String extensionWithDot);
-
-	Path getPathForFailed(String extraSuffix, String extensionWithDot);
+	ApprovalTesting test(Callback callback);
 
 	ApprovalTesting withExtension(String extensionWithDot);
 
-	ApprovalTesting withMaxFailures(int maxFailures);
+	ApprovalTesting withFileSpamLimit(int limit);
+
+	ApprovalTesting withOutput(String extraSuffix, String extensionWithDot, SingleCallback<Path> callback);
 
 	ApprovalTesting withSuffix(String suffix);
 }

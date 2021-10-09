@@ -3,12 +3,15 @@ package net.sourceforge.plantuml.test;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.readAllBytes;
 import static net.sourceforge.plantuml.FileFormat.BUFFERED_IMAGE;
+import static net.sourceforge.plantuml.StringUtils.substringAfterLast;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import javax.imageio.ImageIO;
 
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
@@ -66,5 +69,17 @@ public class TestUtils {
 
 		Files.createDirectories(path.getParent());
 		Files.write(path, string.getBytes(UTF_8));
+	}
+
+	public static BufferedImage readImageFile(Path path) throws IOException {
+		return ImageIO.read(path.toFile());
+	}
+
+	public static void writeImageFile(Path path, BufferedImage image) throws IOException {
+		final String format = substringAfterLast(path.toString(), '.');
+		boolean failed = !ImageIO.write(image, format, path.toFile());
+		if (failed) {
+			throw new IOException(String.format("No appropriate image writer found for '%s'", path));
+		}
 	}
 }

@@ -19,6 +19,7 @@ import static net.sourceforge.plantuml.test.Assertions.assertImagesSameSize;
 import static net.sourceforge.plantuml.test.ColorComparators.COMPARE_PIXEL_EXACT;
 import static net.sourceforge.plantuml.test.ColorComparators.comparePixelWithSBTolerance;
 import static net.sourceforge.plantuml.test.TestUtils.renderAsImage;
+import static net.sourceforge.plantuml.test.TestUtils.writeImageFile;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.ALL_CHARS;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.JETBRAINS_FONT_FAMILY;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.createFontSpriteSheet;
@@ -37,8 +38,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Comparator;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -441,19 +440,15 @@ class FontSpriteSheetTest {
 		}
 
 		// Compare
-
-		try {
-			assertImagesEqual(image_from_font, image_from_sprite, options.comparator, 0);
-		} catch (AssertionError e) {
-			approvalTesting
-					.withMaxFailures(2)
-					.fail(a -> {
-						ImageIO.write(image_from_font, "png", a.getPathForFailed("_from_font", ".png").toFile());
-						ImageIO.write(image_from_sprite, "png", a.getPathForFailed("_from_sprite", ".png").toFile());
-						sheet.writeAsPNG(a.getPathForFailed("_sprite_sheet", ".png"));
-					})
-					.rethrow(e);
-		}
+		
+		approvalTesting
+				.withFileSpamLimit(2)
+				.withOutput("_from_font", ".png", path -> writeImageFile(path, image_from_font))
+				.withOutput("_from_sprite", ".png", path -> writeImageFile(path, image_from_sprite))
+				.withOutput("_sprite_sheet", ".png", sheet::writeAsPNG)
+				.test(() ->
+						assertImagesEqual(image_from_font, image_from_sprite, options.comparator, 0)
+				);
 	}
 
 	private static boolean notice = false;

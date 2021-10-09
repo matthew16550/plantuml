@@ -20,7 +20,7 @@ public class ApprovalTestingJUnitExtension implements BeforeEachCallback {
 	@Override
 	public void beforeEach(ExtensionContext context) {
 
-		final Predicate<Field> filter = field -> field.getType().isAssignableFrom(ApprovalTesting.class);
+		final Predicate<Field> filter = field -> ApprovalTesting.class.isAssignableFrom(field.getType());
 
 		findFields(context.getRequiredTestClass(), filter, TOP_DOWN).forEach(field -> {
 			try {

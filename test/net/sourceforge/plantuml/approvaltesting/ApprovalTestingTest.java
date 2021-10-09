@@ -9,12 +9,14 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junitpioneer.jupiter.CartesianProductTest;
+
+import net.sourceforge.plantuml.test.TestUtils;
 
 @ExtendWith(ApprovalTestingJUnitExtension.class)
 class ApprovalTestingTest {
@@ -66,21 +68,37 @@ class ApprovalTestingTest {
 		approvalTesting.withExtension(".foo").approve("foo");
 	}
 
-	@RepeatedTest(value = 3, name = "{currentRepetition}")
-	void test_withMaxFailures(TestInfo testInfo) throws Exception {
-		final int maxFailures = 2;
-		final String prefix = testInfo.getDisplayName().equals("3") ? "** APPROVAL FAILURE FILE(S) WERE SUPPRESSED ** " : "";
+	@RepeatedTest(value = 4, name = "{currentRepetition}")
+	void test_withFileSpamLimit(RepetitionInfo repetitionInfo) throws Exception {
+		final int fileSpamLimit = 2;
+
+		final String prefix = repetitionInfo.getCurrentRepetition() >= 3
+				? String.format("** APPROVAL FAILURE FILES WERE SUPPRESSED (test has failed %d times) ** ", repetitionInfo.getCurrentRepetition())
+				: "";
 
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> approvalTesting.withMaxFailures(maxFailures).approve("bar"))
+				.isThrownBy(() -> approvalTesting.withFileSpamLimit(fileSpamLimit).approve("bar"))
 				.withMessageStartingWith(prefix + EOL + "expected:");
 
-		final List<String> failureFiles = glob(approvalTesting.getDir(), "**/ApprovalTestingTest.test_withMaxFailures.*.failed.txt")
+		final List<String> failureFiles = glob(approvalTesting.getDir(), "**/ApprovalTestingTest.test_withFileSpamLimit.*.failed.txt")
 				.map(path -> path.getFileName().toString())
 				.collect(toList());
 
 		assertThat(failureFiles)
-				.hasSizeBetween(1, maxFailures);
+				.hasSizeBetween(1, fileSpamLimit);
+	}
+
+	@Test
+	void test_withOutput() {
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() ->
+						approvalTesting
+								.withOutput("-extra", ".txt", path -> TestUtils.writeUtf8File(path, "123"))
+								.approve("bar ")
+				);
+
+		assertThat(approvalTesting.getDir().resolve("ApprovalTestingTest.test_withOutput-extra.failed.txt"))
+				.hasContent("123");
 	}
 
 	@Test
@@ -114,6 +132,6 @@ class ApprovalTestingTest {
 	private static final String EOL = System.getProperty("line.separator");
 
 	@SuppressWarnings("unused")  // injected by ApprovalTestingJUnitExtension
-	private ApprovalTesting approvalTesting;
+	private ApprovalTestingImpl approvalTesting;
 
 }
