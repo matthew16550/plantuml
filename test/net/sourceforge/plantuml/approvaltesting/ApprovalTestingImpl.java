@@ -52,6 +52,7 @@ class ApprovalTestingImpl implements ApprovalTesting {
 		}
 	}
 
+	static boolean allowDuplicateFileUse = false; // TODO
 	private final String className;
 	private final Path dir;
 	private final List<OutputCallbackRecord> outputCallbacks = new ArrayList<>();
@@ -181,11 +182,6 @@ class ApprovalTestingImpl implements ApprovalTesting {
 				});
 	}
 
-	@VisibleForTesting
-	Path getDir() {
-		return dir;
-	}
-
 	private Path registerFile(String name, String extensionWithDot) {
 		StringBuilder b = new StringBuilder(className).append('.');
 		if (methodName != null) b.append(methodName).append('.');
@@ -193,8 +189,8 @@ class ApprovalTestingImpl implements ApprovalTesting {
 		b.append(name);
 		b.append(extensionWithDot);
 		
-		final Path path = getDir().resolve(b.toString());
-		if (!sharedState.filesUsed.add(path.toString())) {
+		final Path path = dir.resolve(b.toString());
+		if (!sharedState.filesUsed.add(path.toString()) && !allowDuplicateFileUse) {
 			throw new RuntimeException(String.format("The file has already been used: '%s'", path));
 		}
 		return path;

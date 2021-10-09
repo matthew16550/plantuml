@@ -71,6 +71,12 @@ public class TestUtils {
 		Files.write(path, string.getBytes(UTF_8));
 	}
 
+	public static byte[] imageToBytes(BufferedImage image, String format) throws IOException {
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(image, format, baos);
+		return baos.toByteArray();
+	}
+
 	public static BufferedImage readImageFile(Path path) throws IOException {
 		return ImageIO.read(path.toFile());
 	}

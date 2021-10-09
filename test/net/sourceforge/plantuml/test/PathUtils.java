@@ -13,6 +13,7 @@ public class PathUtils {
 		final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
 		return Files
 				.walk(dir)
+				.filter(path -> path != dir)
 				.filter(matcher::matches);
 	}
 }

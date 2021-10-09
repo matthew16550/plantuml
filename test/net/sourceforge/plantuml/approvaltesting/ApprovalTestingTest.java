@@ -2,16 +2,22 @@ package net.sourceforge.plantuml.approvaltesting;
 
 import static java.util.stream.Collectors.toList;
 import static net.sourceforge.plantuml.test.PathUtils.glob;
+import static net.sourceforge.plantuml.test.TestUtils.imageToBytes;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.awt.image.BufferedImage;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junitpioneer.jupiter.CartesianProductTest;
@@ -26,10 +32,44 @@ class ApprovalTestingTest {
 	//
 
 	@Test
-	void test_approve_image_bmp() {
+	void test_approve_image_bmp() throws Exception {
+
+		// Approve the initial value
+
 		final BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
 		image.createGraphics().drawRect(2, 3, 5, 3);
+
 		approvalTesting.withExtension(".bmp").approve(image);
+
+//		assertThat(filesInDir())
+//				.containsExactly("ApprovalTestingTest.test_approve_image.bmp.approved.bmp");
+
+		assertThat(dir.resolve("ApprovalTestingTest.test_approve_image.bmp.approved.bmp"))
+				.hasBinaryContent(imageToBytes(image, "bmp"));
+
+		// Fail the changed value
+
+		image.setRGB(1, 2, 0xFF112233);
+
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() ->
+						approvalTesting.withExtension(".bmp").approve(image)
+				)
+				.withMessage("" +
+						"expected:ColorHSB[a=FF r=00 g=00 b=00 / h=0.000000 s=0.000000 b=0.000000] " +
+						"but was:ColorHSB[a=FF r=11 g=22 b=33 / h=0.583333 s=0.666667 b=0.200000] " +
+						"at:<[1, 2]> using COMPARE_PIXEL_EXACT"
+				);
+
+//		assertThat(filesInDir())
+//				.containsExactly(
+//						"ApprovalTestingTest.test_approve_image.bmp.approved.bmp",
+//						"ApprovalTestingTest.test_approve_image.bmp.failed.bmp"
+//				);
+
+		assertThat(dir.resolve("ApprovalTestingTest.test_approve_image.bmp.failed.bmp"))
+				.hasBinaryContent(imageToBytes(image, "bpm"));
+
 	}
 
 	@Test
@@ -80,7 +120,7 @@ class ApprovalTestingTest {
 				.isThrownBy(() -> approvalTesting.withFileSpamLimit(fileSpamLimit).approve("bar"))
 				.withMessageStartingWith(prefix + EOL + "expected:");
 
-		final List<String> failureFiles = glob(approvalTesting.getDir(), "**/ApprovalTestingTest.test_withFileSpamLimit.*.failed.txt")
+		final List<String> failureFiles = glob(dir, "**/ApprovalTestingTest.test_withFileSpamLimit.*.failed.txt")
 				.map(path -> path.getFileName().toString())
 				.collect(toList());
 
@@ -102,7 +142,7 @@ class ApprovalTestingTest {
 								.approve("bar")
 				);
 
-		assertThat(approvalTesting.getDir().resolve("ApprovalTestingTest.test_withOutput.OUTPUT.failed.txt"))
+		assertThat(dir.resolve("ApprovalTestingTest.test_withOutput.OUTPUT.failed.txt"))
 				.hasContent("123");
 	}
 
@@ -116,7 +156,7 @@ class ApprovalTestingTest {
 								.approve("bar")
 				);
 
-		assertThat(approvalTesting.getDir().resolve("ApprovalTestingTest.test_withOutput_and_withLabel.LABEL.OUTPUT.failed.txt"))
+		assertThat(dir.resolve("ApprovalTestingTest.test_withOutput_and_withLabel.LABEL.OUTPUT.failed.txt"))
 				.hasContent("123");
 	}
 
@@ -145,7 +185,21 @@ class ApprovalTestingTest {
 
 	private static final String EOL = System.getProperty("line.separator");
 
-	@SuppressWarnings("unused")  // injected by ApprovalTestingJUnitExtension
 	private ApprovalTestingImpl approvalTesting;
 
+	private Path dir;
+
+	@BeforeEach
+	void beforeEach(@TempDir Path tempDir, TestInfo testInfo) {
+		ApprovalTestingImpl.allowDuplicateFileUse = true;
+		dir = Paths.get("test").resolve("net").resolve("sourceforge").resolve("plantuml").resolve("approvaltesting");
+	}
+
+	private List<String> filesInDir() throws Exception {
+		return glob(dir, "**")
+				.map(path -> dir.relativize(path))
+				.map(Path::toString)
+				.sorted()
+				.collect(toList());
+	}
 }
