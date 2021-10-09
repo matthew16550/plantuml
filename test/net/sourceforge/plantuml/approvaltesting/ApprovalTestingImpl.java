@@ -11,8 +11,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.awt.image.BufferedImage;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +30,8 @@ import net.sourceforge.plantuml.utils.functional.Callback;
 import net.sourceforge.plantuml.utils.functional.SingleCallback;
 
 class ApprovalTestingImpl implements ApprovalTesting {
+
+	private static final String PATH_SEPARATOR = FileSystems.getDefault().getSeparator();
 
 	private static class SharedState {
 		final Set<String> filesUsed = new HashSet<>();
@@ -50,7 +52,8 @@ class ApprovalTestingImpl implements ApprovalTesting {
 		}
 	}
 
-	private String className;
+	private final String className;
+	private final Path dir;
 	private String displayName;
 	private String extensionWithDot;
 	private int fileSpamLimit;
@@ -60,10 +63,11 @@ class ApprovalTestingImpl implements ApprovalTesting {
 	private String suffix;
 
 	// Computed state
-	private Path dir;
 	private String baseName;
 
-	ApprovalTestingImpl() {
+	ApprovalTestingImpl(Path baseDir, String className) {
+		this.className = className;
+		this.dir = baseDir.resolve(className.replaceAll("\\.", PATH_SEPARATOR)).getParent();
 		this.fileSpamLimit = 10;
 		this.sharedState = new SharedState();
 		this.suffix = "";
@@ -71,6 +75,7 @@ class ApprovalTestingImpl implements ApprovalTesting {
 
 	private ApprovalTestingImpl(ApprovalTestingImpl other) {
 		this.className = other.className;
+		this.dir = other.dir;
 		this.displayName = other.displayName;
 		this.extensionWithDot = other.extensionWithDot;
 		this.fileSpamLimit = other.fileSpamLimit;
@@ -81,12 +86,10 @@ class ApprovalTestingImpl implements ApprovalTesting {
 
 		// nulling computed state here to avoid lint warnings
 		this.baseName = null;
-		this.dir = null;
 	}
 
 	ApprovalTestingImpl forExtensionContext(ExtensionContext context) {
 		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
-		copy.className = context.getRequiredTestClass().getName();
 		copy.displayName = context.getDisplayName();
 		copy.methodName = context.getRequiredTestMethod().getName();
 		return copy;
@@ -204,9 +207,6 @@ class ApprovalTestingImpl implements ApprovalTesting {
 
 	@VisibleForTesting
 	Path getDir() {
-		if (dir == null) {
-			dir = Paths.get("test", className.split("\\.")).getParent();
-		}
 		return dir;
 	}
 

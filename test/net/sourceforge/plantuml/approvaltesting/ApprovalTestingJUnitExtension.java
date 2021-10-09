@@ -5,14 +5,21 @@ import static org.junit.platform.commons.util.ReflectionUtils.findFields;
 import static org.junit.platform.commons.util.ReflectionUtils.makeAccessible;
 
 import java.lang.reflect.Field;
+import java.nio.file.Paths;
 import java.util.function.Predicate;
 
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class ApprovalTestingJUnitExtension implements BeforeEachCallback {
+public class ApprovalTestingJUnitExtension implements BeforeAllCallback, BeforeEachCallback {
 
-	private final ApprovalTestingImpl approvalTestingImpl = new ApprovalTestingImpl();
+	private ApprovalTestingImpl approvalTestingImpl;
+
+	@Override
+	public void beforeAll(ExtensionContext context) {
+		approvalTestingImpl = new ApprovalTestingImpl(Paths.get("test"), context.getRequiredTestClass().getName());
+	}
 
 	/**
 	 * Injects {@link ApprovalTesting} fields;
