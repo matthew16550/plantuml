@@ -12,13 +12,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.approvaltesting.ApprovalTesting;
 import net.sourceforge.plantuml.approvaltesting.ApprovalTestingImpl;
 
-public class Example {
+class Example {
 
 	@RegisterExtension
-	private ApprovalTesting approvalTesting = new ApprovalTestingImpl();
+	static final ApprovalTestingImpl approvalTesting = new ApprovalTestingImpl();
 
 	private static final String SOURCE = "" +
 			"@startuml\n" +

@@ -34,7 +34,7 @@ import net.sourceforge.plantuml.utils.functional.BiCallback;
 import net.sourceforge.plantuml.utils.functional.Callback;
 import net.sourceforge.plantuml.utils.functional.SingleCallback;
 
-public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
+public class ApprovalTestingImpl implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
 
 	private static class OutputCallbackRecord {
 		final Path path;
@@ -77,10 +77,9 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 	}
 
 	//
-	// Implement ApprovalTesting
+	// Public API
 	//
 
-	@Override
 	public ApprovalTestingImpl approve(BufferedImage value) {
 		approve(value, ".png", TestUtils::writeImageFile, path -> {
 			final BufferedImage approved = readImageFile(path);
@@ -89,7 +88,6 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 		return this;
 	}
 
-	@Override
 	public ApprovalTestingImpl approve(String value) {
 		approve(value, ".txt", TestUtils::writeUtf8File, path -> {
 			final String approved = readUtf8File(path);
@@ -98,7 +96,6 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 		return this;
 	}
 
-	@Override
 	public ApprovalTestingImpl test(Callback callback) {
 		try {
 			callback.call();
@@ -119,35 +116,30 @@ public class ApprovalTestingImpl implements ApprovalTesting, BeforeAllCallback, 
 		return this;
 	}
 
-	@Override
 	public ApprovalTestingImpl withDir(Path dir) {
 		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
 		copy.dir = dir;
 		return copy;
 	}
 
-	@Override
 	public ApprovalTestingImpl withDuplicateFiles(boolean duplicateFiles) {
 		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
 		copy.duplicateFiles = duplicateFiles;
 		return copy;
 	}
 
-	@Override
 	public ApprovalTestingImpl withExtension(String extensionWithDot) {
 		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
 		copy.extensionWithDot = extensionWithDot;
 		return copy;
 	}
 
-	@Override
 	public ApprovalTestingImpl withFileSpamLimit(int fileSpamLimit) {
 		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);
 		copy.fileSpamLimit = fileSpamLimit;
 		return copy;
 	}
 
-	@Override
 	public ApprovalTestingImpl withOutput(String name, String extensionWithDot, SingleCallback<Path> callback) {
 		final Path path = registerFile(StringUtils.isEmpty(name) ? "failed" : name + ".failed", extensionWithDot);
 		final ApprovalTestingImpl copy = new ApprovalTestingImpl(this);

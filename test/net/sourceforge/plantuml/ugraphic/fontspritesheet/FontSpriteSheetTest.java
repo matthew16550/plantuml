@@ -50,7 +50,6 @@ import org.junitpioneer.jupiter.CartesianValueSource;
 import org.junitpioneer.jupiter.params.IntRangeSource;
 
 import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.approvaltesting.ApprovalTesting;
 import net.sourceforge.plantuml.approvaltesting.ApprovalTestingImpl;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.color.ColorHSB;
@@ -391,7 +390,7 @@ class FontSpriteSheetTest {
 	}
 
 	@RegisterExtension
-	private final ApprovalTesting approvalTesting = new ApprovalTestingImpl();
+	static final ApprovalTestingImpl approvalTesting = new ApprovalTestingImpl();
 
 	private static class CheckOptions {
 		Color color = BLACK;
