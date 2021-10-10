@@ -3,7 +3,7 @@ package net.sourceforge.plantuml.approvaltesting;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class ApprovalTestingTest_withExtension extends ApprovalTestingAbstractTest {
+class ApprovalTestingTest_withExtension extends TempDirTest {
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting();

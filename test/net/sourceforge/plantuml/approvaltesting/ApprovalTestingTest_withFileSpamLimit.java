@@ -10,7 +10,7 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class ApprovalTestingTest_withFileSpamLimit extends ApprovalTestingAbstractTest {
+class ApprovalTestingTest_withFileSpamLimit extends TempDirTest {
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting()
@@ -52,7 +52,7 @@ class ApprovalTestingTest_withFileSpamLimit extends ApprovalTestingAbstractTest 
 				"ApprovalTestingTest_withFileSpamLimit.testB.1.OUTPUT_1.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testB.1.OUTPUT_2.failed.txt"
 		);
-
+ 
 		assertThatFiles(
 				"ApprovalTestingTest_withFileSpamLimit.testA.1.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.2.failed.txt",

@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class ApprovalTestingTest_Approve_PNG extends ApprovalTestingAbstractTest {
+class ApprovalTestingTest_Approve_PNG extends TempDirTest {
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting()

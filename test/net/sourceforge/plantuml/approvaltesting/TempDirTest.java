@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.io.TempDir;
 
-abstract class ApprovalTestingAbstractTest {
+abstract class TempDirTest {
 
 	@TempDir
 	static Path dir;
