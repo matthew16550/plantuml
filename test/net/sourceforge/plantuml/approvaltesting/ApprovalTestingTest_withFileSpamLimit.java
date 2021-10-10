@@ -10,7 +10,7 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class ApprovalTestingTest_withFileSpamLimit extends TempDirTest {
+class ApprovalTestingTest_withFileSpamLimit extends AbstractTempDirTest {
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting()

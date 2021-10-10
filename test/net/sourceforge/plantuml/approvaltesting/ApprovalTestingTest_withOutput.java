@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class ApprovalTestingTest_withOutput extends TempDirTest {
+class ApprovalTestingTest_withOutput extends AbstractTempDirTest {
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting()

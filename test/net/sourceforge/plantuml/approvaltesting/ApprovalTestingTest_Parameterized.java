@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class ApprovalTestingTest_Parameterized extends TempDirTest {
+class ApprovalTestingTest_Parameterized extends AbstractTempDirTest {
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting();

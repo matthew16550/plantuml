@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junitpioneer.jupiter.CartesianProductTest;
 
-class ApprovalTestingTest_Cartesian extends TempDirTest {
+class ApprovalTestingTest_Cartesian extends AbstractTempDirTest {
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting();
