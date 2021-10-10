@@ -1,14 +1,14 @@
 package net.sourceforge.plantuml.approvaltesting;
 
-import static net.sourceforge.plantuml.test.TestUtils.writeUtf8File;
+import static net.sourceforge.plantuml.test.FileTestUtils.writeUtf8File;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.function.Consumer;
 
-import net.sourceforge.plantuml.test.AbstractTempDirTest;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import net.sourceforge.plantuml.test.AbstractTempDirTest;
 
 class ApprovalTestingTest_withOutput extends AbstractTempDirTest {
 

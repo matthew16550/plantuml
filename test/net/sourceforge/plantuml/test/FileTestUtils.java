@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 
-public class TestUtils {
+public class FileTestUtils {
 
 	public static Path createFile(Path path, FileAttribute<?>... attrs) {
 		try {

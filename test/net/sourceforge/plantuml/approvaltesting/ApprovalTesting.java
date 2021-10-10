@@ -5,8 +5,8 @@ import static java.nio.file.Files.deleteIfExists;
 import static java.nio.file.Files.notExists;
 import static net.sourceforge.plantuml.StringUtils.substringAfterLast;
 import static net.sourceforge.plantuml.test.Assertions.assertImagesEqual;
+import static net.sourceforge.plantuml.test.FileTestUtils.readUtf8File;
 import static net.sourceforge.plantuml.test.ImageTestUtils.readImageFile;
-import static net.sourceforge.plantuml.test.TestUtils.readUtf8File;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sourceforge.plantuml.test.ImageTestUtils;
-
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -30,7 +28,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.opentest4j.AssertionFailedError;
 
 import net.sourceforge.plantuml.StringUtils;
-import net.sourceforge.plantuml.test.TestUtils;
+import net.sourceforge.plantuml.test.FileTestUtils;
+import net.sourceforge.plantuml.test.ImageTestUtils;
 import net.sourceforge.plantuml.utils.annotations.VisibleForTesting;
 import net.sourceforge.plantuml.utils.functional.BiCallback;
 import net.sourceforge.plantuml.utils.functional.Callback;
@@ -91,7 +90,7 @@ public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, A
 	}
 
 	public ApprovalTesting approve(String value) {
-		approve(value, ".txt", TestUtils::writeUtf8File, path -> {
+		approve(value, ".txt", FileTestUtils::writeUtf8File, path -> {
 			final String approved = readUtf8File(path);
 			assertThat(value).isEqualTo(approved);
 		});

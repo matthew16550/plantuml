@@ -1,8 +1,8 @@
 package net.sourceforge.plantuml.test;
 
 import static net.sourceforge.plantuml.test.PathTestUtils.listAllFilesRecursive;
-import static net.sourceforge.plantuml.test.TestUtils.createFile;
-import static net.sourceforge.plantuml.test.TestUtils.writeUtf8File;
+import static net.sourceforge.plantuml.test.FileTestUtils.createFile;
+import static net.sourceforge.plantuml.test.FileTestUtils.writeUtf8File;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Path;

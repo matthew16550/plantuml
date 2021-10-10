@@ -1,16 +1,16 @@
 package net.sourceforge.plantuml.approvaltesting;
 
 import static net.sourceforge.plantuml.StringUtils.EOL;
-import static net.sourceforge.plantuml.test.TestUtils.writeUtf8File;
+import static net.sourceforge.plantuml.test.FileTestUtils.writeUtf8File;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
-import net.sourceforge.plantuml.test.AbstractTempDirTest;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import net.sourceforge.plantuml.test.AbstractTempDirTest;
 
 class ApprovalTestingTest_withFileSpamLimit extends AbstractTempDirTest {
 
