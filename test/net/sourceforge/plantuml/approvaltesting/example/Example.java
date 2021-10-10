@@ -1,6 +1,6 @@
 package net.sourceforge.plantuml.approvaltesting.example;
 
-import static net.sourceforge.plantuml.test.TestUtils.exportDiagram;
+import static net.sourceforge.plantuml.test.PlantUmlTestUtils.exportDiagram;
 
 import java.awt.image.BufferedImage;
 

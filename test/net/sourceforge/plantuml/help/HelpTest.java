@@ -1,6 +1,6 @@
 package net.sourceforge.plantuml.help;
 
-import static net.sourceforge.plantuml.test.TestUtils.exportDiagram;
+import static net.sourceforge.plantuml.test.PlantUmlTestUtils.exportDiagram;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;

@@ -18,7 +18,7 @@ import static net.sourceforge.plantuml.test.Assertions.assertImagesEqual;
 import static net.sourceforge.plantuml.test.Assertions.assertImagesSameSize;
 import static net.sourceforge.plantuml.test.ColorComparators.COMPARE_PIXEL_EXACT;
 import static net.sourceforge.plantuml.test.ColorComparators.comparePixelWithSBTolerance;
-import static net.sourceforge.plantuml.test.TestUtils.exportDiagram;
+import static net.sourceforge.plantuml.test.PlantUmlTestUtils.exportDiagram;
 import static net.sourceforge.plantuml.test.TestUtils.writeImageFile;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.ALL_CHARS;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.JETBRAINS_FONT_FAMILY;
