@@ -5,7 +5,7 @@ import static java.nio.file.Files.deleteIfExists;
 import static java.nio.file.Files.notExists;
 import static net.sourceforge.plantuml.StringUtils.substringAfterLast;
 import static net.sourceforge.plantuml.test.Assertions.assertImagesEqual;
-import static net.sourceforge.plantuml.test.TestUtils.readImageFile;
+import static net.sourceforge.plantuml.test.ImageTestUtils.readImageFile;
 import static net.sourceforge.plantuml.test.TestUtils.readUtf8File;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import net.sourceforge.plantuml.test.ImageTestUtils;
 
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -81,7 +83,7 @@ public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, A
 	//
 
 	public ApprovalTesting approve(BufferedImage value) {
-		approve(value, ".png", TestUtils::writeImageFile, path -> {
+		approve(value, ".png", ImageTestUtils::writeImageFile, path -> {
 			final BufferedImage approved = readImageFile(path);
 			assertImagesEqual(approved, value);
 		});

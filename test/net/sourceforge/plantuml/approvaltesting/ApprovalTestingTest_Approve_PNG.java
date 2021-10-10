@@ -1,14 +1,14 @@
 package net.sourceforge.plantuml.approvaltesting;
 
-import static net.sourceforge.plantuml.test.TestUtils.imageToBytes;
+import static net.sourceforge.plantuml.test.ImageTestUtils.imageToBytes;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.awt.image.BufferedImage;
 
-import net.sourceforge.plantuml.test.AbstractTempDirTest;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import net.sourceforge.plantuml.test.AbstractTempDirTest;
 
 class ApprovalTestingTest_Approve_PNG extends AbstractTempDirTest {
 

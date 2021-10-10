@@ -1,6 +1,6 @@
 package net.sourceforge.plantuml.approvaltesting;
 
-import static net.sourceforge.plantuml.test.TestUtils.imageToBytes;
+import static net.sourceforge.plantuml.test.ImageTestUtils.imageToBytes;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.awt.image.BufferedImage;
