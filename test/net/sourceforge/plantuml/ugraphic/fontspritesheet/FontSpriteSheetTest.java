@@ -19,7 +19,6 @@ import static net.sourceforge.plantuml.test.Assertions.assertImagesSameSize;
 import static net.sourceforge.plantuml.test.ColorComparators.COMPARE_PIXEL_EXACT;
 import static net.sourceforge.plantuml.test.ColorComparators.comparePixelWithSBTolerance;
 import static net.sourceforge.plantuml.test.PlantUmlTestUtils.exportDiagram;
-import static net.sourceforge.plantuml.test.ImageTestUtils.writeImageFile;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.ALL_CHARS;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.JETBRAINS_FONT_FAMILY;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.createFontSpriteSheet;
@@ -237,27 +236,55 @@ class FontSpriteSheetTest {
 		assertThat(loaded.getAdvance())
 				.isNotZero()
 				.isEqualTo(original.getAdvance());
+
 		assertThat(loaded.getAscent())
 				.isNotZero()
 				.isEqualTo(original.getAscent());
+
 		assertThat(loaded.getDescent())
 				.isNotZero()
 				.isEqualTo(original.getDescent());
+
 		assertThat(loaded.getLeading())
 				.isNotZero()
 				.isEqualTo(original.getLeading());
+
+		assertThat(loaded.getMetadata())
+				.isNotEmpty()
+				.isEqualTo(original.getMetadata());
+
 		assertThat(loaded.getName())
 				.isNotEmpty()
 				.isEqualTo(font.getFontName());
+
 		assertThat(loaded.getPointSize())
 				.isNotZero()
 				.isEqualTo(pointSize);
+
 		assertThat(loaded.getSpriteWidth())
 				.isNotZero()
 				.isEqualTo(original.getSpriteWidth());
+
+		assertThat(loaded.getStrikethroughOffset())
+				.isNotZero()
+				.isEqualTo(original.getStrikethroughOffset());
+
+		assertThat(loaded.getStrikethroughThickness())
+				.isNotZero()
+				.isEqualTo(original.getStrikethroughThickness());
+
 		assertThat(loaded.getStyle())
 				.isNotZero()
 				.isEqualTo(style);
+
+		assertThat(loaded.getUnderlineOffset())
+				.isNotZero()
+				.isEqualTo(original.getUnderlineOffset());
+
+		assertThat(loaded.getUnderlineThickness())
+				.isNotZero()
+				.isEqualTo(original.getUnderlineThickness());
+
 		assertThat(loaded.getXOffset())
 				.isNotZero()
 				.isEqualTo(original.getXOffset());
@@ -440,7 +467,7 @@ class FontSpriteSheetTest {
 		}
 
 		// Compare
-		
+
 		approvalTesting
 				.withFileSpamLimit(2)
 				.withOutput("_from_font", ".png", path -> writeImageFile(path, image_from_font))

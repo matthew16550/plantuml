@@ -20,12 +20,15 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
+import java.awt.font.LineMetrics;
 import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
+import net.sourceforge.plantuml.annotation.VisibleForTesting;
 
 // I did a few experiments comparing a single PNG containing four font styles (plain / bold / italic / bold-italic) 
 // vs four separate PNGs and found the total file size is very similar either way.
@@ -36,10 +39,10 @@ public class FontSpriteSheetMaker {
 
 	private static final char TOFU = (char) -1;  // not sure if this is a good idea but so far it is working fine !
 
-	// Visible for testing
+	@VisibleForTesting
 	static final String ALL_CHARS = TOFU + "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
-	// Visible for testing
+	@VisibleForTesting
 	static final String JETBRAINS_FONT_FAMILY = "JetBrains Mono NL";
 
 	private static final List<String> JETBRAINS_FONT_FILES = immutableList(
@@ -62,7 +65,7 @@ public class FontSpriteSheetMaker {
 		}
 	}
 
-	// Visible for testing
+	@VisibleForTesting
 	static void registerJetBrainsFonts() throws Exception {
 		final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
@@ -73,7 +76,7 @@ public class FontSpriteSheetMaker {
 		}
 	}
 
-	// Visible for testing
+	@VisibleForTesting
 	static FontSpriteSheet createFontSpriteSheet(Font font) {
 		if (font.canDisplay(TOFU)) {
 			throw new RuntimeException("Oops this font has a glyph for TOFU : " + font.getFontName());
@@ -117,6 +120,7 @@ public class FontSpriteSheetMaker {
 			x += spriteWidth;
 		}
 
-		return new FontSpriteSheet(image, fontMetrics, textLayout, advance, spriteWidth, xOffset);
+		final LineMetrics lineMetrics = font.getLineMetrics(ALL_CHARS, frc);
+		return new FontSpriteSheet(image, fontMetrics, lineMetrics, textLayout, advance, spriteWidth, xOffset);
 	}
 }

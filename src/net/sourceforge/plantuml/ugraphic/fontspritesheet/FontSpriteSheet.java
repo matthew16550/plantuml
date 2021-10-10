@@ -12,6 +12,7 @@ import java.awt.Color;
 import java.awt.Composite;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.font.LineMetrics;
 import java.awt.font.TextLayout;
 import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
@@ -21,7 +22,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.SoftReference;
 import java.nio.file.Path;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.imageio.IIOImage;
@@ -42,22 +47,34 @@ public class FontSpriteSheet {
 	private final float ascent;
 	private final float descent;
 	private final float leading;
+	private final String metadata;
 	private final String name;
 	private final int pointSize;
 	private final int spriteWidth;
+	private final float strikethroughOffset;
+	private final float strikethroughThickness;
 	private final int style;
+	private final float underlineOffset;
+	private final float underlineThickness;
 	private final int xOffset;
 
-	FontSpriteSheet(BufferedImage alphaImage, FontMetrics fontMetrics, TextLayout textLayout, int advance, int spriteWidth, int xOffset) {
-		this.advance = advance;
-		this.alphaImage = alphaImage;
+	FontSpriteSheet(BufferedImage alphaImage, FontMetrics fontMetrics, LineMetrics lineMetrics, TextLayout textLayout, int advance, int spriteWidth, int xOffset) {
+		// I have seen these sometimes different from the values in LineMetrics and the values in TextLayout have worked better
 		this.ascent = textLayout.getAscent();
 		this.descent = textLayout.getDescent();
 		this.leading = textLayout.getLeading();
+
+		this.advance = advance;
+		this.alphaImage = alphaImage;
+		this.metadata = createMetadata();
 		this.name = fontMetrics.getFont().getFontName();
 		this.pointSize = fontMetrics.getFont().getSize();
 		this.spriteWidth = spriteWidth;
+		this.strikethroughOffset = lineMetrics.getStrikethroughOffset();
+		this.strikethroughThickness = lineMetrics.getStrikethroughThickness();
 		this.style = fontMetrics.getFont().getStyle();
+		this.underlineOffset = lineMetrics.getUnderlineOffset();
+		this.underlineThickness = lineMetrics.getUnderlineThickness();
 		this.xOffset = xOffset;
 	}
 
@@ -69,12 +86,38 @@ public class FontSpriteSheet {
 			ascent = getMetadataFloat(iioImage, TAG_ASCENT);
 			descent = getMetadataFloat(iioImage, TAG_DESCENT);
 			leading = getMetadataFloat(iioImage, TAG_LEADING);
+			metadata = getMetadataString(iioImage, TAG_METADATA);
 			name = getMetadataString(iioImage, TAG_NAME);
 			pointSize = getMetadataInt(iioImage, TAG_POINT_SIZE);
 			spriteWidth = getMetadataInt(iioImage, TAG_SPRITE_WIDTH);
+			strikethroughOffset = getMetadataFloat(iioImage, TAG_STRIKETHROUGH_OFFSET);
+			strikethroughThickness = getMetadataFloat(iioImage, TAG_STRIKETHROUGH_THICKNESS);
 			style = getMetadataInt(iioImage, TAG_STYLE);
+			underlineOffset = getMetadataFloat(iioImage, TAG_UNDERLINE_OFFSET);
+			underlineThickness = getMetadataFloat(iioImage, TAG_UNDERLINE_THICKNESS);
 			xOffset = getMetadataInt(iioImage, TAG_X_OFFSET);
 		}
+	}
+
+	private static String createMetadata() {
+		final StringBuilder b = new StringBuilder();
+
+		final String[] versionProperties = new String[]{
+				"java.runtime.name", "java.runtime.version",
+				"java.vendor", "java.vendor.version",
+				"java.vm.name", "java.vm.version",
+				"os.arch", "os.name", "os.version"
+		};
+
+		for (String p : versionProperties) {
+			b.append(p).append('=').append(System.getProperty(p)).append('\n');
+		}
+
+		final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+		df.setTimeZone(TimeZone.getTimeZone("UTC"));
+		b.append("timestamp=").append(df.format(new Date())).append('\n');
+
+		return b.toString();
 	}
 
 	int getAdvance() {
@@ -93,6 +136,10 @@ public class FontSpriteSheet {
 		return leading;
 	}
 
+	String getMetadata() {
+		return metadata;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -109,8 +156,24 @@ public class FontSpriteSheet {
 		return spriteWidth;
 	}
 
+	float getStrikethroughOffset() {
+		return strikethroughOffset;
+	}
+
+	float getStrikethroughThickness() {
+		return strikethroughThickness;
+	}
+
 	public int getStyle() {
 		return style;
+	}
+
+	float getUnderlineOffset() {
+		return underlineOffset;
+	}
+
+	float getUnderlineThickness() {
+		return underlineThickness;
 	}
 
 	int getXOffset() {
@@ -134,7 +197,7 @@ public class FontSpriteSheet {
 		// As an alternative I tried making a ColorModel class that returns colorized pixels
 		// with their alpha value read direct from alphaImage but drawing that way was 2 - 3 times slower
 		// than the blitting approach.
-		
+
 		final Composite oldComposite = g.getComposite();
 		g.setComposite(AlphaComposite.SrcOver);
 
@@ -161,7 +224,7 @@ public class FontSpriteSheet {
 			}
 			x += advance;
 		}
-		
+
 		g.setComposite(oldComposite);
 	}
 
@@ -229,10 +292,15 @@ public class FontSpriteSheet {
 	private static final String TAG_ASCENT = "PlantUml-FontSprite-Ascent";
 	private static final String TAG_DESCENT = "PlantUml-FontSprite-Descent";
 	private static final String TAG_LEADING = "PlantUml-FontSprite-Leading";
+	private static final String TAG_METADATA = "PlantUml-FontSprite-Metadata";
 	private static final String TAG_NAME = "PlantUml-FontSprite-Name";
 	private static final String TAG_POINT_SIZE = "PlantUml-FontSprite-PointSize";
 	private static final String TAG_SPRITE_WIDTH = "PlantUml-FontSprite-SpriteWidth";
+	private static final String TAG_STRIKETHROUGH_OFFSET = "PlantUml-Strikethrough-Offset";
+	private static final String TAG_STRIKETHROUGH_THICKNESS = "PlantUml-Strikethrough-Thickness";
 	private static final String TAG_STYLE = "PlantUml-FontSprite-Style";
+	private static final String TAG_UNDERLINE_OFFSET = "PlantUml-Underline-Offset";
+	private static final String TAG_UNDERLINE_THICKNESS = "PlantUml-Underline-Thickness";
 	private static final String TAG_X_OFFSET = "PlantUml-FontSprite-XOffset";
 
 	void writeAsPNG(Path path) throws IOException {
@@ -241,17 +309,23 @@ public class FontSpriteSheet {
 		}
 	}
 
+	@SuppressWarnings("DuplicatedCode") // Prevent strange IntelliJ false positive
 	void writeAsPNG(OutputStream out) throws IOException {
 		final PngIOMetadata writer = new PngIOMetadata();
-		writer.addText(TAG_ADVANCE, String.valueOf(advance));
-		writer.addText(TAG_ASCENT, String.valueOf(ascent));
-		writer.addText(TAG_DESCENT, String.valueOf(descent));
-		writer.addText(TAG_LEADING, String.valueOf(leading));
-		writer.addText(TAG_NAME, String.valueOf(name));
-		writer.addText(TAG_POINT_SIZE, String.valueOf(pointSize));
-		writer.addText(TAG_SPRITE_WIDTH, String.valueOf(spriteWidth));
-		writer.addText(TAG_STYLE, String.valueOf(style));
-		writer.addText(TAG_X_OFFSET, String.valueOf(xOffset));
+		writer.addText(TAG_ADVANCE, advance);
+		writer.addText(TAG_ASCENT, ascent);
+		writer.addText(TAG_DESCENT, descent);
+		writer.addText(TAG_LEADING, leading);
+		writer.addText(TAG_METADATA, metadata);
+		writer.addText(TAG_NAME, name);
+		writer.addText(TAG_POINT_SIZE, pointSize);
+		writer.addText(TAG_SPRITE_WIDTH, spriteWidth);
+		writer.addText(TAG_STRIKETHROUGH_OFFSET, strikethroughOffset);
+		writer.addText(TAG_STRIKETHROUGH_THICKNESS, strikethroughThickness);
+		writer.addText(TAG_STYLE, style);
+		writer.addText(TAG_UNDERLINE_OFFSET, underlineOffset);
+		writer.addText(TAG_UNDERLINE_THICKNESS, underlineThickness);
+		writer.addText(TAG_X_OFFSET, xOffset);
 		writer.write(alphaImage, out);
 	}
 

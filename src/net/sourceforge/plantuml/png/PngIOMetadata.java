@@ -176,6 +176,14 @@ public class PngIOMetadata {
 		meta.mergeTree("javax_imageio_png_1.0", root);
 	}
 
+	public void addText(String key, int value) throws IIOInvalidTreeException {
+		addText(key, String.valueOf(value));
+	}
+
+	public void addText(String key, float value) throws IIOInvalidTreeException {
+		addText(key, String.valueOf(value));
+	}
+
 	private static ImageWriter getImageWriter() {
 		final Iterator<ImageWriter> iterator = ImageIO.getImageWritersBySuffix("png");
 		for (final Iterator<ImageWriter> it = ImageIO.getImageWritersBySuffix("png"); it.hasNext();) {
