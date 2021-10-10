@@ -3,6 +3,8 @@ package net.sourceforge.plantuml.approvaltesting;
 import static net.sourceforge.plantuml.StringUtils.EOL;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import net.sourceforge.plantuml.test.AbstractTempDirTest;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 

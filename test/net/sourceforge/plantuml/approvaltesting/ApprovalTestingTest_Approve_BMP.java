@@ -8,6 +8,8 @@ import java.awt.image.BufferedImage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import net.sourceforge.plantuml.test.AbstractTempDirTest;
+
 class ApprovalTestingTest_Approve_BMP extends AbstractTempDirTest {
 
 	@RegisterExtension

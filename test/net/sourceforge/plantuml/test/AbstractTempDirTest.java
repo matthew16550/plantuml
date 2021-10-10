@@ -1,4 +1,4 @@
-package net.sourceforge.plantuml.approvaltesting;
+package net.sourceforge.plantuml.test;
 
 import static net.sourceforge.plantuml.test.PathUtils.listAllFilesRecursive;
 import static net.sourceforge.plantuml.test.TestUtils.createFile;
@@ -47,19 +47,19 @@ public abstract class AbstractTempDirTest {
 			this.file = file;
 		}
 
-		AssertThatFile hasContent(String expected) {
+		public AssertThatFile hasContent(String expected) {
 			assertThat(dir.resolve(file))
 					.hasContent(expected);
 			return this;
 		}
 
-		AssertThatFile isRegularFile() {
+		public AssertThatFile isRegularFile() {
 			assertThat(dir.resolve(file))
 					.isRegularFile();
 			return this;
 		}
 
-		AssertThatFile hasBinaryContent(byte[] expected) {
+		public AssertThatFile hasBinaryContent(byte[] expected) {
 			assertThat(dir.resolve(file))
 					.hasBinaryContent(expected);
 			return this;
@@ -73,7 +73,7 @@ public abstract class AbstractTempDirTest {
 			this.files = files;
 		}
 
-		AssertThatFileSet haveContent(String expected) {
+		public AssertThatFileSet haveContent(String expected) {
 			for (String f : files) {
 				assertThat(dir.resolve(f))
 						.hasContent(expected);
@@ -81,7 +81,7 @@ public abstract class AbstractTempDirTest {
 			return this;
 		}
 
-		AssertThatFileSet areRegularFiles() {
+		public AssertThatFileSet areRegularFiles() {
 			for (String f : files) {
 				assertThat(dir.resolve(f))
 						.isRegularFile();
@@ -97,12 +97,12 @@ public abstract class AbstractTempDirTest {
 			this.file = file;
 		}
 
-		GivenFile contains(String content) {
+		public GivenFile contains(String content) {
 			writeUtf8File(dir.resolve(file), content);
 			return this;
 		}
 
-		GivenFile exists() {
+		public GivenFile exists() {
 			createFile(dir.resolve(file));
 			return this;
 		}
@@ -115,14 +115,14 @@ public abstract class AbstractTempDirTest {
 			this.files = files;
 		}
 
-		GivenFileSet contain(String content) {
+		public GivenFileSet contain(String content) {
 			for (String f : files) {
 				writeUtf8File(dir.resolve(f), content);
 			}
 			return this;
 		}
 
-		GivenFileSet exist() {
+		public GivenFileSet exist() {
 			for (String f : files) {
 				createFile(dir.resolve(f));
 			}

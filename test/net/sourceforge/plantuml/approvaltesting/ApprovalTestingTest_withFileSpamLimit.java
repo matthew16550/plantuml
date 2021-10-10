@@ -4,6 +4,8 @@ import static net.sourceforge.plantuml.StringUtils.EOL;
 import static net.sourceforge.plantuml.test.TestUtils.writeUtf8File;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import net.sourceforge.plantuml.test.AbstractTempDirTest;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;

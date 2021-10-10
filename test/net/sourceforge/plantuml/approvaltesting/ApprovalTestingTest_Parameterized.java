@@ -1,5 +1,7 @@
 package net.sourceforge.plantuml.approvaltesting;
 
+import net.sourceforge.plantuml.test.AbstractTempDirTest;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
