@@ -11,7 +11,7 @@ import java.nio.file.PathMatcher;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class PathUtils {
+public class PathTestUtils {
 
 	public static List<String> listAllFilesRecursive(Path dir) {
 		try {
