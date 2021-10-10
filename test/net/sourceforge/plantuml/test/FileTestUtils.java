@@ -37,5 +37,4 @@ public class FileTestUtils {
 			throwAsUncheckedException(e);
 		}
 	}
-
 }

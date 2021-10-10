@@ -28,9 +28,9 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.opentest4j.AssertionFailedError;
 
 import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.annotation.VisibleForTesting;
 import net.sourceforge.plantuml.test.FileTestUtils;
 import net.sourceforge.plantuml.test.ImageTestUtils;
-import net.sourceforge.plantuml.utils.annotations.VisibleForTesting;
 import net.sourceforge.plantuml.utils.functional.BiCallback;
 import net.sourceforge.plantuml.utils.functional.Callback;
 import net.sourceforge.plantuml.utils.functional.SingleCallback;
