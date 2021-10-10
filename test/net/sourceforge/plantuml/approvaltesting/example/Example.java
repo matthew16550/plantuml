@@ -1,8 +1,6 @@
 package net.sourceforge.plantuml.approvaltesting.example;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static net.sourceforge.plantuml.test.TestUtils.exportOneDiagramToByteArray;
-import static net.sourceforge.plantuml.test.TestUtils.renderAsImage;
+import static net.sourceforge.plantuml.test.TestUtils.exportOneDiagram;
 
 import java.awt.image.BufferedImage;
 
@@ -19,21 +17,25 @@ class Example {
 	@RegisterExtension
 	static final ApprovalTesting approvalTesting = new ApprovalTesting();
 
-	private static final String SOURCE = "" +
-			"@startuml\n" +
-			"a -> b\n" +
-			"@enduml\n";
+	private static final String[] SOURCE = new String[]{
+			"@startuml",
+			"a -> b",
+			"@enduml"
+	};
 
 	@Test
 	void test_export_png() {
-		final BufferedImage image = renderAsImage(SOURCE);
+		final BufferedImage image = exportOneDiagram(SOURCE)
+				.assertNoError()
+				.toImage();
 		approvalTesting.approve(image);
 	}
 
 	@Test
 	void test_export_ascii() {
-		final byte[] bytes = exportOneDiagramToByteArray(SOURCE, FileFormat.ATXT);
-		final String string = new String(bytes, UTF_8);
+		final String string = exportOneDiagram(SOURCE)
+				.assertNoError()
+				.toString(FileFormat.ATXT);
 		approvalTesting.approve(string);
 	}
 
@@ -43,8 +45,11 @@ class Example {
 			names = {"ATXT", "DEBUG", "EPS", "HTML5", "LATEX", "SVG", "UTXT", "VDX"}
 	)
 	void test_export_many(FileFormat fileFormat) {
-		final byte[] bytes = exportOneDiagramToByteArray(SOURCE, fileFormat, "-nometadata");
-		final String string = new String(bytes, UTF_8);
+		final String string = exportOneDiagram(SOURCE)
+				.assertNoError()
+				.withMetadata(false)
+				.toString(fileFormat);
+
 		approvalTesting
 				.withExtension(fileFormat.getFileSuffix())
 				.approve(string);
