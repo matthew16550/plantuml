@@ -19,7 +19,6 @@ import javax.imageio.ImageIO;
 
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
-import net.sourceforge.plantuml.Option;
 import net.sourceforge.plantuml.SourceStringReader;
 import net.sourceforge.plantuml.api.ImageDataBufferedImage;
 import net.sourceforge.plantuml.core.Diagram;
@@ -29,25 +28,7 @@ import net.sourceforge.plantuml.preproc.Defines;
 
 public class TestUtils {
 
-	public static byte[] exportOneDiagramToByteArray(String source, FileFormat fileFormat, String... options) {
-		try {
-			final Option option = new Option(options);
-			option.setFileFormatOption(new FileFormatOption(fileFormat));
-
-			final SourceStringReader ssr = new SourceStringReader(option.getDefaultDefines(), source, UTF_8.name(), option.getConfig());
-
-			final ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-			ssr.getBlocks().get(0).getDiagram().exportDiagram(os, 0, option.getFileFormatOption());
-
-			return os.toByteArray();
-		} catch (Exception e) {
-			throwAsUncheckedException(e);
-			return new byte[]{};  // this line will never run - but it appeases the compiler
-		}
-	}
-
-	public static ExportOneDiagram exportOneDiagram(String... source) {
+	public static ExportOneDiagram exportDiagram(String... source) {
 		final SourceStringReader ssr = new SourceStringReader(Defines.createEmpty(), String.join("\n", source), UTF_8.name(), emptyList());
 		final Diagram diagram = ssr.getBlocks().get(0).getDiagram();
 		return new ExportOneDiagram(diagram);
@@ -112,36 +93,6 @@ public class TestUtils {
 			final FileFormatOption fileFormatOption = new FileFormatOption(fileFormat, metadata);
 			return diagram.exportDiagram(os, 0, fileFormatOption);
 		}
-	}
-
-	public static BufferedImage renderAsImage(String... source) {
-
-		try {
-			final Option option = new Option(new String[]{});
-			option.setFileFormatOption(new FileFormatOption(FileFormat.BUFFERED_IMAGE));
-
-			final SourceStringReader ssr = new SourceStringReader(option.getDefaultDefines(), String.join("\n", source), UTF_8.name(), option.getConfig());
-
-			final ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-			ImageDataBufferedImage imageData = (ImageDataBufferedImage) ssr.getBlocks().get(0).getDiagram().exportDiagram(os, 0, option.getFileFormatOption());
-
-			return imageData.getImage();
-		} catch (Exception e) {
-			throwAsUncheckedException(e);
-			return new BufferedImage(0, 0, 0);  // this line will never run - but it appeases the compiler
-		}
-	}
-
-	public static String renderAsUnicode(String source, String... options) {
-
-		final byte[] bytes = exportOneDiagramToByteArray(source, FileFormat.UTXT, options);
-		return new String(bytes, UTF_8);
-	}
-
-	public static String renderUmlAsUnicode(String source, String... options) {
-
-		return renderAsUnicode("@startuml\n" + source + "\n@enduml\n", options);
 	}
 
 	public static Path createFile(Path path, FileAttribute<?>... attrs) {

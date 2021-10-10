@@ -1,6 +1,6 @@
 package net.sourceforge.plantuml.approvaltesting.example;
 
-import static net.sourceforge.plantuml.test.TestUtils.exportOneDiagram;
+import static net.sourceforge.plantuml.test.TestUtils.exportDiagram;
 
 import java.awt.image.BufferedImage;
 
@@ -25,7 +25,7 @@ class Example {
 
 	@Test
 	void test_export_png() {
-		final BufferedImage image = exportOneDiagram(SOURCE)
+		final BufferedImage image = exportDiagram(SOURCE)
 				.assertNoError()
 				.toImage();
 		approvalTesting.approve(image);
@@ -33,7 +33,7 @@ class Example {
 
 	@Test
 	void test_export_ascii() {
-		final String string = exportOneDiagram(SOURCE)
+		final String string = exportDiagram(SOURCE)
 				.assertNoError()
 				.toString(FileFormat.ATXT);
 		approvalTesting.approve(string);
@@ -45,7 +45,7 @@ class Example {
 			names = {"ATXT", "DEBUG", "EPS", "HTML5", "LATEX", "SVG", "UTXT", "VDX"}
 	)
 	void test_export_many(FileFormat fileFormat) {
-		final String string = exportOneDiagram(SOURCE)
+		final String string = exportDiagram(SOURCE)
 				.assertNoError()
 				.withMetadata(false)
 				.toString(fileFormat);

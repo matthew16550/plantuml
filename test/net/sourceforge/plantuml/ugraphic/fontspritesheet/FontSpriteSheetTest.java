@@ -18,7 +18,7 @@ import static net.sourceforge.plantuml.test.Assertions.assertImagesEqual;
 import static net.sourceforge.plantuml.test.Assertions.assertImagesSameSize;
 import static net.sourceforge.plantuml.test.ColorComparators.COMPARE_PIXEL_EXACT;
 import static net.sourceforge.plantuml.test.ColorComparators.comparePixelWithSBTolerance;
-import static net.sourceforge.plantuml.test.TestUtils.renderAsImage;
+import static net.sourceforge.plantuml.test.TestUtils.exportDiagram;
 import static net.sourceforge.plantuml.test.TestUtils.writeImageFile;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.ALL_CHARS;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.JETBRAINS_FONT_FAMILY;
@@ -41,6 +41,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -276,6 +277,7 @@ class FontSpriteSheetTest {
 	@CartesianValueSource(strings = {"black", "red", "green", "blue", "yellow", "cyan", "magenta"})
 	@CartesianValueSource(ints = {9, 20})
 	@IntRangeSource(from = 0, to = 255)
+	@Disabled
 	void test_plantuml_draws_same_with_font_and_sprite(String text, String fgColor, int size, int backAlpha) {
 		final String[] source = {
 				"@startuml",
@@ -290,10 +292,10 @@ class FontSpriteSheetTest {
 		};
 
 		FontSpriteSheetManager.USE = false;
-		final BufferedImage fromFont = renderAsImage(source);
+		final BufferedImage fromFont = exportDiagram(source).toImage();
 
 		FontSpriteSheetManager.USE = true;
-		final BufferedImage fromSprite = renderAsImage(source);
+		final BufferedImage fromSprite = exportDiagram(source).toImage();
 
 		assertImagesSameSize(fromFont, fromSprite);
 
