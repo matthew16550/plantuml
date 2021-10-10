@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class HelpTest {
 
 	@Test
-	public void test_help_themes() throws Exception {
+	public void test_help_themes() {
 
 		final String output = renderUmlAsUnicode("help themes");
 		

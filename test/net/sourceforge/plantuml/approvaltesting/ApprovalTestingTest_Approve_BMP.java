@@ -1,28 +1,21 @@
 package net.sourceforge.plantuml.approvaltesting;
 
-import static net.sourceforge.plantuml.test.PathUtils.listAllFilesRecursive;
 import static net.sourceforge.plantuml.test.TestUtils.imageToBytes;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.awt.image.BufferedImage;
-import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.api.io.TempDir;
 
-class ApprovalTestingTest_Approve_BMP {
+class ApprovalTestingTest_Approve_BMP extends ApprovalTestingAbstractTest {
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting()
 			.withDuplicateFiles(true);
 
-	@TempDir
-	static Path dir;
-
 	@Test
-	void test() throws Exception {
+	void test() {
 
 		// Approve the initial value
 
@@ -34,10 +27,11 @@ class ApprovalTestingTest_Approve_BMP {
 				.withExtension(".bmp")
 				.approve(value);
 
-		assertThat(listAllFilesRecursive(dir))
-				.containsExactly("ApprovalTestingTest_Approve_BMP.test.approved.bmp");
+		assertThatDirContainsExactlyTheseFiles(
+				"ApprovalTestingTest_Approve_BMP.test.approved.bmp"
+		);
 
-		assertThat(dir.resolve("ApprovalTestingTest_Approve_BMP.test.approved.bmp"))
+		assertThatFile("ApprovalTestingTest_Approve_BMP.test.approved.bmp")
 				.hasBinaryContent(imageToBytes(value, "bmp"));
 
 		// Change the value then approve() should fail
@@ -58,13 +52,12 @@ class ApprovalTestingTest_Approve_BMP {
 						"at:<[1, 2]> using COMPARE_PIXEL_EXACT"
 				);
 
-		assertThat(listAllFilesRecursive(dir))
-				.containsExactlyInAnyOrder(
-						"ApprovalTestingTest_Approve_BMP.test.approved.bmp",
-						"ApprovalTestingTest_Approve_BMP.test.failed.bmp"
-				);
+		assertThatDirContainsExactlyTheseFiles(
+				"ApprovalTestingTest_Approve_BMP.test.approved.bmp",
+				"ApprovalTestingTest_Approve_BMP.test.failed.bmp"
+		);
 
-		assertThat(dir.resolve("ApprovalTestingTest_Approve_BMP.test.failed.bmp"))
+		assertThatFile("ApprovalTestingTest_Approve_BMP.test.failed.bmp")
 				.hasBinaryContent(imageToBytes(value, "bmp"));
 	}
 }

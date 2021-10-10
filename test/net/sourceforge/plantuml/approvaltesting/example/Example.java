@@ -25,13 +25,13 @@ class Example {
 			"@enduml\n";
 
 	@Test
-	void test_export_png() throws Exception {
+	void test_export_png() {
 		final BufferedImage image = renderAsImage(SOURCE);
 		approvalTesting.approve(image);
 	}
 
 	@Test
-	void test_export_ascii() throws Exception {
+	void test_export_ascii() {
 		final byte[] bytes = exportOneDiagramToByteArray(SOURCE, FileFormat.ATXT);
 		final String string = new String(bytes, UTF_8);
 		approvalTesting.approve(string);
@@ -42,7 +42,7 @@ class Example {
 			value = FileFormat.class,
 			names = {"ATXT", "DEBUG", "EPS", "HTML5", "LATEX", "SVG", "UTXT", "VDX"}
 	)
-	void test_export_many(FileFormat fileFormat) throws Exception {
+	void test_export_many(FileFormat fileFormat) {
 		final byte[] bytes = exportOneDiagramToByteArray(SOURCE, fileFormat, "-nometadata");
 		final String string = new String(bytes, UTF_8);
 		approvalTesting

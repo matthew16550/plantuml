@@ -1,27 +1,19 @@
 package net.sourceforge.plantuml.approvaltesting;
 
 import static net.sourceforge.plantuml.StringUtils.EOL;
-import static net.sourceforge.plantuml.test.PathUtils.listAllFilesRecursive;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
-import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.api.io.TempDir;
 
-class ApprovalTestingTest_Approve_TXT {
+class ApprovalTestingTest_Approve_TXT extends ApprovalTestingAbstractTest {
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting()
 			.withDuplicateFiles(true);
 
-	@TempDir
-	static Path dir;
-
 	@Test
-	void test() throws Exception {
+	void test() {
 
 		// Approve the initial value
 
@@ -31,14 +23,15 @@ class ApprovalTestingTest_Approve_TXT {
 				.withDir(dir)
 				.approve(value);
 
-		assertThat(listAllFilesRecursive(dir))
-				.containsExactly("ApprovalTestingTest_Approve_TXT.test.approved.txt");
+		assertThatDirContainsExactlyTheseFiles(
+				"ApprovalTestingTest_Approve_TXT.test.approved.txt"
+		);
 
-		assertThat(dir.resolve("ApprovalTestingTest_Approve_TXT.test.approved.txt"))
+		assertThatFile("ApprovalTestingTest_Approve_TXT.test.approved.txt")
 				.hasContent(value);
 
 		// Change the value then approve() should fail
-		
+
 		final String changedValue = value + "bar";
 
 		assertThatExceptionOfType(AssertionError.class)
@@ -49,13 +42,12 @@ class ApprovalTestingTest_Approve_TXT {
 				)
 				.withMessage(EOL + "expected: \"foo\"" + EOL + " but was: \"foobar\"");
 
-		assertThat(listAllFilesRecursive(dir))
-				.containsExactlyInAnyOrder(
-						"ApprovalTestingTest_Approve_TXT.test.approved.txt",
-						"ApprovalTestingTest_Approve_TXT.test.failed.txt"
-				);
+		assertThatDirContainsExactlyTheseFiles(
+				"ApprovalTestingTest_Approve_TXT.test.approved.txt",
+				"ApprovalTestingTest_Approve_TXT.test.failed.txt"
+		);
 
-		assertThat(dir.resolve("ApprovalTestingTest_Approve_TXT.test.failed.txt"))
+		assertThatFile("ApprovalTestingTest_Approve_TXT.test.failed.txt")
 				.hasContent(changedValue);
 	}
 }

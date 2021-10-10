@@ -276,7 +276,7 @@ class FontSpriteSheetTest {
 	@CartesianValueSource(strings = {"black", "red", "green", "blue", "yellow", "cyan", "magenta"})
 	@CartesianValueSource(ints = {9, 20})
 	@IntRangeSource(from = 0, to = 255)
-	void test_plantuml_draws_same_with_font_and_sprite(String text, String fgColor, int size, int backAlpha) throws Exception {
+	void test_plantuml_draws_same_with_font_and_sprite(String text, String fgColor, int size, int backAlpha) {
 		final String[] source = {
 				"@startuml",
 				"!$BGCOLOR=transparent",
