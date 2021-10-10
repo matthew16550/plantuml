@@ -10,37 +10,37 @@ import java.util.List;
 
 import org.junit.jupiter.api.io.TempDir;
 
-abstract class TempDirTest {
+public abstract class TempDirTest {
 
 	@TempDir
-	static Path dir;
+	public static Path dir;
 
-	static void assertThatDirContainsExactlyTheseFiles(String... files) {
+	public static void assertThatDirContainsExactlyTheseFiles(String... files) {
 		assertThat(listFilesInDir())
 				.containsExactlyInAnyOrder(files);
 	}
 
-	static AssertThatFile assertThatFile(String file) {
+	public static AssertThatFile assertThatFile(String file) {
 		return new AssertThatFile(file);
 	}
 
-	static AssertThatFileSet assertThatFiles(String... files) {
+	public static AssertThatFileSet assertThatFiles(String... files) {
 		return new AssertThatFileSet(files);
 	}
 
-	static GivenFile givenFile(String file) {
+	public static GivenFile givenFile(String file) {
 		return new GivenFile(file);
 	}
 
-	static GivenFileSet givenFiles(String... files) {
+	public static GivenFileSet givenFiles(String... files) {
 		return new GivenFileSet(files);
 	}
 
-	static List<String> listFilesInDir() {
+	public static List<String> listFilesInDir() {
 		return listAllFilesRecursive(dir);
 	}
 
-	static class AssertThatFile {
+	public static class AssertThatFile {
 		private final String file;
 
 		public AssertThatFile(String file) {
@@ -66,7 +66,7 @@ abstract class TempDirTest {
 		}
 	}
 
-	static class AssertThatFileSet {
+	public static class AssertThatFileSet {
 		private final String[] files;
 
 		public AssertThatFileSet(String... files) {
@@ -90,7 +90,7 @@ abstract class TempDirTest {
 		}
 	}
 
-	static class GivenFile {
+	public static class GivenFile {
 		private final String file;
 
 		public GivenFile(String file) {
@@ -108,7 +108,7 @@ abstract class TempDirTest {
 		}
 	}
 
-	static class GivenFileSet {
+	public static class GivenFileSet {
 		private final String[] files;
 
 		public GivenFileSet(String... files) {
