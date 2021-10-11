@@ -11,36 +11,38 @@ jobs:
       fail-fast: false
       matrix:
         java_distribution: [ zulu ]
-#        java_version: [ 8 ]
-#        os: [ ubuntu-latest ]
-#        java_version: [ 8, 11, 17 ]
-#        os: [ macos-latest, ubuntu-latest, windows-latest ]
+        java_version: [ 8 ]
+        os: [ ubuntu-latest ]
+        #        java_version: [ 8, 11, 17 ]
+        #        os: [ macos-latest, ubuntu-latest, windows-latest ]
 
         # All temurin:
-#        java_version: [ 8.0.302+8, 11.0.12+7, 17.0.0+35 ]
+        #        java_version: [ 8.0.302+8, 11.0.12+7, 17.0.0+35 ]
 
         # All zulu:
-        java_version: [ 8.0.302+8, 9.0.7+0, 10.0.2+13, 11.0.12+7, 12.0.2+3, 13.0.8+5, 14.0.2+12, 15.0.4+5, 16.0.2+7, 17.0.0+35 ]
-        
-        # All OS:
-        os: [ macos-11, macos-10.15, ubuntu-18.04, ubuntu-20.04, windows-2016, windows-2019, windows-2022 ]
+#        java_version: [ 8.0.302+8, 9.0.7+0, 10.0.2+13, 11.0.12+7, 12.0.2+3, 13.0.8+5, 14.0.2+12, 15.0.4+5, 16.0.2+7, 17.0.0+35 ]
 
-#        include:
-#          - java_distribution: temurin
-#            java_version: 8
-#            os: ubuntu-latest
-#          - java_distribution: temurin
-#            java_version: 11
-#            os: ubuntu-latest
-#          - java_distribution: temurin
-#            java_version: 17
-#            os: ubuntu-latest
+        # All OS:
+#        os: [ macos-11, macos-10.15, ubuntu-18.04, ubuntu-20.04, windows-2016, windows-2019, windows-2022 ]
+
+    #        include:
+    #          - java_distribution: temurin
+    #            java_version: 8
+    #            os: ubuntu-latest
+    #          - java_distribution: temurin
+    #            java_version: 11
+    #            os: ubuntu-latest
+    #          - java_distribution: temurin
+    #            java_version: 17
+    #            os: ubuntu-latest
     defaults:
       run:
         shell: bash
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Set up java
         uses: actions/setup-java@v2.3.0
@@ -52,6 +54,12 @@ jobs:
       # Downloading all the dependencies is very log spammy, so we do this in its own step.
       - name: Prime maven cache
         run: mvn --batch-mode dependency:go-offline
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
 
       - name: Compile
         run: mvn --batch-mode compile resources:testResources compiler:testCompile
@@ -85,3 +93,8 @@ jobs:
             !test/**/ApprovalTestingTest.test_withMaxFailures.1.failed.txt
             !test/**/ApprovalTestingTest.test_withMaxFailures.2.failed.txt
           if-no-files-found: ignore
+
+      - name: Sonar analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn --batch-mode org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=matthew16550_plantuml

@@ -56,7 +56,12 @@
         <artifactId>oss-parent</artifactId>
         <version>7</version>
     </parent>
-
+	
+	<properties>
+		<sonar.organization>matthew16550</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+	</properties>
+	
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
