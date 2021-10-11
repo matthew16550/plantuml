@@ -105,4 +105,4 @@ jobs:
         env:
           GITHUB_TOKEN: none
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn --batch-mode verify sonar:sonar
+        run: mvn --batch-mode -Dmaven.javadoc.skip=true verify sonar:sonar
