@@ -39,8 +39,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.Comparator;
 import java.util.List;
 
-import net.sourceforge.plantuml.test.ImageTestUtils;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;

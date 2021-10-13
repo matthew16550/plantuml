@@ -42,14 +42,14 @@ public class FontSpriteSheet {
 	private static final char MAX_CHAR = 0x7e;
 
 	private final Map<Integer, SoftReference<BufferedImage>> colorizedImageCache = new ConcurrentHashMap<>();
-	private final int advance;
+	private final float advance;
 	private final BufferedImage alphaImage;
 	private final float ascent;
 	private final float descent;
 	private final float leading;
 	private final String metadata;
 	private final String name;
-	private final int pointSize;
+	private final float pointSize;
 	private final int spriteWidth;
 	private final float strikethroughOffset;
 	private final float strikethroughThickness;
@@ -58,7 +58,9 @@ public class FontSpriteSheet {
 	private final float underlineThickness;
 	private final int xOffset;
 
-	FontSpriteSheet(BufferedImage alphaImage, FontMetrics fontMetrics, LineMetrics lineMetrics, TextLayout textLayout, int advance, int spriteWidth, int xOffset) {
+	FontSpriteSheet(BufferedImage alphaImage, FontMetrics fontMetrics, LineMetrics lineMetrics, TextLayout textLayout,
+			float advance, int spriteWidth, int xOffset) {
+
 		// I have seen these sometimes different from the values in LineMetrics and the values in TextLayout have worked better
 		this.ascent = textLayout.getAscent();
 		this.descent = textLayout.getDescent();
@@ -68,7 +70,7 @@ public class FontSpriteSheet {
 		this.alphaImage = alphaImage;
 		this.metadata = createMetadata();
 		this.name = fontMetrics.getFont().getFontName();
-		this.pointSize = fontMetrics.getFont().getSize();
+		this.pointSize = fontMetrics.getFont().getSize2D();
 		this.spriteWidth = spriteWidth;
 		this.strikethroughOffset = lineMetrics.getStrikethroughOffset();
 		this.strikethroughThickness = lineMetrics.getStrikethroughThickness();
@@ -81,14 +83,14 @@ public class FontSpriteSheet {
 	FontSpriteSheet(InputStream in) throws IOException {
 		try (ImageInputStream iis = ImageIO.createImageInputStream(in)) {
 			final IIOImage iioImage = createImageReader(iis).readAll(0, null);
-			advance = getMetadataInt(iioImage, TAG_ADVANCE);
+			advance = getMetadataFloat(iioImage, TAG_ADVANCE);
 			alphaImage = (BufferedImage) iioImage.getRenderedImage();
 			ascent = getMetadataFloat(iioImage, TAG_ASCENT);
 			descent = getMetadataFloat(iioImage, TAG_DESCENT);
 			leading = getMetadataFloat(iioImage, TAG_LEADING);
 			metadata = getMetadataString(iioImage, TAG_METADATA);
 			name = getMetadataString(iioImage, TAG_NAME);
-			pointSize = getMetadataInt(iioImage, TAG_POINT_SIZE);
+			pointSize = getMetadataFloat(iioImage, TAG_POINT_SIZE);
 			spriteWidth = getMetadataInt(iioImage, TAG_SPRITE_WIDTH);
 			strikethroughOffset = getMetadataFloat(iioImage, TAG_STRIKETHROUGH_OFFSET);
 			strikethroughThickness = getMetadataFloat(iioImage, TAG_STRIKETHROUGH_THICKNESS);
@@ -120,7 +122,7 @@ public class FontSpriteSheet {
 		return b.toString();
 	}
 
-	int getAdvance() {
+	float getAdvance() {
 		return advance;
 	}
 
@@ -144,12 +146,13 @@ public class FontSpriteSheet {
 		return name;
 	}
 
-	public int getPointSize() {
+	public float getPointSize() {
 		return pointSize;
 	}
 
 	String getPreferredFilename() {
-		return getName().replace(' ', '-') + "-" + getPointSize() + ".png";
+		final String size = getPointSize() % 1 > 0 ? Float.toString(getPointSize()) : Integer.toString((int) getPointSize());
+		return getName().replace(' ', '-') + "-" + size + ".png";
 	}
 
 	int getSpriteWidth() {

@@ -60,6 +60,7 @@ public class FontSpriteSheetMaker {
 				final Font font = new Font(JETBRAINS_FONT_FAMILY, style, size);
 				final FontSpriteSheet sheet = createFontSpriteSheet(font);
 				final Path path = Paths.get("testResources").resolve("font-sprite-sheets").resolve(sheet.getPreferredFilename());
+				System.out.println("Writing: " + path);
 				sheet.writeAsPNG(path);
 			}
 		}
@@ -91,12 +92,12 @@ public class FontSpriteSheetMaker {
 		final TextLayout textLayout = new TextLayout(ALL_CHARS, font, frc);
 		final float ascent = textLayout.getAscent();
 
-		int advance = 0;
+		float advance = 0;
 		final Rectangle bounds = new Rectangle();
 
 		for (char c : ALL_CHARS.toCharArray()) {
 			final GlyphVector glyphVector = font.createGlyphVector(frc, new char[]{c});
-			advance = max(advance, roundUp(glyphVector.getGlyphMetrics(0).getAdvance()));
+			advance = max(advance, glyphVector.getGlyphMetrics(0).getAdvance());
 			bounds.add(glyphVector.getGlyphPixelBounds(0, frc, 0, ascent));
 		}
 
