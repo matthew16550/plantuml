@@ -163,7 +163,7 @@ public class PngIOMetadata {
 
 	}
 
-	public void addText(String key, String value) throws IIOInvalidTreeException {
+	public PngIOMetadata addText(String key, String value) throws IIOInvalidTreeException {
 		final IIOMetadataNode text = new IIOMetadataNode("tEXt");
 		final IIOMetadataNode entry = new IIOMetadataNode("tEXtEntry");
 		entry.setAttribute("keyword", key);
@@ -174,14 +174,17 @@ public class PngIOMetadata {
 		root.appendChild(text);
 		
 		meta.mergeTree("javax_imageio_png_1.0", root);
+		return this;
 	}
 
-	public void addText(String key, int value) throws IIOInvalidTreeException {
+	public PngIOMetadata addText(String key, int value) throws IIOInvalidTreeException {
 		addText(key, String.valueOf(value));
+		return this;
 	}
 
-	public void addText(String key, float value) throws IIOInvalidTreeException {
+	public PngIOMetadata addText(String key, float value) throws IIOInvalidTreeException {
 		addText(key, String.valueOf(value));
+		return this;
 	}
 
 	private static ImageWriter getImageWriter() {

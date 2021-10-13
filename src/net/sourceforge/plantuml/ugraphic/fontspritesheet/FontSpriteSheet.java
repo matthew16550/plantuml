@@ -309,24 +309,23 @@ public class FontSpriteSheet {
 		}
 	}
 
-	@SuppressWarnings("DuplicatedCode") // Prevent strange IntelliJ false positive
 	void writeAsPNG(OutputStream out) throws IOException {
-		final PngIOMetadata writer = new PngIOMetadata();
-		writer.addText(TAG_ADVANCE, advance);
-		writer.addText(TAG_ASCENT, ascent);
-		writer.addText(TAG_DESCENT, descent);
-		writer.addText(TAG_LEADING, leading);
-		writer.addText(TAG_METADATA, metadata);
-		writer.addText(TAG_NAME, name);
-		writer.addText(TAG_POINT_SIZE, pointSize);
-		writer.addText(TAG_SPRITE_WIDTH, spriteWidth);
-		writer.addText(TAG_STRIKETHROUGH_OFFSET, strikethroughOffset);
-		writer.addText(TAG_STRIKETHROUGH_THICKNESS, strikethroughThickness);
-		writer.addText(TAG_STYLE, style);
-		writer.addText(TAG_UNDERLINE_OFFSET, underlineOffset);
-		writer.addText(TAG_UNDERLINE_THICKNESS, underlineThickness);
-		writer.addText(TAG_X_OFFSET, xOffset);
-		writer.write(alphaImage, out);
+		new PngIOMetadata()
+				.addText(TAG_ADVANCE, advance)
+				.addText(TAG_ASCENT, ascent)
+				.addText(TAG_DESCENT, descent)
+				.addText(TAG_LEADING, leading)
+				.addText(TAG_METADATA, metadata)
+				.addText(TAG_NAME, name)
+				.addText(TAG_POINT_SIZE, pointSize)
+				.addText(TAG_SPRITE_WIDTH, spriteWidth)
+				.addText(TAG_STRIKETHROUGH_OFFSET, strikethroughOffset)
+				.addText(TAG_STRIKETHROUGH_THICKNESS, strikethroughThickness)
+				.addText(TAG_STYLE, style)
+				.addText(TAG_UNDERLINE_OFFSET, underlineOffset)
+				.addText(TAG_UNDERLINE_THICKNESS, underlineThickness)
+				.addText(TAG_X_OFFSET, xOffset)
+				.write(alphaImage, out);
 	}
 
 	private static float getMetadataFloat(IIOImage image, String tag) {
