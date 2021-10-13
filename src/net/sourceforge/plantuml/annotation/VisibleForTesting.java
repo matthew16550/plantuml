@@ -1,7 +1,7 @@
 package net.sourceforge.plantuml.annotation;
 
 /**
- * Indicates that an item exists or has greater visibility so that code is testable.
+ * Indicates things that could be private but have greater visibility so that we can test them.
  */
 public @interface VisibleForTesting {
 }
