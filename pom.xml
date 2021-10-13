@@ -62,7 +62,7 @@
 		<sonar.inclusions>src/net/sourceforge/plantuml/**,test/**</sonar.inclusions>
 		<sonar.java.source>1.8</sonar.java.source>
 		<sonar.organization>matthew16550</sonar.organization>
-		<sonar.projectKey>matthew16550_plantuml</sonar.projectKey>
+		<sonar.projectKey>plantuml</sonar.projectKey>
 	</properties>
 	
 	<dependencyManagement>
