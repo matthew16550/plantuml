@@ -61,7 +61,7 @@ jobs:
       - name: Prime maven cache
         run: mvn --batch-mode dependency:go-offline
 
-      - name: Cache SonarCloud packages
+      - name: Cache sonar packages
         uses: actions/cache@v1
         with:
           path: ~/.sonar/cache
@@ -103,6 +103,6 @@ jobs:
       - name: Sonar analysis
         if: ${{ steps.config.outputs.java_major_version >= 11 }}
         env:
-          GITHUB_TOKEN: none
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn --batch-mode -Dmaven.javadoc.skip=true verify sonar:sonar
