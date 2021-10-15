@@ -61,7 +61,9 @@ public class FontSpriteSheet {
 	FontSpriteSheet(BufferedImage alphaImage, FontMetrics fontMetrics, LineMetrics lineMetrics, TextLayout textLayout,
 			float advance, int spriteWidth, int xOffset) {
 
-		// I have seen these sometimes different from the values in LineMetrics and the values in TextLayout have worked better
+		// I have seen these values sometimes different from the values in LineMetrics,
+		// in my very limited experience the values from TextLayout have worked better for small fonts,
+		// but it was only one pixel different either way
 		this.ascent = textLayout.getAscent();
 		this.descent = textLayout.getDescent();
 		this.leading = textLayout.getLeading();

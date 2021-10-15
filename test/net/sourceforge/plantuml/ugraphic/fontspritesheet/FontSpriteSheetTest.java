@@ -36,6 +36,7 @@ import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 
@@ -293,6 +294,27 @@ class FontSpriteSheetTest {
 		assertImagesEqual(original.getAlphaImage(), loaded.getAlphaImage());
 	}
 
+	@Test
+	void test_sample() {
+		FontSpriteSheetManager.USE = true;
+		final BufferedImage image = exportDiagram(
+				"@startuml",
+				"!theme plain",
+				":",
+//				"<color:#e64808><size:20><b>bold",
+//				"<color:#f1be02><size:20><i>italic",
+//				"<color:#048207><size:20><s>strike",
+				"<color:#441349><size:20><u>underlined",
+//				"<color:#c0043f><size:20><w>wave",
+//				"<color:#000000><size:20>plain",
+				";",
+				"@enduml"
+		).toImage();
+		
+		writeImageFile(Paths.get("sample.png"), image);
+	}
+	
+	
 	@CartesianProductTest(name = "{arguments}")
 	@CartesianValueSource(strings = {
 			"<b>bold",
