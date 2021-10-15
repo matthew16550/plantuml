@@ -213,7 +213,7 @@ public class FontSpriteSheet {
 
 		for (char c : s.toCharArray()) {
 			if (c != ' ') {
-				final int srcLeft = spriteIndex(c) * spriteWidth;
+				final int srcLeft = calculateSpriteIndex(c) * spriteWidth;
 				final int srcRight = srcLeft + spriteWidth;
 				final int destLeft = round(x - xOffset);
 				final int destRight = destLeft + spriteWidth;
@@ -231,7 +231,7 @@ public class FontSpriteSheet {
 		g.setComposite(oldComposite);
 	}
 
-	private int spriteIndex(char c) {
+	private int calculateSpriteIndex(char c) {
 		if (c < MIN_CHAR || c > MAX_CHAR) {
 			return 0;  // tofu
 		} else {
