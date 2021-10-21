@@ -2,17 +2,24 @@ package net.sourceforge.plantuml.approvaltesting;
 
 import static net.sourceforge.plantuml.StringUtils.EOL;
 import static net.sourceforge.plantuml.test.FileTestUtils.writeUtf8File;
+import static net.sourceforge.plantuml.test.PathTestUtils.assertThatDirContainsExactlyTheseFiles;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
-import net.sourceforge.plantuml.test.AbstractTempDirTest;
+class ApprovalTestingTest_withFileSpamLimit {
 
-class ApprovalTestingTest_withFileSpamLimit extends AbstractTempDirTest {
+	@TempDir
+	static Path dir;
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting()
@@ -20,7 +27,7 @@ class ApprovalTestingTest_withFileSpamLimit extends AbstractTempDirTest {
 
 	@BeforeAll
 	static void beforeAll() {
-		givenFiles(
+		Stream.of(
 				"ApprovalTestingTest_withFileSpamLimit.testA.1.approved.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.2.approved.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.3.approved.txt",
@@ -28,12 +35,14 @@ class ApprovalTestingTest_withFileSpamLimit extends AbstractTempDirTest {
 
 				"ApprovalTestingTest_withFileSpamLimit.testB.1.approved.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testB.2.approved.txt"
-		).contain("foo");
+		).forEach(file ->
+				writeUtf8File(dir.resolve(file), "foo")
+		);
 	}
 
 	@AfterAll
 	static void afterAll() {
-		assertThatDirContainsExactlyTheseFiles(
+		assertThatDirContainsExactlyTheseFiles(dir,
 				"ApprovalTestingTest_withFileSpamLimit.testA.1.approved.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.2.approved.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.3.approved.txt",
@@ -45,7 +54,7 @@ class ApprovalTestingTest_withFileSpamLimit extends AbstractTempDirTest {
 				"ApprovalTestingTest_withFileSpamLimit.testA.1.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.1.OUTPUT_1.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.1.OUTPUT_2.failed.txt",
-				
+
 				"ApprovalTestingTest_withFileSpamLimit.testA.2.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.2.OUTPUT_1.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.2.OUTPUT_2.failed.txt",
@@ -54,21 +63,27 @@ class ApprovalTestingTest_withFileSpamLimit extends AbstractTempDirTest {
 				"ApprovalTestingTest_withFileSpamLimit.testB.1.OUTPUT_1.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testB.1.OUTPUT_2.failed.txt"
 		);
- 
-		assertThatFiles(
+
+		Stream.of(
 				"ApprovalTestingTest_withFileSpamLimit.testA.1.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.2.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testB.1.failed.txt"
-		).haveContent("bar");
+		).forEach(file ->
+				assertThat(dir.resolve(file))
+						.hasContent("bar")
+		);
 
-		assertThatFiles(
+		Stream.of(
 				"ApprovalTestingTest_withFileSpamLimit.testA.1.OUTPUT_1.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.1.OUTPUT_2.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.2.OUTPUT_1.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testA.2.OUTPUT_2.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testB.1.OUTPUT_1.failed.txt",
 				"ApprovalTestingTest_withFileSpamLimit.testB.1.OUTPUT_2.failed.txt"
-		).haveContent("123");
+		).forEach(file ->
+				assertThat(dir.resolve(file))
+						.hasContent("123")
+		);
 	}
 
 	@RepeatedTest(value = 4, name = "{currentRepetition}")

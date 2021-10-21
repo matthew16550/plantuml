@@ -1,16 +1,23 @@
 package net.sourceforge.plantuml.approvaltesting;
 
+import static net.sourceforge.plantuml.test.FileTestUtils.createFile;
 import static net.sourceforge.plantuml.test.FileTestUtils.writeUtf8File;
+import static net.sourceforge.plantuml.test.PathTestUtils.assertThatDirContainsExactlyTheseFiles;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.nio.file.Path;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
-import net.sourceforge.plantuml.test.AbstractTempDirTest;
+class ApprovalTestingTest_withOutput {
 
-class ApprovalTestingTest_withOutput extends AbstractTempDirTest {
+	@TempDir
+	static Path dir;
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting()
@@ -19,14 +26,15 @@ class ApprovalTestingTest_withOutput extends AbstractTempDirTest {
 	@Test
 	void test() {
 
-		givenFile("ApprovalTestingTest_withOutput.test.approved.txt")
-				.contains("foo");
+		writeUtf8File(dir.resolve("ApprovalTestingTest_withOutput.test.approved.txt"), "foo");
 
-		givenFiles(
+		Stream.of(
 				"ApprovalTestingTest_withOutput.other_test.approved.txt",
 				"ApprovalTestingTest_withOutput.other_test.failed.txt",
 				"ApprovalTestingTest_withOutput.other_test.OUTPUT.failed.txt"
-		).exist();
+		).forEach(file ->
+				createFile(dir.resolve(file))
+		);
 
 		// With a bad value, approve() should fail
 
@@ -39,7 +47,7 @@ class ApprovalTestingTest_withOutput extends AbstractTempDirTest {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> doApprove.accept("bar"));
 
-		assertThatDirContainsExactlyTheseFiles(
+		assertThatDirContainsExactlyTheseFiles(dir,
 				"ApprovalTestingTest_withOutput.test.approved.txt",
 				"ApprovalTestingTest_withOutput.test.failed.txt",
 				"ApprovalTestingTest_withOutput.test.OUTPUT.failed.txt",
@@ -49,17 +57,17 @@ class ApprovalTestingTest_withOutput extends AbstractTempDirTest {
 				"ApprovalTestingTest_withOutput.other_test.OUTPUT.failed.txt"
 		);
 
-		assertThatFile("ApprovalTestingTest_withOutput.test.failed.txt")
+		assertThat(dir.resolve("ApprovalTestingTest_withOutput.test.failed.txt"))
 				.hasContent("bar");
 
-		assertThatFile("ApprovalTestingTest_withOutput.test.OUTPUT.failed.txt")
+		assertThat(dir.resolve("ApprovalTestingTest_withOutput.test.OUTPUT.failed.txt"))
 				.hasContent("123");
 
 		// With the correct value, approve() should pass and remove the relevant "failed" files
 
 		doApprove.accept("foo");
 
-		assertThatDirContainsExactlyTheseFiles(
+		assertThatDirContainsExactlyTheseFiles(dir,
 				"ApprovalTestingTest_withOutput.test.approved.txt",
 
 				"ApprovalTestingTest_withOutput.other_test.approved.txt",

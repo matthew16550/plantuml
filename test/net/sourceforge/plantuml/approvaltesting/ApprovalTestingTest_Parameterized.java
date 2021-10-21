@@ -1,13 +1,19 @@
 package net.sourceforge.plantuml.approvaltesting;
 
-import net.sourceforge.plantuml.test.AbstractTempDirTest;
+import static net.sourceforge.plantuml.test.PathTestUtils.assertThatDirContainsExactlyTheseFiles;
+
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class ApprovalTestingTest_Parameterized extends AbstractTempDirTest {
+class ApprovalTestingTest_Parameterized {
+
+	@TempDir
+	static Path dir;
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting();
@@ -25,7 +31,7 @@ class ApprovalTestingTest_Parameterized extends AbstractTempDirTest {
 
 	@AfterAll
 	static void afterAll() {
-		assertThatDirContainsExactlyTheseFiles(
+		assertThatDirContainsExactlyTheseFiles(dir,
 				"ApprovalTestingTest_Parameterized.test.foo_1.approved.txt",
 				"ApprovalTestingTest_Parameterized.test.bar_2.approved.txt"
 		);

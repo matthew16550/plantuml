@@ -1,14 +1,20 @@
 package net.sourceforge.plantuml.approvaltesting;
 
 import static net.sourceforge.plantuml.StringUtils.EOL;
+import static net.sourceforge.plantuml.test.PathTestUtils.assertThatDirContainsExactlyTheseFiles;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import net.sourceforge.plantuml.test.AbstractTempDirTest;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
-class ApprovalTestingTest_Approve_TXT extends AbstractTempDirTest {
+class ApprovalTestingTest_Approve_TXT {
+
+	@TempDir
+	static Path dir;
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting()
@@ -25,11 +31,11 @@ class ApprovalTestingTest_Approve_TXT extends AbstractTempDirTest {
 				.withDir(dir)
 				.approve(value);
 
-		assertThatDirContainsExactlyTheseFiles(
+		assertThatDirContainsExactlyTheseFiles(dir,
 				"ApprovalTestingTest_Approve_TXT.test.approved.txt"
 		);
 
-		assertThatFile("ApprovalTestingTest_Approve_TXT.test.approved.txt")
+		assertThat(dir.resolve("ApprovalTestingTest_Approve_TXT.test.approved.txt"))
 				.hasContent(value);
 
 		// Change the value then approve() should fail
@@ -42,14 +48,17 @@ class ApprovalTestingTest_Approve_TXT extends AbstractTempDirTest {
 								.withDir(dir)
 								.approve(changedValue)
 				)
-				.withMessage(EOL + "expected: \"foo\"" + EOL + " but was: \"foobar\"");
+				.withMessage(EOL +
+						"expected: \"foo\"" + EOL +
+						" but was: \"foobar\""
+				);
 
-		assertThatDirContainsExactlyTheseFiles(
+		assertThatDirContainsExactlyTheseFiles(dir,
 				"ApprovalTestingTest_Approve_TXT.test.approved.txt",
 				"ApprovalTestingTest_Approve_TXT.test.failed.txt"
 		);
 
-		assertThatFile("ApprovalTestingTest_Approve_TXT.test.failed.txt")
+		assertThat(dir.resolve("ApprovalTestingTest_Approve_TXT.test.failed.txt"))
 				.hasContent(changedValue);
 	}
 }

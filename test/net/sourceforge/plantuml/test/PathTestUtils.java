@@ -2,6 +2,7 @@ package net.sourceforge.plantuml.test;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.nio.file.FileSystems;
@@ -12,6 +13,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class PathTestUtils {
+
+	public static void assertThatDirContainsExactlyTheseFiles(Path dir, String... values) {
+		assertThat(listAllFilesRecursive(dir))
+				.containsExactlyInAnyOrder(values);
+	}
 
 	public static List<String> listAllFilesRecursive(Path dir) {
 		try {

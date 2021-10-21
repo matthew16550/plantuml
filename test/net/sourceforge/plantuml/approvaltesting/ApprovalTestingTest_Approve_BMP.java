@@ -1,16 +1,21 @@
 package net.sourceforge.plantuml.approvaltesting;
 
 import static net.sourceforge.plantuml.test.ImageTestUtils.imageToBytes;
+import static net.sourceforge.plantuml.test.PathTestUtils.assertThatDirContainsExactlyTheseFiles;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.awt.image.BufferedImage;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
-import net.sourceforge.plantuml.test.AbstractTempDirTest;
+class ApprovalTestingTest_Approve_BMP {
 
-class ApprovalTestingTest_Approve_BMP extends AbstractTempDirTest {
+	@TempDir
+	static Path dir;
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting()
@@ -29,11 +34,11 @@ class ApprovalTestingTest_Approve_BMP extends AbstractTempDirTest {
 				.withExtension(".bmp")
 				.approve(value);
 
-		assertThatDirContainsExactlyTheseFiles(
+		assertThatDirContainsExactlyTheseFiles(dir,
 				"ApprovalTestingTest_Approve_BMP.test.approved.bmp"
 		);
 
-		assertThatFile("ApprovalTestingTest_Approve_BMP.test.approved.bmp")
+		assertThat(dir.resolve("ApprovalTestingTest_Approve_BMP.test.approved.bmp"))
 				.hasBinaryContent(imageToBytes(value, "bmp"));
 
 		// Change the value then approve() should fail
@@ -46,7 +51,6 @@ class ApprovalTestingTest_Approve_BMP extends AbstractTempDirTest {
 								.withDir(dir)
 								.withExtension(".bmp")
 								.approve(value)
-
 				)
 				.withMessage("" +
 						"expected:ColorHSB[a=FF r=00 g=00 b=00 / h=0.000000 s=0.000000 b=0.000000] " +
@@ -54,12 +58,12 @@ class ApprovalTestingTest_Approve_BMP extends AbstractTempDirTest {
 						"at:<[1, 2]> using COMPARE_PIXEL_EXACT"
 				);
 
-		assertThatDirContainsExactlyTheseFiles(
+		assertThatDirContainsExactlyTheseFiles(dir,
 				"ApprovalTestingTest_Approve_BMP.test.approved.bmp",
 				"ApprovalTestingTest_Approve_BMP.test.failed.bmp"
 		);
 
-		assertThatFile("ApprovalTestingTest_Approve_BMP.test.failed.bmp")
+		assertThat(dir.resolve("ApprovalTestingTest_Approve_BMP.test.failed.bmp"))
 				.hasBinaryContent(imageToBytes(value, "bmp"));
 	}
 }

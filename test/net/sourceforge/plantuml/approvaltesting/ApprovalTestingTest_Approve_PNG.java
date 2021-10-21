@@ -1,16 +1,21 @@
 package net.sourceforge.plantuml.approvaltesting;
 
 import static net.sourceforge.plantuml.test.ImageTestUtils.imageToBytes;
+import static net.sourceforge.plantuml.test.PathTestUtils.assertThatDirContainsExactlyTheseFiles;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.awt.image.BufferedImage;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
-import net.sourceforge.plantuml.test.AbstractTempDirTest;
+class ApprovalTestingTest_Approve_PNG {
 
-class ApprovalTestingTest_Approve_PNG extends AbstractTempDirTest {
+	@TempDir
+	static Path dir;
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting()
@@ -28,11 +33,11 @@ class ApprovalTestingTest_Approve_PNG extends AbstractTempDirTest {
 				.withDir(dir)
 				.approve(value);
 
-		assertThatDirContainsExactlyTheseFiles(
+		assertThatDirContainsExactlyTheseFiles(dir,
 				"ApprovalTestingTest_Approve_PNG.test.approved.png"
 		);
 
-		assertThatFile("ApprovalTestingTest_Approve_PNG.test.approved.png")
+		assertThat(dir.resolve("ApprovalTestingTest_Approve_PNG.test.approved.png"))
 				.hasBinaryContent(imageToBytes(value, "png"));
 
 		// Change the value then approve() should fail
@@ -51,12 +56,12 @@ class ApprovalTestingTest_Approve_PNG extends AbstractTempDirTest {
 						"at:<[1, 2]> using COMPARE_PIXEL_EXACT"
 				);
 
-		assertThatDirContainsExactlyTheseFiles(
+		assertThatDirContainsExactlyTheseFiles(dir,
 				"ApprovalTestingTest_Approve_PNG.test.approved.png",
 				"ApprovalTestingTest_Approve_PNG.test.failed.png"
 		);
 
-		assertThatFile("ApprovalTestingTest_Approve_PNG.test.failed.png")
+		assertThat(dir.resolve("ApprovalTestingTest_Approve_PNG.test.failed.png"))
 				.hasBinaryContent(imageToBytes(value, "png"));
 	}
 }

@@ -1,12 +1,18 @@
 package net.sourceforge.plantuml.approvaltesting;
 
-import net.sourceforge.plantuml.test.AbstractTempDirTest;
+import static net.sourceforge.plantuml.test.PathTestUtils.assertThatDirContainsExactlyTheseFiles;
+
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
-class ApprovalTestingTest_Repeated extends AbstractTempDirTest {
+class ApprovalTestingTest_Repeated {
+
+	@TempDir
+	static Path dir;
 
 	@RegisterExtension
 	static ApprovalTesting approvalTesting = new ApprovalTesting();
@@ -20,7 +26,7 @@ class ApprovalTestingTest_Repeated extends AbstractTempDirTest {
 
 	@AfterAll
 	static void afterAll() {
-		assertThatDirContainsExactlyTheseFiles(
+		assertThatDirContainsExactlyTheseFiles(dir,
 				"ApprovalTestingTest_Repeated.test.1.approved.txt",
 				"ApprovalTestingTest_Repeated.test.2.approved.txt"
 		);
