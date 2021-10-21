@@ -31,19 +31,19 @@ import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.annotation.VisibleForTesting;
 import net.sourceforge.plantuml.test.FileTestUtils;
 import net.sourceforge.plantuml.test.ImageTestUtils;
-import net.sourceforge.plantuml.utils.functional.BiCallback;
-import net.sourceforge.plantuml.utils.functional.Callback;
-import net.sourceforge.plantuml.utils.functional.SingleCallback;
+import net.sourceforge.plantuml.utils.functional.BiConsumerWithException;
+import net.sourceforge.plantuml.utils.functional.ConsumerWithException;
+import net.sourceforge.plantuml.utils.functional.RunnableWithException;
 
 public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
 
 	private static class OutputCallbackRecord {
 		final Path path;
-		final SingleCallback<Path> callback;
+		final ConsumerWithException<Path> consumer;
 
-		OutputCallbackRecord(Path path, SingleCallback<Path> callback) {
+		OutputCallbackRecord(Path path, ConsumerWithException<Path> consumer) {
 			this.path = path;
-			this.callback = callback;
+			this.consumer = consumer;
 		}
 	}
 
@@ -97,9 +97,9 @@ public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, A
 		return this;
 	}
 
-	public ApprovalTesting test(Callback callback) {
+	public ApprovalTesting test(RunnableWithException runnable) {
 		try {
-			callback.call();
+			runnable.run();
 		} catch (Throwable t) {
 			final int failureCount = failuresPerMethod.compute(methodName, (k, v) -> (v == null) ? 1 : v + 1);
 			if (failureCount > fileSpamLimit) {
@@ -141,7 +141,7 @@ public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, A
 		return copy;
 	}
 
-	public ApprovalTesting withOutput(String name, String extensionWithDot, SingleCallback<Path> callback) {
+	public ApprovalTesting withOutput(String name, String extensionWithDot, ConsumerWithException<Path> callback) {
 		final Path path = registerFile(StringUtils.isEmpty(name) ? "failed" : name + ".failed", extensionWithDot);
 		final ApprovalTesting copy = new ApprovalTesting(this);
 		copy.outputCallbacks.add(new OutputCallbackRecord(path, callback));
@@ -176,20 +176,20 @@ public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, A
 		outputCallbacks.clear();
 	}
 
-	private <T> void approve(T value, String defaultExtension, BiCallback<Path, T> write, SingleCallback<Path> compare) {
+	private <T> void approve(T value, String defaultExtension, BiConsumerWithException<Path, T> write, ConsumerWithException<Path> compare) {
 		final String extension = extensionWithDot == null ? defaultExtension : extensionWithDot;
 		final Path approvedFile = registerFile("approved", extension);
 
 		this
-				.withOutput(null, extension, path -> write.call(path, value))
+				.withOutput(null, extension, path -> write.accept(path, value))
 				.test(() -> {
 					if (notExists(approvedFile)) {
 						createDirectories(approvedFile.getParent());
-						write.call(approvedFile, value);
+						write.accept(approvedFile, value);
 						return;
 					}
 
-					compare.call(approvedFile);
+					compare.accept(approvedFile);
 				});
 	}
 
@@ -224,7 +224,7 @@ public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, A
 		for (OutputCallbackRecord o : outputCallbacks) {
 			try {
 				createDirectories(o.path.getParent());
-				o.callback.call(o.path);
+				o.consumer.accept(o.path);
 			} catch (Exception e) {
 				logError(e, "Error creating output file '%s' : %s", o.path, e.getMessage());
 			}
