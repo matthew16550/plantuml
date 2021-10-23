@@ -4,7 +4,7 @@ import static net.sourceforge.plantuml.test.ImageTestUtils.imageToBytes;
 import static net.sourceforge.plantuml.test.PathTestUtils.assertThatDirContainsExactlyTheseFiles;
 import static net.sourceforge.plantuml.test.outputs.TestOutputsImpl.simplifyName;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
@@ -173,13 +173,13 @@ class TestOutputsTest {
 
 		// Using the same name again is not allowed
 
-		assertThatThrownBy(() -> outputs.registerPath(name))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessageStartingWith("Trying to reuse output file");
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> outputs.registerPath(name))
+				.withMessageStartingWith("Trying to reuse output file");
 
-		assertThatThrownBy(() -> outputs.usePath(name))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessageStartingWith("Trying to reuse output file");
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> outputs.usePath(name))
+				.withMessageStartingWith("Trying to reuse output file");
 	}
 
 	@Test
@@ -192,13 +192,13 @@ class TestOutputsTest {
 
 		// Using the same name again is not allowed
 
-		assertThatThrownBy(() -> outputs.usePath(name))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessageStartingWith("Trying to reuse output file");
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> outputs.usePath(name))
+				.withMessageStartingWith("Trying to reuse output file");
 
-		assertThatThrownBy(() -> outputs.registerPath(name))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessageStartingWith("Trying to reuse output file");
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> outputs.registerPath(name))
+				.withMessageStartingWith("Trying to reuse output file");
 	}
 
 	@Test
@@ -208,13 +208,13 @@ class TestOutputsTest {
 
 		// Using the same name again is not allowed
 
-		assertThatThrownBy(() -> outputs.usePath(name))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessageStartingWith("Trying to reuse output file");
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> outputs.usePath(name))
+				.withMessageStartingWith("Trying to reuse output file");
 
-		assertThatThrownBy(() -> outputs.registerPath(name))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessageStartingWith("Trying to reuse output file");
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> outputs.registerPath(name))
+				.withMessageStartingWith("Trying to reuse output file");
 
 		// Using the same name again is allowed after reuseFiles(true)
 
