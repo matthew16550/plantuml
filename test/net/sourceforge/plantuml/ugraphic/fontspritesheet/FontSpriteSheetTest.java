@@ -7,7 +7,7 @@ import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.util.Arrays.stream;
 import static net.sourceforge.plantuml.graphic.TextBlockUtils.getFontRenderContext;
-import static net.sourceforge.plantuml.test.Assertions.assertImagesEqual;
+import static net.sourceforge.plantuml.test.ImageTestUtils.assertImagesEqual;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.ALL_CHARS;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.JETBRAINS_FONT_FAMILY;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.createFontSpriteSheet;

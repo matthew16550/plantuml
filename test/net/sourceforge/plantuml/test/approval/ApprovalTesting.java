@@ -1,9 +1,9 @@
 package net.sourceforge.plantuml.test.approval;
 
 import static java.nio.file.Files.notExists;
-import static net.sourceforge.plantuml.test.Assertions.assertImagesEqual;
 import static net.sourceforge.plantuml.test.FileTestUtils.readUtf8File;
 import static net.sourceforge.plantuml.test.FileTestUtils.writeUtf8File;
+import static net.sourceforge.plantuml.test.ImageTestUtils.assertImagesEqual;
 import static net.sourceforge.plantuml.test.ImageTestUtils.readImageFile;
 import static net.sourceforge.plantuml.test.ImageTestUtils.writeImageFile;
 import static net.sourceforge.plantuml.test.ThrowableTestUtils.rethrowWithMessage;
