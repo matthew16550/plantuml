@@ -68,9 +68,9 @@ public class ApprovalTesting implements BeforeEachCallback {
 		return copy;
 	}
 
-	public ApprovalTesting withName(String name) {
+	public ApprovalTesting withName(String format, Object... args) {
 		final ApprovalTesting copy = new ApprovalTesting(this);
-		copy.name = name;
+		copy.name = String.format(format, args);
 		return copy;
 	}
 

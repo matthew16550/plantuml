@@ -193,9 +193,14 @@ class ApprovalTestingTest {
 		approvalTesting
 				.withName("foo")
 				.approve("bar");
+		
+		approvalTesting
+				.withName("foo-%d", 2)
+				.approve("bar");
 
 		assertThatDirContainsExactlyTheseFiles(dir,
-				"ApprovalTestingTest.test_withName.foo.approved.txt"
+				"ApprovalTestingTest.test_withName.foo.approved.txt",
+				"ApprovalTestingTest.test_withName.foo-2.approved.txt"
 		);
 	}
 }
