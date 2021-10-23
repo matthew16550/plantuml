@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 import static net.sourceforge.plantuml.test.FileTestUtils.createDirectories;
 import static net.sourceforge.plantuml.test.FileTestUtils.writeUtf8File;
 import static net.sourceforge.plantuml.test.ImageTestUtils.writeImageFile;
-import static net.sourceforge.plantuml.test.LoggingTestUtils.logWarning;
 import static net.sourceforge.plantuml.test.PathTestUtils.glob;
 
 import java.awt.image.BufferedImage;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import net.sourceforge.plantuml.annotation.VisibleForTesting;
 import net.sourceforge.plantuml.test.FileTestUtils;
+import net.sourceforge.plantuml.test.TestLogger;
 
 class TestOutputsImpl implements TestOutputs {
 
@@ -161,7 +161,7 @@ class TestOutputsImpl implements TestOutputs {
 		}
 		
 		if (getSpamCount() > getSpamLimit()) {
-			logWarning("Suppressing spammy output file '%s'", getDir().relativize(registeredPath.getPath()));
+			TestLogger.warning("Suppressing spammy output file '%s'", getDir().relativize(registeredPath.getPath()));
 			return true;
 		}
 		

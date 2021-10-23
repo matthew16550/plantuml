@@ -7,29 +7,29 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class LoggingTestUtils {
+public class TestLogger {
 
 	//
 	// Public API
 	//
 
-	public static void logError(Exception e, String message, Object... args) {
-		output("ERROR  : ", message, e, args);
+	public static void error(Throwable t, String message, Object... args) {
+		output("ERROR  : ", message, t, args);
 	}
 
-	public static void logWarning(String message, Object... args) {
+	public static void warning(String message, Object... args) {
 		output("WARNING : ", message, null, args);
 	}
 
-	public static void enableCaptureThisThread() {
+	public static void enableCapture() {
 		capture.set(new ArrayList<>());
 	}
 
-	public static void disableCaptureThisThread() {
+	public static void disableCapture() {
 		capture.remove();
 	}
 
-	public static List<String> getCaptureThisThread() {
+	public static List<String> getCaptured() {
 		return capture.get();
 	}
 
@@ -37,15 +37,15 @@ public class LoggingTestUtils {
 	// Internals
 	//
 
-	private static ThreadLocal<List<String>> capture = new ThreadLocal<>();
+	private static final ThreadLocal<List<String>> capture = new ThreadLocal<>();
 
-	private static void output(String prefix, String message, Exception exception, Object... args) {
+	private static void output(String prefix, String message, Throwable throwable, Object... args) {
 		final StringWriter stringWriter = new StringWriter();
 		final PrintWriter w = new PrintWriter(stringWriter);
 		w.print(prefix);
 		w.format(Locale.US, message, args);
 		w.println();
-		if (exception != null) exception.printStackTrace(w);
+		if (throwable != null) throwable.printStackTrace(w);
 		w.flush();
 
 		final List<String> captured = capture.get();

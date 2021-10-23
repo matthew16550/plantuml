@@ -2,7 +2,6 @@ package net.sourceforge.plantuml.test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.readAllBytes;
-import static net.sourceforge.plantuml.test.LoggingTestUtils.logError;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.io.IOException;
@@ -35,7 +34,7 @@ public class FileTestUtils {
 		try {
 			Files.deleteIfExists(path);
 		} catch (IOException e) {
-			logError(e, "Error deleting file '%s' : %s", path, e.getMessage());
+			TestLogger.error(e, "Error deleting file '%s' : %s", path, e.getMessage());
 		}
 	}
 

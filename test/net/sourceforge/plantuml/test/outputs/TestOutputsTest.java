@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junitpioneer.jupiter.CartesianProductTest;
 import org.junitpioneer.jupiter.CartesianValueSource;
 
-import net.sourceforge.plantuml.test.LoggingTestUtils;
+import net.sourceforge.plantuml.test.TestLogger;
 import net.sourceforge.plantuml.test.outputs.TestOutputs.RegisteredPath;
 
 class TestOutputsTest {
@@ -50,7 +50,7 @@ class TestOutputsTest {
 
 	@AfterEach
 	void afterEach() {
-		LoggingTestUtils.disableCaptureThisThread();
+		TestLogger.disableCapture();
 	}
 
 	@Test
@@ -245,7 +245,7 @@ class TestOutputsTest {
 
 	@RepeatedTest(value = 3)
 	void test_spam_counting_auto(TestOutputs outputs, RepetitionInfo repetitionInfo) {
-		LoggingTestUtils.enableCaptureThisThread();
+		TestLogger.enableCapture();
 		expectFiles(
 				"TestOutputsTest.test_spam_counting_auto.1.output.txt",
 				"TestOutputsTest.test_spam_counting_auto.2.output.txt"
@@ -259,14 +259,14 @@ class TestOutputsTest {
 				.isEqualTo(shouldWriteFile);
 
 		if (!shouldWriteFile) {
-			assertThat(LoggingTestUtils.getCaptureThisThread())
+			assertThat(TestLogger.getCaptured())
 					.containsExactly("WARNING : Suppressing spammy output file 'TestOutputsTest.test_spam_counting_auto.3.output.txt'");
 		}
 	}
 
 	@Test
 	void test_spam_counting_manual(TestOutputs outputs) {
-		LoggingTestUtils.enableCaptureThisThread();
+		TestLogger.enableCapture();
 		expectFiles(
 				"TestOutputsTest.test_spam_counting_manual.out1",
 				"TestOutputsTest.test_spam_counting_manual.out2",
@@ -295,7 +295,7 @@ class TestOutputsTest {
 		assertThat(outputs.write("out5", ""))
 				.isFalse();
 
-		assertThat(LoggingTestUtils.getCaptureThisThread())
+		assertThat(TestLogger.getCaptured())
 				.containsExactly("WARNING : Suppressing spammy output file 'TestOutputsTest.test_spam_counting_manual.out5'");
 
 	}
