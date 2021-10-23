@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ExtensionContext.Store;
 
 import net.sourceforge.plantuml.annotation.VisibleForTesting;
 import net.sourceforge.plantuml.test.FileTestUtils;
@@ -93,7 +94,7 @@ class TestOutputsImpl implements TestOutputs {
 
 	@Override
 	public TestOutputs bumpSpamCount() {
-		final ExtensionContext.Store store = getSpamStore();
+		final Store store = getSpamStore();
 		final String key = context.getRequiredTestMethod().getName();
 		final Integer current = store.getOrDefault(key, Integer.class, 0);
 		store.put(key, current + 1);
@@ -122,7 +123,6 @@ class TestOutputsImpl implements TestOutputs {
 
 		return path;
 	}
-
 
 	@Override
 	public boolean write(String name, BufferedImage image) {
@@ -159,12 +159,12 @@ class TestOutputsImpl implements TestOutputs {
 		if (getAutoSpamCount()) {
 			bumpSpamCount();
 		}
-		
+
 		if (getSpamCount() > getSpamLimit()) {
 			TestLogger.warning("Suppressing spammy output file '%s'", getDir().relativize(registeredPath.getPath()));
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -246,11 +246,11 @@ class TestOutputsImpl implements TestOutputs {
 				.getOrDefault(context.getRequiredTestMethod().getName(), Integer.class, 0);
 	}
 
-	private ExtensionContext.Store getStore() {
+	private Store getStore() {
 		return context.getStore(NAMESPACE);
 	}
 
-	private ExtensionContext.Store getSpamStore() {
+	private Store getSpamStore() {
 		return context.getParent().orElse(context).getStore(SPAM_NAMESPACE);
 	}
 
