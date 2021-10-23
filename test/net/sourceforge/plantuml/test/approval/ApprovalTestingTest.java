@@ -106,7 +106,7 @@ class ApprovalTestingTest {
 				.withMessage("" +
 						"expected:ColorHSB[a=FF r=FF g=FF b=FF / h=0.000000 s=0.000000 b=1.000000]" +
 						" but was:ColorHSB[a=00 r=00 g=00 b=00 / h=0.000000 s=0.000000 b=0.000000]" +
-						" at:<[2, 3]> using COMPARE_PIXEL_EXACT"
+						" at:<[2, 3]>"
 				);
 
 		assertThatDirContainsExactlyTheseFiles(dir,
@@ -156,7 +156,7 @@ class ApprovalTestingTest {
 				.withMessage("" +
 						"expected:ColorHSB[a=FF r=FF g=FF b=FF / h=0.000000 s=0.000000 b=1.000000]" +
 						" but was:ColorHSB[a=FF r=00 g=00 b=00 / h=0.000000 s=0.000000 b=0.000000]" +
-						" at:<[2, 3]> using COMPARE_PIXEL_EXACT"
+						" at:<[2, 3]>"
 				);
 
 		assertThatDirContainsExactlyTheseFiles(dir,
@@ -193,7 +193,7 @@ class ApprovalTestingTest {
 		approvalTesting
 				.withName("foo")
 				.approve("bar");
-		
+
 		approvalTesting
 				.withName("foo-%d", 2)
 				.approve("bar");
