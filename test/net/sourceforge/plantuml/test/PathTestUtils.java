@@ -19,6 +19,11 @@ public class PathTestUtils {
 				.containsExactlyInAnyOrder(values);
 	}
 
+	public static void assertThatDirContainsExactlyTheseFiles(Path dir, Iterable<String> values) {
+		assertThat(listAllFilesRecursive(dir))
+				.containsExactlyInAnyOrderElementsOf(values);
+	}
+
 	public static List<String> listAllFilesRecursive(Path dir) {
 		try {
 			return glob(dir, "**")

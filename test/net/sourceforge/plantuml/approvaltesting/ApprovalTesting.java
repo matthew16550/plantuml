@@ -1,80 +1,41 @@
 package net.sourceforge.plantuml.approvaltesting;
 
-import static java.nio.file.Files.createDirectories;
-import static java.nio.file.Files.deleteIfExists;
 import static java.nio.file.Files.notExists;
-import static net.sourceforge.plantuml.StringUtils.substringAfterLast;
 import static net.sourceforge.plantuml.test.Assertions.assertImagesEqual;
 import static net.sourceforge.plantuml.test.FileTestUtils.readUtf8File;
+import static net.sourceforge.plantuml.test.FileTestUtils.writeUtf8File;
 import static net.sourceforge.plantuml.test.ImageTestUtils.readImageFile;
+import static net.sourceforge.plantuml.test.ImageTestUtils.writeImageFile;
+import static net.sourceforge.plantuml.test.ThrowableTestUtils.rethrowWithMessage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.awt.image.BufferedImage;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.opentest4j.AssertionFailedError;
 
-import net.sourceforge.plantuml.StringUtils;
-import net.sourceforge.plantuml.annotation.VisibleForTesting;
 import net.sourceforge.plantuml.test.FileTestUtils;
-import net.sourceforge.plantuml.test.ImageTestUtils;
-import net.sourceforge.plantuml.utils.functional.BiConsumerWithException;
-import net.sourceforge.plantuml.utils.functional.ConsumerWithException;
-import net.sourceforge.plantuml.utils.functional.RunnableWithException;
+import net.sourceforge.plantuml.test.functional.ConsumerWithException;
+import net.sourceforge.plantuml.test.functional.FunctionWithException;
+import net.sourceforge.plantuml.test.outputs.TestOutputs;
+import net.sourceforge.plantuml.test.outputs.TestOutputs.RegisteredPath;
+import net.sourceforge.plantuml.test.outputs.TestOutputsExtension;
 
-public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
+public class ApprovalTesting implements BeforeEachCallback {
 
-	private static class OutputCallbackRecord {
-		final Path path;
-		final ConsumerWithException<Path> consumer;
-
-		OutputCallbackRecord(Path path, ConsumerWithException<Path> consumer) {
-			this.path = path;
-			this.consumer = consumer;
-		}
-	}
-
-	private final Map<String, Integer> failuresPerMethod;
-	private final Set<String> filesUsed;
-	private final List<OutputCallbackRecord> outputCallbacks = new ArrayList<>();
-
-	private String className;
-	private Path dir;
-	private boolean duplicateFiles;
 	private String extensionWithDot;
-	private int fileSpamLimit = 10;
-	private String label;
-	private String methodName;
+	private String name;
+	private TestOutputs outputs;
 
 	public ApprovalTesting() {
-		failuresPerMethod = new HashMap<>();
-		filesUsed = new HashSet<>();
 	}
 
-	private ApprovalTesting(ApprovalTesting other) {
-		this.className = other.className;
-		this.dir = other.dir;
-		this.duplicateFiles = other.duplicateFiles;
+	public ApprovalTesting(ApprovalTesting other) {
 		this.extensionWithDot = other.extensionWithDot;
-		this.failuresPerMethod = other.failuresPerMethod;
-		this.filesUsed = other.filesUsed;
-		this.fileSpamLimit = other.fileSpamLimit;
-		this.label = other.label;
-		this.methodName = other.methodName;
-		this.outputCallbacks.addAll(other.outputCallbacks);
+		this.name = other.name;
+		this.outputs = other.outputs;
 	}
 
 	//
@@ -82,51 +43,23 @@ public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, A
 	//
 
 	public ApprovalTesting approve(BufferedImage value) {
-		approve(value, ".png", ImageTestUtils::writeImageFile, path -> {
-			final BufferedImage approved = readImageFile(path);
-			assertImagesEqual(approved, value);
-		});
+		approve(
+				".png",
+				approvedFile -> assertImagesEqual(readImageFile(approvedFile), value),
+				approvedFile -> writeImageFile(approvedFile, value),
+				failedFile -> outputs.bumpSpamCount().write(failedFile, value)
+		);
 		return this;
 	}
 
 	public ApprovalTesting approve(String value) {
-		approve(value, ".txt", FileTestUtils::writeUtf8File, path -> {
-			final String approved = readUtf8File(path);
-			assertThat(value).isEqualTo(approved);
-		});
+		approve(
+				".txt",
+				approvedFile -> assertThat(value).isEqualTo(readUtf8File(approvedFile)),
+				approvedFile -> writeUtf8File(approvedFile, value),
+				failedFile -> outputs.bumpSpamCount().write(failedFile, value)
+		);
 		return this;
-	}
-
-	public ApprovalTesting test(RunnableWithException runnable) {
-		try {
-			runnable.run();
-		} catch (Throwable t) {
-			final int failureCount = failuresPerMethod.compute(methodName, (k, v) -> (v == null) ? 1 : v + 1);
-			if (failureCount > fileSpamLimit) {
-				final String message = String.format(
-						"** APPROVAL FAILURE FILES WERE SUPPRESSED (test has failed %d times) ** %s",
-						failureCount, t.getMessage()
-				);
-				rethrowWithMessage(t, message);
-			} else {
-				runOutputCallbacks();
-				throwAsUncheckedException(t);
-			}
-		}
-		removeOutputFiles();
-		return this;
-	}
-
-	public ApprovalTesting withDir(Path dir) {
-		final ApprovalTesting copy = new ApprovalTesting(this);
-		copy.dir = dir;
-		return copy;
-	}
-
-	public ApprovalTesting withDuplicateFiles(boolean duplicateFiles) {
-		final ApprovalTesting copy = new ApprovalTesting(this);
-		copy.duplicateFiles = duplicateFiles;
-		return copy;
 	}
 
 	public ApprovalTesting withExtension(String extensionWithDot) {
@@ -135,16 +68,9 @@ public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, A
 		return copy;
 	}
 
-	public ApprovalTesting withFileSpamLimit(int fileSpamLimit) {
+	public ApprovalTesting withName(String name) {
 		final ApprovalTesting copy = new ApprovalTesting(this);
-		copy.fileSpamLimit = fileSpamLimit;
-		return copy;
-	}
-
-	public ApprovalTesting withOutput(String name, String extensionWithDot, ConsumerWithException<Path> callback) {
-		final Path path = registerFile(StringUtils.isEmpty(name) ? "failed" : name + ".failed", extensionWithDot);
-		final ApprovalTesting copy = new ApprovalTesting(this);
-		copy.outputCallbacks.add(new OutputCallbackRecord(path, callback));
+		copy.name = name;
 		return copy;
 	}
 
@@ -152,105 +78,48 @@ public class ApprovalTesting implements BeforeAllCallback, BeforeEachCallback, A
 	// Internals
 	//
 
-	private static final String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
-
-	@Override
-	public void beforeAll(ExtensionContext context) {
-		final String classNameWithPackage = context.getRequiredTestClass().getName();
-		className = simplifyName(substringAfterLast(classNameWithPackage, '.'));
-		if (dir == null) {
-			dir = Paths.get("test").resolve(classNameWithPackage.replaceAll("\\.", FILE_SEPARATOR)).getParent();
-		}
-	}
-
 	@Override
 	public void beforeEach(ExtensionContext context) {
-		final String displayName = context.getDisplayName();
-		final String methodName = context.getRequiredTestMethod().getName();
-		this.methodName = simplifyName(methodName);
-		this.label = displayName.equals(methodName + "()") ? null : simplifyName(displayName);
+		outputs = TestOutputsExtension.getImpl(context);
 	}
 
-	@Override
-	public void afterEach(ExtensionContext context) {
-		outputCallbacks.clear();
-	}
-
-	private <T> void approve(T value, String defaultExtension, BiConsumerWithException<Path, T> write, ConsumerWithException<Path> compare) {
+	private void approve(
+			String defaultExtension,
+			ConsumerWithException<Path> compare,
+			ConsumerWithException<Path> writeApproved,
+			FunctionWithException<RegisteredPath, Boolean> writeFailed
+	) {
 		final String extension = extensionWithDot == null ? defaultExtension : extensionWithDot;
-		final Path approvedFile = registerFile("approved", extension);
+		final String approvedName = (name == null ? "approved" : name + ".approved") + extension;
+		final String failedName = (name == null ? "failed" : name + ".failed") + extension;
+		final Path approvedFile = outputs.usePath(approvedName);
+		final RegisteredPath failedFile = outputs.registerPath(failedName);
 
-		this
-				.withOutput(null, extension, path -> write.accept(path, value))
-				.test(() -> {
-					if (notExists(approvedFile)) {
-						createDirectories(approvedFile.getParent());
-						write.accept(approvedFile, value);
-						return;
-					}
-
-					compare.accept(approvedFile);
-				});
-	}
-
-	private Path registerFile(String name, String extensionWithDot) {
-		if (className == null) {
-			throw new RuntimeException(
-					"beforeAll() was not called. The ApprovalTesting field must be static and annotated with @RegisterExtension.");
-		}
-		StringBuilder b = new StringBuilder(className).append('.');
-		if (methodName != null) b.append(methodName).append('.');
-		if (label != null) b.append(label).append('.');
-		b.append(name);
-		b.append(extensionWithDot);
-
-		final Path path = dir.resolve(b.toString());
-		if (!filesUsed.add(path.toString()) && !duplicateFiles) {
-			throw new RuntimeException(String.format("The file has already been used: '%s'", path));
-		}
-		return path;
-	}
-
-	private void rethrowWithMessage(Throwable t, String message) {
-		if (t instanceof AssertionFailedError) {
-			final AssertionFailedError assertionFailedError = (AssertionFailedError) t;
-			throw new AssertionFailedError(message, assertionFailedError.getExpected(), assertionFailedError.getActual(), t);
-		}
-
-		throwAsUncheckedException(new Throwable(message, t));
-	}
-
-	private void runOutputCallbacks() {
-		for (OutputCallbackRecord o : outputCallbacks) {
+		if (notExists(approvedFile)) {
 			try {
-				createDirectories(o.path.getParent());
-				o.consumer.accept(o.path);
+				writeApproved.accept(approvedFile);
+				return;
 			} catch (Exception e) {
-				logError(e, "Error creating output file '%s' : %s", o.path, e.getMessage());
+				throwAsUncheckedException(e);
 			}
 		}
-	}
 
-	private void removeOutputFiles() {
-		for (OutputCallbackRecord o : outputCallbacks) {
+		try {
+			compare.accept(approvedFile);
+			FileTestUtils.delete(failedFile.getPath());
+		} catch (Throwable t) {
+			Boolean fileWritten = false;
 			try {
-				deleteIfExists(o.path);
+				fileWritten = writeFailed.apply(failedFile);
 			} catch (Exception e) {
-				logError(e, "Error deleting output file '%s' : %s", o.path, e.getMessage());
+				throwAsUncheckedException(e);
+			}
+
+			if (fileWritten) {
+				throwAsUncheckedException(t);
+			} else {
+				rethrowWithMessage(t, "** APPROVAL FAILURE FILE WAS SUPPRESSED ** " + t.getMessage());
 			}
 		}
-	}
-
-	@VisibleForTesting
-	static String simplifyName(String name) {
-		return name
-				.replaceAll("[^A-Za-z0-9]+", "_")
-				.replaceAll("(^_+|_+$)", "");
-	}
-
-	private static void logError(Exception e, String message, Object... args) {
-		System.err.printf((message) + "%n", args);
-		System.err.println();
-		e.printStackTrace();
 	}
 }

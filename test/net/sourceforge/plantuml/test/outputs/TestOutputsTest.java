@@ -45,7 +45,7 @@ class TestOutputsTest {
 
 	@AfterAll
 	static void afterAll() {
-		assertThatDirContainsExactlyTheseFiles(dir, expectedFiles.toArray(new String[]{}));
+		assertThatDirContainsExactlyTheseFiles(dir, expectedFiles);
 	}
 
 	@AfterEach

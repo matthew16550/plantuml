@@ -1,33 +1,201 @@
 package net.sourceforge.plantuml.approvaltesting;
 
+import static net.sourceforge.plantuml.StringUtils.EOL;
+import static net.sourceforge.plantuml.test.ImageTestUtils.imageToBytes;
+import static net.sourceforge.plantuml.test.PathTestUtils.assertThatDirContainsExactlyTheseFiles;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import java.awt.image.BufferedImage;
+import java.nio.file.Path;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
+
+import net.sourceforge.plantuml.test.outputs.TestOutputs;
 
 class ApprovalTestingTest {
 
-	// TODO
-	// test();
-	// withDuplicateFiles();
+	@TempDir
+	Path dir;
 
-	@ParameterizedTest
-	@CsvSource(delimiter = 'D', value = {
-			"x     D  x",
-			"_x    D  x",
-			"__x   D  x",
-			"x_    D  x",
-			"x__   D  x",
-			"x y   D  x_y",
-			"x  y  D  x_y",
-			"x,y   D  x_y",
-			"x()   D  x",
-			"☺x☺︎   D  x",
-			"!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~} x !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~} y !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~}  D  x_y",
-	})
-	void test_simplifyName(String input, String output) {
-		assertThat(ApprovalTesting.simplifyName(input))
-				.isEqualTo(output);
+	@RegisterExtension
+	final ApprovalTesting approvalTesting = new ApprovalTesting();
+
+	@BeforeEach
+	void beforeEach(TestOutputs outputs) {
+		outputs.dir(dir);
 	}
 
+	@Test
+	void test_approve_txt(TestOutputs outputs) {
+		outputs.reuseFiles(true);  // kludge for this test
+
+		final String initialValue = "foo";
+
+		// Approve the initial value
+
+		assertThatNoException()
+				.isThrownBy(() -> approvalTesting.approve(initialValue));
+
+		assertThatDirContainsExactlyTheseFiles(dir,
+				"ApprovalTestingTest.test_approve_txt.approved.txt"
+		);
+
+		assertThat(dir.resolve("ApprovalTestingTest.test_approve_txt.approved.txt"))
+				.hasContent(initialValue);
+
+		// With a different value, approve() should fail and the "failed" file is written
+
+		final String differentValue = "bar";
+
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> approvalTesting.approve(differentValue))
+				.withMessage(EOL +
+						"expected: \"foo\"" + EOL +
+						" but was: \"bar\""
+				);
+
+		assertThatDirContainsExactlyTheseFiles(dir,
+				"ApprovalTestingTest.test_approve_txt.approved.txt",
+				"ApprovalTestingTest.test_approve_txt.failed.txt"
+		);
+
+		assertThat(dir.resolve("ApprovalTestingTest.test_approve_txt.failed.txt"))
+				.hasContent(differentValue);
+
+		// Back to the initial value, approve() should pass and the "failed" file is deleted
+
+		assertThatNoException()
+				.isThrownBy(() -> approvalTesting.approve(initialValue));
+
+		assertThatDirContainsExactlyTheseFiles(dir,
+				"ApprovalTestingTest.test_approve_txt.approved.txt"
+		);
+	}
+
+	@Test
+	void test_approve_png(TestOutputs outputs) {
+		outputs.reuseFiles(true);  // kludge for this test
+
+		final BufferedImage initialValue = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
+		initialValue.createGraphics().drawRect(2, 3, 5, 3);
+
+		// Approve the initial value
+
+		assertThatNoException()
+				.isThrownBy(() -> approvalTesting.approve(initialValue));
+
+		assertThatDirContainsExactlyTheseFiles(dir,
+				"ApprovalTestingTest.test_approve_png.approved.png"
+		);
+
+		assertThat(dir.resolve("ApprovalTestingTest.test_approve_png.approved.png"))
+				.hasBinaryContent(imageToBytes(initialValue, "png"));
+
+		// With a different value, approve() should fail and the "failed" file is written
+
+		final BufferedImage differentValue = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
+		initialValue.createGraphics().drawOval(2, 3, 5, 3);
+
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> approvalTesting.approve(differentValue))
+				.withMessage("" +
+						"expected:ColorHSB[a=FF r=FF g=FF b=FF / h=0.000000 s=0.000000 b=1.000000]" +
+						" but was:ColorHSB[a=00 r=00 g=00 b=00 / h=0.000000 s=0.000000 b=0.000000]" +
+						" at:<[2, 3]> using COMPARE_PIXEL_EXACT"
+				);
+
+		assertThatDirContainsExactlyTheseFiles(dir,
+				"ApprovalTestingTest.test_approve_png.approved.png",
+				"ApprovalTestingTest.test_approve_png.failed.png"
+		);
+
+		assertThat(dir.resolve("ApprovalTestingTest.test_approve_png.failed.png"))
+				.hasBinaryContent(imageToBytes(differentValue, "png"));
+
+		// Back to the initial value, approve() should pass and the "failed" file is deleted
+
+		assertThatNoException()
+				.isThrownBy(() -> approvalTesting.approve(initialValue));
+
+		assertThatDirContainsExactlyTheseFiles(dir,
+				"ApprovalTestingTest.test_approve_png.approved.png"
+		);
+	}
+
+	@Test
+	void test_approve_bmp(TestOutputs outputs) {
+		outputs.reuseFiles(true);  // kludge for this test
+
+		final BufferedImage initialValue = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+		initialValue.createGraphics().drawRect(2, 3, 5, 3);
+
+		// Approve the initial value
+
+		assertThatNoException()
+				.isThrownBy(() -> approvalTesting.withExtension(".bmp").approve(initialValue));
+
+		assertThatDirContainsExactlyTheseFiles(dir,
+				"ApprovalTestingTest.test_approve_bmp.approved.bmp"
+		);
+
+		assertThat(dir.resolve("ApprovalTestingTest.test_approve_bmp.approved.bmp"))
+				.hasBinaryContent(imageToBytes(initialValue, "bmp"));
+
+		// With a different value, approve() should fail and the "failed" file is written
+
+		final BufferedImage differentValue = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+		initialValue.createGraphics().drawOval(2, 3, 5, 3);
+
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> approvalTesting.withExtension(".bmp").approve(differentValue))
+				.withMessage("" +
+						"expected:ColorHSB[a=FF r=FF g=FF b=FF / h=0.000000 s=0.000000 b=1.000000]" +
+						" but was:ColorHSB[a=FF r=00 g=00 b=00 / h=0.000000 s=0.000000 b=0.000000]" +
+						" at:<[2, 3]> using COMPARE_PIXEL_EXACT"
+				);
+
+		assertThatDirContainsExactlyTheseFiles(dir,
+				"ApprovalTestingTest.test_approve_bmp.approved.bmp",
+				"ApprovalTestingTest.test_approve_bmp.failed.bmp"
+		);
+
+		assertThat(dir.resolve("ApprovalTestingTest.test_approve_bmp.failed.bmp"))
+				.hasBinaryContent(imageToBytes(differentValue, "bmp"));
+
+		// Back to the initial value, approve() should pass and the "failed" file is deleted
+
+		assertThatNoException()
+				.isThrownBy(() -> approvalTesting.withExtension(".bmp").approve(initialValue));
+
+		assertThatDirContainsExactlyTheseFiles(dir,
+				"ApprovalTestingTest.test_approve_bmp.approved.bmp"
+		);
+	}
+
+	@Test
+	void test_withExtension() {
+		approvalTesting
+				.withExtension(".foo")
+				.approve("bar");
+
+		assertThatDirContainsExactlyTheseFiles(dir,
+				"ApprovalTestingTest.test_withExtension.approved.foo"
+		);
+	}
+
+	@Test
+	void test_withName() {
+		approvalTesting
+				.withName("foo")
+				.approve("bar");
+
+		assertThatDirContainsExactlyTheseFiles(dir,
+				"ApprovalTestingTest.test_withName.foo.approved.txt"
+		);
+	}
 }
