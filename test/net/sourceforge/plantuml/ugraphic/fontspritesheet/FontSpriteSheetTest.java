@@ -51,7 +51,7 @@ class FontSpriteSheetTest {
 	//
 
 	@Test
-	void test_stored_font_sprites_always_make_the_same_output() {
+	void test_stored_sprite_sheets_always_make_the_same_output() {
 
 		for (FontSpriteSheet sheet : FontSpriteSheetManager.instance().allSheets()) {
 			final Dimension2D dimension = sheet.calculateDimension(ALL_CHARS);
@@ -134,7 +134,7 @@ class FontSpriteSheetTest {
 	}
 
 	@Test
-	void test_png_read_write() throws Exception {
+	void test_sprite_sheet_loading() throws Exception {
 
 		final Font font = stream(getLocalGraphicsEnvironment().getAllFonts())
 				.filter(f -> f.getLineMetrics("x", getFontRenderContext()).getLeading() > 0)
@@ -207,7 +207,6 @@ class FontSpriteSheetTest {
 					.isNotZero()
 					.isEqualTo(original.getXOffset());
 
-			// TODO softly
 			assertImagesEqual(original.getAlphaImage(), loaded.getAlphaImage());
 		}
 	}
