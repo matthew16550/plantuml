@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -21,24 +22,27 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junitpioneer.jupiter.CartesianProductTest;
 import org.junitpioneer.jupiter.CartesianValueSource;
 
+import net.sourceforge.plantuml.test.outputs.TestOutputs.RegisteredPath;
+
 class TestOutputsTest {
 
-	private static final Set<String> expectedFiles = new HashSet<>();
+	@TempDir
+	static Path dir;
 
-	private static void expectFiles(String... files) {
+	static final Set<String> expectedFiles = new HashSet<>();
+
+	static void expectFiles(String... files) {
 		expectedFiles.addAll(Arrays.asList(files));
+	}
+
+	@BeforeAll
+	static void beforeAll(TestOutputs outputs) {
+		outputs.dir(dir);
 	}
 
 	@AfterAll
 	static void afterAll() {
 		assertThatDirContainsExactlyTheseFiles(dir, expectedFiles.toArray(new String[]{}));
-	}
-
-	@TempDir
-	static Path dir;
-
-	public TestOutputsTest(TestOutputs outputs) {
-		outputs.dir(dir);
 	}
 
 	@Test
@@ -152,17 +156,64 @@ class TestOutputsTest {
 	}
 
 	@Test
-	void test_reuseFiles(TestOutputs outputs) {
-		expectFiles("TestOutputsTest.test_reuseFiles.foo.txt");
+	void test_registerPath(TestOutputs outputs) {
+		final String name = "foo";
+		final RegisteredPath registeredPath = outputs.registerPath(name);
 
-		outputs.write("foo.txt", "");
+		assertThat(registeredPath.getPath())
+				.hasFileName("TestOutputsTest.test_registerPath.foo");
 
-		assertThatThrownBy(() -> outputs.write("foo.txt", ""))
+		// Using the same name again is not allowed
+
+		assertThatThrownBy(() -> outputs.registerPath(name))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessageStartingWith("Trying to reuse output file");
 
+		assertThatThrownBy(() -> outputs.usePath(name))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageStartingWith("Trying to reuse output file");
+	}
+
+	@Test
+	void test_usePath(TestOutputs outputs) {
+		final String name = "foo";
+		final Path path = outputs.usePath(name);
+
+		assertThat(path)
+				.hasFileName("TestOutputsTest.test_usePath.foo");
+
+		// Using the same name again is not allowed
+
+		assertThatThrownBy(() -> outputs.usePath(name))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageStartingWith("Trying to reuse output file");
+
+		assertThatThrownBy(() -> outputs.registerPath(name))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageStartingWith("Trying to reuse output file");
+	}
+
+	@Test
+	void test_reuseFiles(TestOutputs outputs) {
+		final String name = "foo";
+		outputs.usePath(name);
+
+		// Using the same name again is not allowed
+
+		assertThatThrownBy(() -> outputs.usePath(name))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageStartingWith("Trying to reuse output file");
+
+		assertThatThrownBy(() -> outputs.registerPath(name))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageStartingWith("Trying to reuse output file");
+
+		// Using the same name again is allowed after reuseFiles(true)
+
 		outputs.reuseFiles(true);
-		outputs.write("foo.txt", "");
+
+		outputs.usePath(name);
+		outputs.registerPath(name);
 	}
 
 	@ParameterizedTest
