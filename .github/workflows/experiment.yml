@@ -11,10 +11,10 @@ jobs:
       fail-fast: false
       matrix:
         java_distribution: [ zulu ]
-        java_version: [ 17 ]
-        os: [ ubuntu-latest ]
-        #        java_version: [ 8, 11, 17 ]
-        #        os: [ macos-latest, ubuntu-latest, windows-latest ]
+#        java_version: [ 17 ]
+#        os: [ ubuntu-latest ]
+        java_version: [ 8, 11, 17 ]
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
 
         # All temurin:
         #        java_version: [ 8.0.302+8, 11.0.12+7, 17.0.0+35 ]
@@ -84,8 +84,13 @@ jobs:
              -Dexec.classpathScope=test \
              -Dexec.args=" \
                  --disable-ansi-colors \
-                 --select-class net.sourceforge.plantuml.approvaltesting.ApprovalTestingTest \
-                 --select-class net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetTest
+                 --select-class nonreg.simple.A0000_Test \
+                 --select-class nonreg.simple.A0001_Test \
+                 --select-class nonreg.simple.A0002_Test \
+                 --select-class nonreg.simple.A0003_Test \
+                 --select-class nonreg.simple.A0004_Test \
+                 --select-class nonreg.simple.A0005_Test \
+                 --select-class nonreg.simple.A0006_Test
              " \
              -Dsun.java2d.renderer.log=true 
 
@@ -94,15 +99,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ github.run_number }}-${{ matrix.os }}-${{ matrix.java_distribution }}-${{ matrix.java_version }}-approval-test-failures
-          path: |
-            test/**/*.failed.*
-            !test/**/ApprovalTestingTest.test_withMaxFailures.1.failed.txt
-            !test/**/ApprovalTestingTest.test_withMaxFailures.2.failed.txt
+          path: test/**/*.failed.*
           if-no-files-found: ignore
-
-      - name: Sonar analysis
-        if: ${{ steps.config.outputs.java_major_version >= 11 }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn --batch-mode -Dmaven.javadoc.skip=true verify sonar:sonar
