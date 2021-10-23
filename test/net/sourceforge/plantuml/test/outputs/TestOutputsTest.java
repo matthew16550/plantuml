@@ -13,8 +13,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +24,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junitpioneer.jupiter.CartesianProductTest;
 import org.junitpioneer.jupiter.CartesianValueSource;
 
+import net.sourceforge.plantuml.test.LoggingTestUtils;
 import net.sourceforge.plantuml.test.outputs.TestOutputs.RegisteredPath;
 
 class TestOutputsTest {
@@ -43,6 +46,11 @@ class TestOutputsTest {
 	@AfterAll
 	static void afterAll() {
 		assertThatDirContainsExactlyTheseFiles(dir, expectedFiles.toArray(new String[]{}));
+	}
+
+	@AfterEach
+	void afterEach() {
+		LoggingTestUtils.disableCaptureThisThread();
 	}
 
 	@Test
@@ -236,18 +244,29 @@ class TestOutputsTest {
 	}
 
 	@RepeatedTest(value = 3)
-	void test_spam_counting_auto(TestOutputs outputs) {
+	void test_spam_counting_auto(TestOutputs outputs, RepetitionInfo repetitionInfo) {
+		LoggingTestUtils.enableCaptureThisThread();
 		expectFiles(
 				"TestOutputsTest.test_spam_counting_auto.1.output.txt",
 				"TestOutputsTest.test_spam_counting_auto.2.output.txt"
 		);
-		outputs
-				.spamLimit(2)
-				.write("output.txt", "foo");
+		final int spamLimit = 2;
+		outputs.spamLimit(spamLimit);
+
+		final boolean shouldWriteFile = repetitionInfo.getCurrentRepetition() <= spamLimit;
+
+		assertThat(outputs.write("output.txt", "foo"))
+				.isEqualTo(shouldWriteFile);
+
+		if (!shouldWriteFile) {
+			assertThat(LoggingTestUtils.getCaptureThisThread())
+					.containsExactly("WARNING : Suppressing spammy output file 'TestOutputsTest.test_spam_counting_auto.3.output.txt'");
+		}
 	}
 
 	@Test
 	void test_spam_counting_manual(TestOutputs outputs) {
+		LoggingTestUtils.enableCaptureThisThread();
 		expectFiles(
 				"TestOutputsTest.test_spam_counting_manual.out1",
 				"TestOutputsTest.test_spam_counting_manual.out2",
@@ -275,5 +294,9 @@ class TestOutputsTest {
 
 		assertThat(outputs.write("out5", ""))
 				.isFalse();
+
+		assertThat(LoggingTestUtils.getCaptureThisThread())
+				.containsExactly("WARNING : Suppressing spammy output file 'TestOutputsTest.test_spam_counting_manual.out5'");
+
 	}
 }
