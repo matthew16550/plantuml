@@ -31,17 +31,41 @@
  *
  * Original Author:  Arnaud Roques
  *
+ *
  */
-package net.sourceforge.plantuml.ugraphic.visio;
+package net.sourceforge.plantuml.activitydiagram3.ftile.vertical;
 
-import net.sourceforge.plantuml.ugraphic.UDriver;
-import net.sourceforge.plantuml.ugraphic.UParam;
-import net.sourceforge.plantuml.ugraphic.UShape;
-import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
+import net.sourceforge.plantuml.activitydiagram3.ftile.Ftile;
+import net.sourceforge.plantuml.activitydiagram3.ftile.FtileGeometry;
+import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.ugraphic.UGraphic;
+import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class DriverNoneVdx implements UDriver<VisioGraphics> {
+public class FtileDecorateInLabel extends FtileDecorate {
 
-	public void draw(UShape shape, double x, double y, ColorMapper mapper, UParam param, VisioGraphics object) {
+	final private double xl;
+	final private double yl;
+
+	public FtileDecorateInLabel(final Ftile ftile, double xl, double yl) {
+		super(ftile);
+		this.xl = xl;
+		this.yl = yl;
+	}
+
+	@Override
+	public FtileGeometry calculateDimension(StringBounder stringBounder) {
+		FtileGeometry result = super.calculateDimension(stringBounder);
+		result = result.addTop(yl);
+		final double missing = xl - result.getRight();
+		if (missing > 0)
+			result = result.incRight(missing);
+
+		return result;
+	}
+
+	@Override
+	public void drawU(UGraphic ug) {
+		super.drawU(ug.apply(UTranslate.dy(yl)));
 	}
 
 }

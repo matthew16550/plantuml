@@ -219,6 +219,7 @@ public class ImageBuilder {
 
 	public ImageBuilder styled(TitledDiagram diagram) {
 		skinParam = diagram.getSkinParam();
+		stringBounder = fileFormatOption.getDefaultStringBounder(skinParam);
 		animation = diagram.getAnimation();
 		annotations = true;
 		backcolor = diagram.calculateBackColor();

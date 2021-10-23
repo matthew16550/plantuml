@@ -32,15 +32,33 @@
  * Original Author:  Arnaud Roques
  *
  */
-package net.sourceforge.plantuml.ugraphic.html5;
+package net.sourceforge.plantuml.ugraphic.tikz;
 
+import java.awt.Color;
+
+import net.sourceforge.plantuml.tikz.TikzGraphics;
 import net.sourceforge.plantuml.ugraphic.UDriver;
 import net.sourceforge.plantuml.ugraphic.UParam;
-import net.sourceforge.plantuml.ugraphic.UShape;
+import net.sourceforge.plantuml.ugraphic.UPath;
 import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
+import net.sourceforge.plantuml.ugraphic.color.HColor;
+import net.sourceforge.plantuml.ugraphic.color.HColorGradient;
 
-public class DriverNopHtml5 implements UDriver<Html5Drawer> {
+public class DriverPathTikz implements UDriver<UPath, TikzGraphics> {
 
-	public void draw(UShape ushape, double x, double y, ColorMapper mapper, UParam param, Html5Drawer html) {
+	public void draw(UPath path, double x, double y, ColorMapper mapper, UParam param, TikzGraphics tikz) {
+		final HColor back = param.getBackcolor();
+		if (back instanceof HColorGradient) {
+			final HColorGradient gr = (HColorGradient) back;
+			final Color color1 = mapper.toColor(gr.getColor1());
+			final Color color2 = mapper.toColor(gr.getColor2());
+			tikz.setGradientColor(color1, color2, gr.getPolicy());
+		} else {
+			tikz.setFillColor(mapper.toColor(back));
+		}
+		tikz.setStrokeColor(mapper.toColor(param.getColor()));
+		tikz.setStrokeWidth(param.getStroke().getThickness(), param.getStroke().getDashTikz());
+		tikz.upath(x, y, path);
 	}
+
 }

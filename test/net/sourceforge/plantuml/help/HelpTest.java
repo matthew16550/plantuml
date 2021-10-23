@@ -8,13 +8,13 @@ import org.junit.jupiter.api.Test;
 class HelpTest {
 
 	@Test
-	public void test_help_themes() {
+	public void test_help_themes() throws Exception {
 
 		final String output = exportDiagram(
 				"@startuml",
 				"help themes",
 				"@enduml"
-		).toString();
+		).asString();
 		
 		assertThat(output)
 				.startsWith("Help on themes")

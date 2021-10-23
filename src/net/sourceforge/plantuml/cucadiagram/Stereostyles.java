@@ -30,34 +30,45 @@
  *
  *
  * Original Author:  Arnaud Roques
+ * 
  *
  */
-package net.sourceforge.plantuml.ugraphic.tikz;
+package net.sourceforge.plantuml.cucadiagram;
 
-import net.sourceforge.plantuml.graphic.FontConfiguration;
-import net.sourceforge.plantuml.graphic.FontStyle;
-import net.sourceforge.plantuml.tikz.TikzGraphics;
-import net.sourceforge.plantuml.ugraphic.UDriver;
-import net.sourceforge.plantuml.ugraphic.UFont;
-import net.sourceforge.plantuml.ugraphic.UParam;
-import net.sourceforge.plantuml.ugraphic.UShape;
-import net.sourceforge.plantuml.ugraphic.UText;
-import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
-import net.sourceforge.plantuml.ugraphic.color.HColor;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-public class DriverUTextTikz implements UDriver<TikzGraphics> {
+import net.sourceforge.plantuml.command.regex.Matcher2;
+import net.sourceforge.plantuml.command.regex.MyPattern;
+import net.sourceforge.plantuml.command.regex.Pattern2;
 
-	public void draw(UShape ushape, double x, double y, ColorMapper mapper, UParam param, TikzGraphics tikz) {
-		final UText shape = (UText) ushape;
-		final FontConfiguration fontConfiguration = shape.getFontConfiguration();
-		final UFont font = fontConfiguration.getFont();
-		final HColor col = fontConfiguration.getColor();
-		tikz.setStrokeColor(mapper.toColor(col));
-		final boolean underline = fontConfiguration.containsStyle(FontStyle.UNDERLINE);
-		final boolean italic = font.isItalic();
-		final boolean bold = font.isBold();
-		tikz.text(x, y, shape.getText(), underline, italic, bold);
+public class Stereostyles {
 
+	public static final Stereostyles NONE = new Stereostyles();
+
+	private final Set<String> names = new LinkedHashSet<String>();
+
+	private Stereostyles() {
+	}
+
+	public boolean isEmpty() {
+		return names.isEmpty();
+	}
+
+	public static Stereostyles build(String label) {
+		final Stereostyles result = new Stereostyles();
+		final Pattern2 p = MyPattern.cmpile("\\<{3}(.*?)\\>{3}");
+		final Matcher2 m = p.matcher(label);
+		while (m.find()) {
+			result.names.add(m.group(1));
+		}
+		return result;
+	}
+
+	public Collection<String> getStyleNames() {
+		return Collections.unmodifiableCollection(names);
 	}
 
 }

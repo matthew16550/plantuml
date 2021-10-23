@@ -2,12 +2,8 @@ package net.sourceforge.plantuml.test;
 
 import static net.sourceforge.plantuml.StringUtils.substringAfterLast;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Comparator;
 
 import javax.imageio.ImageIO;

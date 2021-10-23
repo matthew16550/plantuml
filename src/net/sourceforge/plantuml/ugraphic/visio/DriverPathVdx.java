@@ -32,17 +32,17 @@
  * Original Author:  Arnaud Roques
  *
  */
-package net.sourceforge.plantuml.ugraphic.tikz;
+package net.sourceforge.plantuml.ugraphic.visio;
 
-import net.sourceforge.plantuml.tikz.TikzGraphics;
 import net.sourceforge.plantuml.ugraphic.UDriver;
 import net.sourceforge.plantuml.ugraphic.UParam;
-import net.sourceforge.plantuml.ugraphic.UShape;
+import net.sourceforge.plantuml.ugraphic.UPath;
 import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
 
-public class DriverNoneTikz implements UDriver<TikzGraphics> {
+public class DriverPathVdx implements UDriver<UPath, VisioGraphics> {
 
-	public void draw(UShape shape, double x, double y, ColorMapper mapper, UParam param, TikzGraphics object) {
+	public void draw(UPath path, double x, double y, ColorMapper mapper, UParam param, VisioGraphics visio) {
+		visio.upath(x, y, path);
 	}
 
 }
