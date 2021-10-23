@@ -50,7 +50,7 @@ TEXT:
   text: Bob
   position: [ 12.0000 ; 22.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -68,7 +68,7 @@ TEXT:
   text: Bob
   position: [ 12.0000 ; 273.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -86,7 +86,7 @@ TEXT:
   text: Alice
   position: [ 210.7758 ; 22.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -104,7 +104,7 @@ TEXT:
   text: Alice
   position: [ 210.7758 ; 273.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -154,7 +154,7 @@ TEXT:
   text: hello1
   position: [ 43.8525 ; 57.1111 ]
   orientation: 0
-  font: SansSerif.plain/13 []
+  font: SansSerif/13 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -194,7 +194,7 @@ TEXT:
   text: hello2
   position: [ 43.8525 ; 102.1111 ]
   orientation: 0
-  font: SansSerif.plain/13 []
+  font: SansSerif/13 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -248,7 +248,7 @@ TEXT:
   text: this is an
   position: [ 38.8525 ; 142.1111 ]
   orientation: 0
-  font: SansSerif.plain/13 []
+  font: SansSerif/13 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -256,7 +256,7 @@ TEXT:
   text: example of long
   position: [ 38.8525 ; 155.1111 ]
   orientation: 0
-  font: SansSerif.plain/13 []
+  font: SansSerif/13 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -264,7 +264,7 @@ TEXT:
   text: message
   position: [ 38.8525 ; 168.1111 ]
   orientation: 0
-  font: SansSerif.plain/13 []
+  font: SansSerif/13 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -290,7 +290,7 @@ TEXT:
   text: And this
   position: [ 38.8525 ; 208.1111 ]
   orientation: 0
-  font: SansSerif.plain/13 []
+  font: SansSerif/13 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -298,7 +298,7 @@ TEXT:
   text: is an other on
   position: [ 38.8525 ; 221.1111 ]
   orientation: 0
-  font: SansSerif.plain/13 []
+  font: SansSerif/13 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -306,7 +306,7 @@ TEXT:
   text: very long too
   position: [ 38.8525 ; 234.1111 ]
   orientation: 0
-  font: SansSerif.plain/13 []
+  font: SansSerif/13 []
   color: ff000000
   extendedColor: NULL_COLOR
 

@@ -30,7 +30,7 @@ TEXT:
   text: header
   position: [ 43.7612 ; 7.7778 ]
   orientation: 0
-  font: SansSerif.plain/10 []
+  font: SansSerif/10 []
   color: ff888888
   extendedColor: NULL_COLOR
 
@@ -52,7 +52,7 @@ TEXT:
   text: title
   position: [ 30.7059 ; 31.8889 ]
   orientation: 0
-  font: SansSerif.bold/14 [BOLD]
+  font: SansSerif/14 [BOLD]
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -84,7 +84,7 @@ ELLIPSE:
 CENTERED_CHAR:
   char: C
   position: [ 44.7685 ; 159.0000 ]
-  font: Monospaced.bold/17
+  font: Monospaced/17
   color: ff000000
 
 EMPTY:
@@ -95,7 +95,7 @@ TEXT:
   text: Bob
   position: [ 59.6726 ; 162.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -114,7 +114,7 @@ TEXT:
   text: hello
   position: [ 31.6999 ; 189.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -157,7 +157,7 @@ ELLIPSE:
 CENTERED_CHAR:
   char: C
   position: [ 33.1999 ; 75.0000 ]
-  font: Monospaced.bold/17
+  font: Monospaced/17
   color: ff000000
 
 EMPTY:
@@ -168,7 +168,7 @@ TEXT:
   text: Sally
   position: [ 47.1999 ; 78.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -236,7 +236,7 @@ TEXT:
   text: legend
   position: [ 14.0000 ; 224.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -258,7 +258,7 @@ TEXT:
   text: caption
   position: [ 3.6679 ; 254.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -280,7 +280,7 @@ TEXT:
   text: footer
   position: [ 16.9796 ; 271.6667 ]
   orientation: 0
-  font: SansSerif.plain/15 []
+  font: SansSerif/15 []
   color: ffff0000
   extendedColor: NULL_COLOR
 

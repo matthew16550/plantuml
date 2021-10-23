@@ -57,7 +57,7 @@ public class UFont {
 
 	public String toStringDebug() {
 		final StringBuilder sb = new StringBuilder();
-		sb.append(font.getFontName());
+		sb.append(family);
 		sb.append("/");
 		sb.append(font.getSize());
 		return sb.toString();

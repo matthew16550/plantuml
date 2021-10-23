@@ -76,7 +76,7 @@ TEXT:
   text: 43
   position: [ 21.0000 ; 23.7778 ]
   orientation: 0
-  font: Serif.plain/10 []
+  font: Serif/10 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -84,7 +84,7 @@ TEXT:
   text: 44
   position: [ 49.0000 ; 23.7778 ]
   orientation: 0
-  font: Serif.plain/10 []
+  font: Serif/10 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -92,7 +92,7 @@ TEXT:
   text: 45
   position: [ 77.0000 ; 23.7778 ]
   orientation: 0
-  font: Serif.plain/10 []
+  font: Serif/10 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -100,7 +100,7 @@ TEXT:
   text: 46
   position: [ 105.0000 ; 23.7778 ]
   orientation: 0
-  font: Serif.plain/10 []
+  font: Serif/10 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -108,7 +108,7 @@ TEXT:
   text: 47
   position: [ 133.0000 ; 23.7778 ]
   orientation: 0
-  font: Serif.plain/10 []
+  font: Serif/10 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -116,7 +116,7 @@ TEXT:
   text: 48
   position: [ 161.0000 ; 23.7778 ]
   orientation: 0
-  font: Serif.plain/10 []
+  font: Serif/10 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -187,7 +187,7 @@ TEXT:
   text: Oct
   position: [ 17.4989 ; 9.3333 ]
   orientation: 0
-  font: Serif.bold/12 [BOLD]
+  font: Serif/12 [BOLD]
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -202,7 +202,7 @@ TEXT:
   text: Nov 2020
   position: [ 72.7816 ; 9.3333 ]
   orientation: 0
-  font: Serif.bold/12 [BOLD]
+  font: Serif/12 [BOLD]
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -560,7 +560,7 @@ TEXT:
   text: Prototype design
   position: [ 142.0000 ; 39.5556 ]
   orientation: 0
-  font: SansSerif.plain/11 []
+  font: SansSerif/11 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -568,7 +568,7 @@ TEXT:
   text: Testing
   position: [ 170.0000 ; 54.5556 ]
   orientation: 0
-  font: SansSerif.plain/11 []
+  font: SansSerif/11 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -597,7 +597,7 @@ TEXT:
   text: Oct
   position: [ 17.4989 ; 68.3333 ]
   orientation: 0
-  font: Serif.bold/12 [BOLD]
+  font: Serif/12 [BOLD]
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -612,7 +612,7 @@ TEXT:
   text: Nov 2020
   position: [ 72.7816 ; 68.3333 ]
   orientation: 0
-  font: Serif.bold/12 [BOLD]
+  font: Serif/12 [BOLD]
   color: ff000000
   extendedColor: NULL_COLOR
 

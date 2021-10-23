@@ -30,7 +30,7 @@ TEXT:
   text: title
   position: [ 45.3586 ; 36.8889 ]
   orientation: 0
-  font: SansSerif.bold/14 [BOLD]
+  font: SansSerif/14 [BOLD]
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -52,7 +52,7 @@ TEXT:
   text: caption
   position: [ 18.3206 ; 205.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -84,7 +84,7 @@ TEXT:
   text: Sally
   position: [ 12.0000 ; 68.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -102,7 +102,7 @@ TEXT:
   text: Sally
   position: [ 12.0000 ; 134.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -120,7 +120,7 @@ TEXT:
   text: Bob
   position: [ 99.6938 ; 68.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -138,7 +138,7 @@ TEXT:
   text: Bob
   position: [ 99.6938 ; 134.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -178,7 +178,7 @@ TEXT:
   text: header
   position: [ 73.0665 ; 12.7778 ]
   orientation: 0
-  font: SansSerif.plain/10 []
+  font: SansSerif/10 []
   color: ff888888
   extendedColor: NULL_COLOR
 
@@ -200,7 +200,7 @@ TEXT:
   text: footer
   position: [ 31.6323 ; 222.6667 ]
   orientation: 0
-  font: SansSerif.plain/15 []
+  font: SansSerif/15 []
   color: ffff0000
   extendedColor: NULL_COLOR
 
@@ -222,7 +222,7 @@ TEXT:
   text: legend
   position: [ 28.6527 ; 175.8889 ]
   orientation: 0
-  font: SansSerif.plain/14 []
+  font: SansSerif/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
