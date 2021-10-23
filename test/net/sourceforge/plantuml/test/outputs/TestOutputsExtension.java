@@ -1,7 +1,7 @@
 package net.sourceforge.plantuml.test.outputs;
 
 
-import java.nio.file.FileSystems;
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -14,15 +14,13 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 
 public class TestOutputsExtension implements BeforeAllCallback, AfterEachCallback, ParameterResolver {
 
-	private static final String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
-
 	public static TestOutputs getImpl(ExtensionContext context) {
 		return new TestOutputsImpl(context);
 	}
 
 	@Override
 	public void beforeAll(ExtensionContext context) {
-		final String classWithSlashes = context.getRequiredTestClass().getName().replaceAll("\\.", FILE_SEPARATOR);
+		final String classWithSlashes = context.getRequiredTestClass().getName().replace('.', File.separatorChar);
 		final Path dir = Paths.get("test").resolve(classWithSlashes).getParent();
 		new TestOutputsImpl(context).dir(dir);
 	}
