@@ -1,4 +1,4 @@
-package net.sourceforge.plantuml.approvaltesting;
+package net.sourceforge.plantuml.test.approval;
 
 import static java.nio.file.Files.notExists;
 import static net.sourceforge.plantuml.test.Assertions.assertImagesEqual;

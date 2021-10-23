@@ -1,4 +1,4 @@
-package net.sourceforge.plantuml.approvaltesting.example;
+package net.sourceforge.plantuml.test.approval.example;
 
 import static net.sourceforge.plantuml.test.PlantUmlTestUtils.exportDiagram;
 
@@ -10,7 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.approvaltesting.ApprovalTesting;
+import net.sourceforge.plantuml.test.approval.ApprovalTesting;
 
 class Example {
 

@@ -1,4 +1,4 @@
-package net.sourceforge.plantuml.approvaltesting;
+package net.sourceforge.plantuml.test.approval;
 
 import static net.sourceforge.plantuml.StringUtils.EOL;
 import static net.sourceforge.plantuml.test.ImageTestUtils.imageToBytes;

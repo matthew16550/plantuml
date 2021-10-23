@@ -18,7 +18,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.sourceforge.plantuml.approvaltesting.ApprovalTesting;
+import net.sourceforge.plantuml.test.approval.ApprovalTesting;
 import sun.java2d.pipe.RenderingEngine;
 
 class RasterTest {
