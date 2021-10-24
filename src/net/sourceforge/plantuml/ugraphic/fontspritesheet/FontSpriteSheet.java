@@ -5,6 +5,8 @@ import static java.lang.Integer.parseInt;
 import static java.lang.Math.round;
 import static java.nio.file.Files.newOutputStream;
 import static net.sourceforge.plantuml.png.MetadataTag.findMetadataValue;
+import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.MAX_CHAR_IN_SHEET;
+import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.MIN_CHAR_IN_SHEET;
 import static net.sourceforge.plantuml.utils.ImageIOUtils.createImageReader;
 
 import java.awt.AlphaComposite;
@@ -37,9 +39,6 @@ import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.png.PngIOMetadata;
 
 public class FontSpriteSheet {
-
-	private static final char MIN_CHAR = 0x21;
-	private static final char MAX_CHAR = 0x7e;
 
 	private final Map<Integer, SoftReference<BufferedImage>> colorizedImageCache = new ConcurrentHashMap<>();
 	private final float advance;
@@ -153,8 +152,7 @@ public class FontSpriteSheet {
 	}
 
 	String getPreferredFilename() {
-		final String size = getPointSize() % 1 > 0 ? Float.toString(getPointSize()) : Integer.toString((int) getPointSize());
-		return getName().replace(' ', '-') + "-" + size + ".png";
+		return getName().replace(' ', '-') + "-" + formatPointSize() + ".png";
 	}
 
 	int getSpriteWidth() {
@@ -187,9 +185,13 @@ public class FontSpriteSheet {
 
 	@Override
 	public String toString() {
-		return getName() + " " + getPointSize();
+		return getName() + " " + formatPointSize();
 	}
 
+	private String formatPointSize() {
+		return getPointSize() % 1 > 0 ? Float.toString(getPointSize()) : Integer.toString((int) getPointSize());
+	}
+ 
 	//
 	// Drawing
 	//
@@ -234,10 +236,10 @@ public class FontSpriteSheet {
 	}
 
 	private int calculateSpriteIndex(char c) {
-		if (c < MIN_CHAR || c > MAX_CHAR) {
+		if (c < MIN_CHAR_IN_SHEET || c > MAX_CHAR_IN_SHEET) {
 			return 0;  // tofu
 		} else {
-			return c - MIN_CHAR + 1;
+			return c - MIN_CHAR_IN_SHEET + 1;
 		}
 	}
 

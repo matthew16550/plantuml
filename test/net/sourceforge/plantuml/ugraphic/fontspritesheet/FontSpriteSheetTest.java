@@ -7,12 +7,14 @@ import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.Collections.unmodifiableList;
 import static net.sourceforge.plantuml.graphic.TextBlockUtils.getFontRenderContext;
 import static net.sourceforge.plantuml.test.ImageTestUtils.assertImagesEqual;
-import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.ALL_CHARS;
-import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.JETBRAINS_FONT_FAMILY;
+import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.ALL_CHARS_IN_SHEET;
+import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.FONT_SPRITE_SHEET_SIZES;
+import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.JETBRAINS_FONT_FAMILY;
+import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.registerJetBrainsFontFiles;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.createFontSpriteSheet;
-import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.registerJetBrainsFonts;
 import static net.sourceforge.plantuml.utils.MathUtils.roundUp;
 
 import java.awt.Font;
@@ -22,11 +24,15 @@ import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.assertj.core.api.AutoCloseableSoftAssertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junitpioneer.jupiter.CartesianEnumSource;
 import org.junitpioneer.jupiter.CartesianProductTest;
 import org.junitpioneer.jupiter.CartesianValueSource;
@@ -34,6 +40,7 @@ import org.junitpioneer.jupiter.CartesianValueSource;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.test.approval.ApprovalTesting;
+import net.sourceforge.plantuml.test.outputs.TestOutputs;
 import net.sourceforge.plantuml.ugraphic.UFont;
 
 class FontSpriteSheetTest {
@@ -43,35 +50,34 @@ class FontSpriteSheetTest {
 
 	@BeforeAll
 	static void before_all() throws Exception {
-		registerJetBrainsFonts();
+		registerJetBrainsFontFiles();
 	}
 
 	//
 	// Test Cases
 	//
 
-	@Test
-	void test_stored_sprite_sheets_always_make_the_same_output() {
+	@ParameterizedTest(name = "{arguments}")
+	@MethodSource("allSheets")
+	void test_stored_sprite_sheets_always_make_the_same_output(FontSpriteSheet sheet, TestOutputs outputs) {
+		outputs.autoSpamCount(false);
 
-		for (FontSpriteSheet sheet : FontSpriteSheetManager.instance().allSheets()) {
-			final Dimension2D dimension = sheet.calculateDimension(ALL_CHARS);
-			final int width = 4 + roundUp(dimension.getWidth());
-			final int height = 4 + roundUp(dimension.getHeight());
+		final Dimension2D dimension = sheet.calculateDimension(ALL_CHARS_IN_SHEET);
+		final int width = 4 + roundUp(dimension.getWidth());
+		final int height = 4 + roundUp(dimension.getHeight());
 
-			final BufferedImage image = new BufferedImage(width, height, TYPE_INT_ARGB);
-			final Graphics2D g = image.createGraphics();
+		final BufferedImage image = new BufferedImage(width, height, TYPE_INT_ARGB);
+		final Graphics2D g = image.createGraphics();
 
-			g.setBackground(WHITE);
-			g.clearRect(0, 0, width, height);
+		g.setBackground(WHITE);
+		g.clearRect(0, 0, width, height);
 
-			g.setColor(BLACK);
-			g.translate(2, 2);
-			sheet.drawString(g, ALL_CHARS, 0, (float) (dimension.getHeight() - sheet.getDescent()));
+		g.setColor(BLACK);
+		g.translate(2, 2);
+		sheet.drawString(g, ALL_CHARS_IN_SHEET, 0, (float) (dimension.getHeight() - sheet.getDescent()));
 
-			approvalTesting
-					.withName("%s_%d", sheet.getName().replace(" ", "_"), (int) sheet.getPointSize())
-					.approve(image);
-		}
+		approvalTesting
+				.approve(image);
 	}
 
 	@CartesianProductTest(name = "{arguments}")
@@ -120,7 +126,7 @@ class FontSpriteSheetTest {
 			final UFont uFont = UFont.fromFont(font);
 			final StringBounder bounder = FileFormat.PNG.getDefaultStringBounder();
 
-			for (String string : asList("", " ", "x", "foo", ALL_CHARS)) {
+			for (String string : asList("", " ", "x", "foo", ALL_CHARS_IN_SHEET)) {
 				final Dimension2D dimensionFromSheet = sheet.calculateDimension(string);
 				final Dimension2D dimensionFromNormalBounder = bounder.calculateDimension(uFont, string);
 
@@ -227,6 +233,17 @@ class FontSpriteSheetTest {
 		FontStyle(int style) {
 			this.style = style;
 		}
+	}
+
+	private static List<FontSpriteSheet> allSheets() {
+		final FontSpriteSheetManager manager = FontSpriteSheetManager.instance();
+		final List<FontSpriteSheet> sheets = new ArrayList<>();
+		for (int size : FONT_SPRITE_SHEET_SIZES) {
+			for (FontStyle style : FontStyle.values()) {
+				sheets.add(manager.findNearestSheet(new Font(null, style.style, size)));
+			}
+		}
+		return unmodifiableList(sheets);
 	}
 
 }
