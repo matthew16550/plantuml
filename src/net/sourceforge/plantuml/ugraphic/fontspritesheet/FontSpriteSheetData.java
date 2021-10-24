@@ -10,7 +10,7 @@ import java.util.List;
 
 public class FontSpriteSheetData {
 
-	static final List<Integer> FONT_SPRITE_SHEET_SIZES = unmodifiableListOf(9, 20);
+	static final List<Integer> FONT_SPRITE_SHEET_SIZES = unmodifiableListOf(9, 11, 14, 20);
 
 	static final String JETBRAINS_FONT_FAMILY = "JetBrains Mono NL";
 

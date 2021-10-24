@@ -43,7 +43,15 @@ public class FontSpriteSheetManager {
 	}
 
 	private int findNearestSize(Font font) {
-		return font.getSize() < 16 ? 9 : 20;
+		final int size = font.getSize();
+		if (size < 11)
+			return 9;
+		else if (size < 13)
+			return 11;
+		else if (size < 17)
+			return 14;
+		else
+			return 20;
 	}
 
 	public StringBounder createStringBounder() {
