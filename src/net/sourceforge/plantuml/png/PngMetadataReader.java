@@ -35,47 +35,36 @@
  */
 package net.sourceforge.plantuml.png;
 
-import static net.sourceforge.plantuml.utils.ImageIOUtils.createImageReader;
+import static java.lang.Float.parseFloat;
+import static java.lang.Integer.parseInt;
 
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageInputStream;
 
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import net.sourceforge.plantuml.security.ImageIO;
-import net.sourceforge.plantuml.security.SFile;
 
-public class MetadataTag {
+public class PngMetadataReader {
 
-	private final Object source;
-	private final String tag;
-
-	public MetadataTag(SFile file, String tag) throws FileNotFoundException {
-		this.source = file.conv();
-		this.tag = tag;
+	public static PngMetadataReader create(File file) throws IOException {
+		final ImageInputStream stream = ImageIO.createImageInputStream(file);
+		final ImageReader reader = ImageIO.createImageReader(stream);
+		return new PngMetadataReader(reader.getImageMetadata(0));
 	}
 
-	public MetadataTag(java.io.File file, String tag) {
-		this.source = file;
-		this.tag = tag;
+	private final IIOMetadata metadata;
+
+	public PngMetadataReader(IIOMetadata metadata) {
+		this.metadata = metadata;
 	}
 
-	public MetadataTag(InputStream is, String tag) {
-		this.source = is;
-		this.tag = tag;
-	}
-
-	public String getData() throws IOException {
-		final ImageReader reader = createImageReader(ImageIO.createImageInputStream(source));
-		return findMetadataValue(reader.getImageMetadata(0), tag);
-	}
-
-	public static String findMetadataValue(IIOMetadata metadata, String tag) {
+	public String findMetadataValue(String tag) {
 			final String[] names = metadata.getMetadataFormatNames();
 			final int length = names.length;
 			for (int i = 0; i < length; i++) {
@@ -86,6 +75,26 @@ public class MetadataTag {
 			}
 
 		return null;
+	}
+
+	public float getRequiredFloat(String tag) {
+		return parseFloat(getRequiredString(tag));
+	}
+
+	public int getRequiredInt(String tag) {
+		return parseInt(getRequiredString(tag));
+	}
+
+	public String getRequiredString(String tag) {
+		final String string = findMetadataValue(tag);
+		if (string == null) {
+			throw new IllegalStateException("PNG metadata is missing: " + tag);
+		}
+		return string;
+	}
+
+	public String getPlantUmlMetadata() throws IOException {
+		return findMetadataValue("plantuml");
 	}
 
 	private static String displayMetadata(Node root, String tag) {

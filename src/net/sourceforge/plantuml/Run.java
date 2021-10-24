@@ -61,7 +61,7 @@ import net.sourceforge.plantuml.code.Transcoder;
 import net.sourceforge.plantuml.code.TranscoderUtil;
 import net.sourceforge.plantuml.ftp.FtpServer;
 import net.sourceforge.plantuml.picoweb.PicoWebServer;
-import net.sourceforge.plantuml.png.MetadataTag;
+import net.sourceforge.plantuml.png.PngMetadataReader;
 import net.sourceforge.plantuml.preproc.Stdlib;
 import net.sourceforge.plantuml.security.ImageIO;
 import net.sourceforge.plantuml.security.SFile;
@@ -465,7 +465,7 @@ public class Run {
 			// new Metadata().readAndDisplayMetadata(f);
 			System.out.println();
 			error.goOk();
-			final String data = new MetadataTag(f, "plantuml").getData();
+			final String data = PngMetadataReader.create(f).getPlantUmlMetadata();
 			// File file = SecurityUtils.File("tmp.txt");
 			// PrintWriter pw = SecurityUtils.PrintWriter(file, "UTF-8");
 			// pw.println(NastyEncoder.fromISO_8859_1(data));

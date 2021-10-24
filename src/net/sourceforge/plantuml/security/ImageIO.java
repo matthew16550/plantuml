@@ -105,6 +105,18 @@ public class ImageIO {
 		return javax.imageio.ImageIO.getImageReaders(iis);
 	}
 
+	public static ImageReader createImageReader(ImageInputStream iis) throws IOException {
+		final Iterator<ImageReader> readers = getImageReaders(iis);
+
+		if (!readers.hasNext()) {
+			throw new IllegalStateException("No ImageReader");
+		}
+
+		final ImageReader reader = readers.next();
+		reader.setInput(iis, true);
+		return reader;
+	}
+	
 	public static Iterator<ImageWriter> getImageWritersBySuffix(String string) {
 		return javax.imageio.ImageIO.getImageWritersBySuffix(string);
 	}

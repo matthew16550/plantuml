@@ -85,7 +85,7 @@ class FontSpriteSheetTest {
 	@CartesianEnumSource(FontStyle.class)
 	void test_sprite_sheet_creation(int size, FontStyle style) {
 
-		final Font font = new Font(JETBRAINS_FONT_FAMILY, style.style, size);
+		final Font font = new Font(JETBRAINS_FONT_FAMILY, style.value, size);
 
 		final FontSpriteSheet sheet = createFontSpriteSheet(font);
 
@@ -115,7 +115,7 @@ class FontSpriteSheetTest {
 					.isEqualTo(lineMetrics.getStrikethroughThickness());
 
 			softly.assertThat(sheet.getStyle())
-					.isEqualTo(style.style);
+					.isEqualTo(style.value);
 
 			softly.assertThat(sheet.getUnderlineOffset())
 					.isEqualTo(lineMetrics.getUnderlineOffset());
@@ -142,6 +142,8 @@ class FontSpriteSheetTest {
 	@Test
 	void test_sprite_sheet_loading() throws Exception {
 
+		// Unfortunately all the JetBrains fonts have zero getLeading(), we expect another font on the machine
+		// to have non-zero leading, so it can be properly tested
 		final Font font = stream(getLocalGraphicsEnvironment().getAllFonts())
 				.filter(f -> f.getLineMetrics("x", getFontRenderContext()).getLeading() > 0)
 				.findFirst()
@@ -228,10 +230,10 @@ class FontSpriteSheetTest {
 		BOLD(Font.BOLD),
 		BOLD_ITALIC(Font.BOLD | Font.ITALIC);
 
-		private final int style;
+		private final int value;
 
-		FontStyle(int style) {
-			this.style = style;
+		FontStyle(int value) {
+			this.value = value;
 		}
 	}
 
@@ -240,10 +242,9 @@ class FontSpriteSheetTest {
 		final List<FontSpriteSheet> sheets = new ArrayList<>();
 		for (int size : FONT_SPRITE_SHEET_SIZES) {
 			for (FontStyle style : FontStyle.values()) {
-				sheets.add(manager.findNearestSheet(new Font(null, style.style, size)));
+				sheets.add(manager.findNearestSheet(new Font(null, style.value, size)));
 			}
 		}
 		return unmodifiableList(sheets);
 	}
-
 }

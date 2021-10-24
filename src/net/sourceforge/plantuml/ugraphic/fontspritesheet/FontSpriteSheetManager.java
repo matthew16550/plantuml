@@ -14,11 +14,13 @@ import net.sourceforge.plantuml.ugraphic.UFont;
 public class FontSpriteSheetManager {
 
 	public static boolean USE = false;  // TODO temporary kludge
-	
-	private static final FontSpriteSheetManager INSTANCE = new FontSpriteSheetManager();
+
+	private static class InstanceHolder {
+		static final FontSpriteSheetManager INSTANCE = new FontSpriteSheetManager();
+	}
 
 	public static FontSpriteSheetManager instance() {
-		return INSTANCE;
+		return InstanceHolder.INSTANCE;
 	}
 
 	private final Map<String, FontSpriteSheet> cache = new ConcurrentHashMap<>();
@@ -30,7 +32,10 @@ public class FontSpriteSheetManager {
 		final int size = findNearestSize(font);
 		final String cacheKey = font.getStyle() + "-" + size;
 		FontSpriteSheet sheet = cache.get(cacheKey);
-		if (sheet == null) { // TODO concurrency?
+		if (sheet == null) {
+			// There is a race condition here where multiple threads are loading the sheet at the same time,
+			// it is a tiny waste of CPU, but I think should not cause a problem because the sheets will behave identically.
+			// For simplicity, we just ignore it!
 			sheet = load(font.getStyle(), size);
 			cache.put(cacheKey, sheet);
 		}

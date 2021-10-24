@@ -1,13 +1,9 @@
 package net.sourceforge.plantuml.ugraphic.fontspritesheet;
 
-import static java.lang.Float.parseFloat;
-import static java.lang.Integer.parseInt;
 import static java.lang.Math.round;
 import static java.nio.file.Files.newOutputStream;
-import static net.sourceforge.plantuml.png.MetadataTag.findMetadataValue;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.MAX_CHAR_IN_SHEET;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.MIN_CHAR_IN_SHEET;
-import static net.sourceforge.plantuml.utils.ImageIOUtils.createImageReader;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -32,11 +28,12 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.png.PngIOMetadata;
+import net.sourceforge.plantuml.png.PngMetadataReader;
+import net.sourceforge.plantuml.security.ImageIO;
 
 public class FontSpriteSheet {
 
@@ -83,22 +80,23 @@ public class FontSpriteSheet {
 
 	FontSpriteSheet(InputStream in) throws IOException {
 		try (ImageInputStream iis = ImageIO.createImageInputStream(in)) {
-			final IIOImage iioImage = createImageReader(iis).readAll(0, null);
-			advance = getMetadataFloat(iioImage, TAG_ADVANCE);
+			final IIOImage iioImage = ImageIO.createImageReader(iis).readAll(0, null);
+			final PngMetadataReader reader = new PngMetadataReader(iioImage.getMetadata());
+			advance = reader.getRequiredFloat(TAG_ADVANCE);
 			alphaImage = (BufferedImage) iioImage.getRenderedImage();
-			ascent = getMetadataFloat(iioImage, TAG_ASCENT);
-			descent = getMetadataFloat(iioImage, TAG_DESCENT);
-			leading = getMetadataFloat(iioImage, TAG_LEADING);
-			metadata = getMetadataString(iioImage, TAG_METADATA);
-			name = getMetadataString(iioImage, TAG_NAME);
-			pointSize = getMetadataFloat(iioImage, TAG_POINT_SIZE);
-			spriteWidth = getMetadataInt(iioImage, TAG_SPRITE_WIDTH);
-			strikethroughOffset = getMetadataFloat(iioImage, TAG_STRIKETHROUGH_OFFSET);
-			strikethroughThickness = getMetadataFloat(iioImage, TAG_STRIKETHROUGH_THICKNESS);
-			style = getMetadataInt(iioImage, TAG_STYLE);
-			underlineOffset = getMetadataFloat(iioImage, TAG_UNDERLINE_OFFSET);
-			underlineThickness = getMetadataFloat(iioImage, TAG_UNDERLINE_THICKNESS);
-			xOffset = getMetadataInt(iioImage, TAG_X_OFFSET);
+			ascent = reader.getRequiredFloat(TAG_ASCENT);
+			descent = reader.getRequiredFloat(TAG_DESCENT);
+			leading = reader.getRequiredFloat(TAG_LEADING);
+			metadata = reader.getRequiredString(TAG_METADATA);
+			name = reader.getRequiredString(TAG_NAME);
+			pointSize = reader.getRequiredFloat(TAG_POINT_SIZE);
+			spriteWidth = reader.getRequiredInt(TAG_SPRITE_WIDTH);
+			strikethroughOffset = reader.getRequiredFloat(TAG_STRIKETHROUGH_OFFSET);
+			strikethroughThickness = reader.getRequiredFloat(TAG_STRIKETHROUGH_THICKNESS);
+			style = reader.getRequiredInt(TAG_STYLE);
+			underlineOffset = reader.getRequiredFloat(TAG_UNDERLINE_OFFSET);
+			underlineThickness = reader.getRequiredFloat(TAG_UNDERLINE_THICKNESS);
+			xOffset = reader.getRequiredInt(TAG_X_OFFSET);
 		}
 	}
 
@@ -333,21 +331,5 @@ public class FontSpriteSheet {
 				.addText(TAG_UNDERLINE_THICKNESS, underlineThickness)
 				.addText(TAG_X_OFFSET, xOffset)
 				.write(alphaImage, out);
-	}
-
-	private static float getMetadataFloat(IIOImage image, String tag) {
-		return parseFloat(getMetadataString(image, tag));
-	}
-
-	private static int getMetadataInt(IIOImage image, String tag) {
-		return parseInt(getMetadataString(image, tag));
-	}
-
-	private static String getMetadataString(IIOImage image, String tag) {
-		final String string = findMetadataValue(image.getMetadata(), tag);
-		if (string == null) {
-			throw new IllegalStateException("PNG metadata is missing: " + tag);
-		}
-		return string;
 	}
 }
