@@ -5,6 +5,7 @@ import static java.awt.Color.WHITE;
 import static java.awt.Font.ITALIC;
 import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static java.lang.Math.ceil;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableList;
@@ -15,7 +16,6 @@ import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetD
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.JETBRAINS_FONT_FAMILY;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.registerJetBrainsFontFiles;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.createFontSpriteSheet;
-import static net.sourceforge.plantuml.utils.MathUtils.roundUp;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -63,8 +63,8 @@ class FontSpriteSheetTest {
 		outputs.autoSpamCount(false);
 
 		final Dimension2D dimension = sheet.calculateDimension(ALL_CHARS_IN_SHEET);
-		final int width = 4 + roundUp(dimension.getWidth());
-		final int height = 4 + roundUp(dimension.getHeight());
+		final int width = 4 + (int) ceil(dimension.getWidth());
+		final int height = 4 + (int) ceil(dimension.getHeight());
 
 		final BufferedImage image = new BufferedImage(width, height, TYPE_INT_ARGB);
 		final Graphics2D g = image.createGraphics();

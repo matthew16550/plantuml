@@ -7,6 +7,7 @@ import static java.awt.Font.PLAIN;
 import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_GASP;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static java.lang.Math.ceil;
 import static java.lang.Math.max;
 import static java.util.Arrays.asList;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.ALL_CHARS_IN_SHEET;
@@ -14,7 +15,6 @@ import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetD
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.JETBRAINS_FONT_FAMILY;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.TOFU_CHAR;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.registerJetBrainsFontFiles;
-import static net.sourceforge.plantuml.utils.MathUtils.roundUp;
 
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -75,9 +75,9 @@ public class FontSpriteSheetMaker {
 			bounds.add(glyphVector.getGlyphPixelBounds(0, frc, 0, ascent));
 		}
 
-		final int xOffset = -roundUp(bounds.getX());
-		final int sheetHeight = roundUp(bounds.getHeight() - bounds.getY());
-		final int spriteWidth = roundUp(bounds.getWidth() - bounds.getX());
+		final int xOffset = (int) -ceil(bounds.getX());
+		final int sheetHeight = (int) ceil(bounds.getHeight() - bounds.getY());
+		final int spriteWidth = (int) ceil(bounds.getWidth() - bounds.getX());
 		final int sheetWidth = xOffset + spriteWidth * ALL_CHARS_IN_SHEET.length();
 
 		// Draw sprites

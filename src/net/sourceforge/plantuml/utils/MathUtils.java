@@ -35,8 +35,6 @@
  */
 package net.sourceforge.plantuml.utils;
 
-import static java.lang.Math.ceil;
-
 public class MathUtils {
 
 	public static double max(double a, double b) {
@@ -85,12 +83,5 @@ public class MathUtils {
 		}
 		return v;
 	}
-	
-	public static int roundUp(double d) {
-		return (int) ceil(d);
-	}
-	
-	public static int roundUp(float f) {
-		return (int) ceil(f);
-	}
+
 }
