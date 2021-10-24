@@ -77,7 +77,7 @@ public class StringUtils {
 
 	public static final char INTERNAL_BOLD = '\uE100';
 
-	public static final String EOL = System.getProperty("line.separator");
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	public static String toInternalBoldNumber(String s) {
 		final StringBuilder sb = new StringBuilder();

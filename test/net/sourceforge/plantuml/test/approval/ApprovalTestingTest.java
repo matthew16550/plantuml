@@ -1,6 +1,6 @@
 package net.sourceforge.plantuml.test.approval;
 
-import static net.sourceforge.plantuml.StringUtils.EOL;
+import static net.sourceforge.plantuml.StringUtils.LINE_SEPARATOR;
 import static net.sourceforge.plantuml.test.ImageTestUtils.imageToBytes;
 import static net.sourceforge.plantuml.test.PathTestUtils.assertThatDirContainsExactlyTheseFiles;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,8 +54,8 @@ class ApprovalTestingTest {
 
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> approvalTesting.approve(differentValue))
-				.withMessage(EOL +
-						"expected: \"foo\"" + EOL +
+				.withMessage(LINE_SEPARATOR +
+						"expected: \"foo\"" + LINE_SEPARATOR +
 						" but was: \"bar\""
 				);
 
