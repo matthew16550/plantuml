@@ -1,6 +1,5 @@
 package net.sourceforge.plantuml.test;
 
-import static net.sourceforge.plantuml.StringUtils.substringAfterLast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
@@ -95,13 +94,17 @@ public class ImageTestUtils {
 	}
 
 	public static void writeImageFile(Path path, BufferedImage image) {
+		final String fileName = path.getFileName().toString();
+		final int index = fileName.lastIndexOf('.');
+		if (index == -1) {
+			throw new IllegalArgumentException(String.format("Path has no extension: '%s'", path));
+		}
+		final String formatName = fileName.substring(index + 1);
 		try {
-			final String format = substringAfterLast(path.toString(), '.');
-			boolean failed = !ImageIO.write(image, format, path.toFile());
-			if (failed) {
+			if (!ImageIO.write(image, formatName, path.toFile())) {
 				throw new IOException(String.format("No appropriate image writer found for '%s'", path));
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			throwAsUncheckedException(e);
 		}
 	}

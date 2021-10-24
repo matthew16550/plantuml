@@ -549,9 +549,4 @@ public class StringUtils {
 	}
 
 	// http://docs.oracle.com/javase/tutorial/i18n/format/dateFormat.html
-
-	public static String substringAfterLast(String s, int separator) {
-		final int index = s.lastIndexOf(separator);
-		return index == -1 ? s : s.substring(index + 1);
-	}
 }
