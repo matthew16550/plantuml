@@ -40,7 +40,7 @@ TEXT:
   text: Alice
   position: [ 12.0000 ; 22.8889 ]
   orientation: 0
-  font: SansSerif/14 []
+  font: SansSerif.plain/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -58,7 +58,7 @@ TEXT:
   text: Alice
   position: [ 12.0000 ; 101.8889 ]
   orientation: 0
-  font: SansSerif/14 []
+  font: SansSerif.plain/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -76,7 +76,7 @@ TEXT:
   text: Bob
   position: [ 137.8135 ; 22.8889 ]
   orientation: 0
-  font: SansSerif/14 []
+  font: SansSerif.plain/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -94,7 +94,7 @@ TEXT:
   text: Bob
   position: [ 137.8135 ; 101.8889 ]
   orientation: 0
-  font: SansSerif/14 []
+  font: SansSerif.plain/14 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -120,7 +120,7 @@ TEXT:
   text: Hello
   position: [ 57.9786 ; 62.1111 ]
   orientation: 0
-  font: SansSerif/13 []
+  font: SansSerif.plain/13 []
   color: ff000000
   extendedColor: NULL_COLOR
 

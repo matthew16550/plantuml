@@ -36,7 +36,7 @@ TEXT:
   text: VerifyReservation
   position: [ 49.5000 ; 87.3333 ]
   orientation: 0
-  font: SansSerif/12 []
+  font: SansSerif.plain/12 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -66,7 +66,7 @@ TEXT:
   text: sendToAirport
   position: [ 17.0000 ; 198.3333 ]
   orientation: 0
-  font: SansSerif/12 []
+  font: SansSerif.plain/12 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -104,7 +104,7 @@ TEXT:
   text: getPreference
   position: [ 155.5000 ; 248.3333 ]
   orientation: 0
-  font: SansSerif/12 []
+  font: SansSerif.plain/12 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -154,7 +154,7 @@ TEXT:
   text: ReceiveBaggage
   position: [ 272.0000 ; 470.3333 ]
   orientation: 0
-  font: SansSerif/12 []
+  font: SansSerif.plain/12 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -172,7 +172,7 @@ TEXT:
   text: PrintBoadingboard
   position: [ 361.0000 ; 420.3333 ]
   orientation: 0
-  font: SansSerif/12 []
+  font: SansSerif.plain/12 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -190,7 +190,7 @@ TEXT:
   text: GiveTravelDocumentation
   position: [ 125.5000 ; 600.3333 ]
   orientation: 0
-  font: SansSerif/12 []
+  font: SansSerif.plain/12 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -250,7 +250,7 @@ TEXT:
   text:  
   position: [ 138.0000 ; 133.1969 ]
   orientation: 0
-  font: SansSerif/11 []
+  font: SansSerif.plain/11 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -286,7 +286,7 @@ TEXT:
   text: incorrect
   position: [ 34.1176 ; 165.1119 ]
   orientation: 0
-  font: SansSerif/11 []
+  font: SansSerif.plain/11 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -358,7 +358,7 @@ TEXT:
   text: correct
   position: [ 217.0000 ; 198.0556 ]
   orientation: 0
-  font: SansSerif/11 []
+  font: SansSerif.plain/11 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -418,7 +418,7 @@ TEXT:
   text:  
   position: [ 264.0000 ; 355.5079 ]
   orientation: 0
-  font: SansSerif/11 []
+  font: SansSerif.plain/11 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -458,7 +458,7 @@ TEXT:
   text: nobagage
   position: [ 139.0000 ; 470.0556 ]
   orientation: 0
-  font: SansSerif/11 []
+  font: SansSerif.plain/11 []
   color: ff000000
   extendedColor: NULL_COLOR
 
@@ -498,7 +498,7 @@ TEXT:
   text: bagage
   position: [ 278.0000 ; 420.0556 ]
   orientation: 0
-  font: SansSerif/11 []
+  font: SansSerif.plain/11 []
   color: ff000000
   extendedColor: NULL_COLOR
 
