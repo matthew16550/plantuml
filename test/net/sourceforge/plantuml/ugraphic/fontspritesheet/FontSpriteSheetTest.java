@@ -31,7 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.assertj.core.api.AutoCloseableSoftAssertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,6 +42,7 @@ import org.junitpioneer.jupiter.CartesianEnumSource;
 import org.junitpioneer.jupiter.CartesianProductTest;
 import org.junitpioneer.jupiter.CartesianValueSource;
 
+import net.sourceforge.plantuml.AbstractPSystem;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.test.approval.ApprovalTesting;
@@ -52,8 +55,13 @@ class FontSpriteSheetTest {
 	static final ApprovalTesting approvalTesting = new ApprovalTesting();
 
 	@BeforeAll
-	static void before_all() throws Exception {
+	static void beforeAll() throws Exception {
 		registerJetBrainsFontFiles();
+	}
+
+	@AfterEach
+	void afterEach() {
+		AbstractPSystem.FORCE_TESTING_FONT = false;
 	}
 
 	//
@@ -61,12 +69,245 @@ class FontSpriteSheetTest {
 	//
 
 	@Test
-	void test_class_diagram() {
+	void test_diagram_activity() {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"(*) -> foo",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_activity3() {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				":foo;",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_board() {
+		approve(
+				"@startboard",
+				"!pragma testing_font",
+				"foo",
+				"@endboard"
+		);
+	}
+
+	@Test
+	void test_diagram_bpm() {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startbpm",
+				":foo;",
+				"@endbpm"
+		);
+	}
+
+	@Test
+	void test_diagram_class() {
 		approve(
 				"@startuml",
 				"!pragma testing_font",
 				"class foo",
 				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_description() {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"[foo]",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_dot() {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startuml",
+				"digraph foo {",
+				"  foo [shape=box]",
+				"}",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_flow() {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startflow",
+				"10 \"foo\"",
+				"@endflow"
+		);
+	}
+
+	@Test
+	void test_diagram_gantt() {
+		approve(
+				"@startgantt",
+				"!pragma testing_font",
+				"[foo] lasts 5 days",
+				"@endgantt"
+		);
+	}
+
+	@Test
+	void test_diagram_git() {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startgit",
+				"* foo",
+				"@endgit"
+		);
+	}
+
+	@Test
+	void test_diagram_json() {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startjson",
+				"[\"foo\"]",
+				"@endjson"
+		);
+	}
+
+	@Test
+	void test_diagram_mindmap() {
+		approve(
+				"@startmindmap",
+				"!pragma testing_font",
+				"* foo",
+				"@endmindmap"
+		);
+	}
+
+	@Test
+	void test_diagram_network() {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"nwdiag {",
+				"    network {",
+				"        foo ;",
+				"    }",
+				"}",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_plain() {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startuml",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_salt() {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"salt",
+				"{",
+				"  [foo]",
+				"}",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_sequence() {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"foo -> foo",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_state() {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"[*] --> foo",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_stdlib() {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startuml",
+				"stdlib c4",
+				"@enduml"
+		);
+	}
+
+	@Test
+	@Disabled("TODO sudoku needs work to support font sprites")
+	void test_diagram_sudoku() {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startuml",
+				"sudoku 1",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_timing() {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"concise foo",
+				"@0",
+				"foo is _",
+				"@100",
+				"foo is _",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_wbs() {
+		approve(
+				"@startwbs",
+				"!pragma testing_font",
+				"* foo",
+				"@endwbs"
+		);
+	}
+
+	@Test
+	void test_diagram_wire() {
+		approve(
+				"@startwire",
+				"!pragma testing_font",
+				"*foo",
+				"@endwire"
+		);
+	}
+
+	@Test
+	void test_diagram_yaml() {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startyaml",
+				"foo: _",
+				"@endyaml"
 		);
 	}
 
