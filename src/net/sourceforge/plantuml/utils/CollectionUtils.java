@@ -8,7 +8,7 @@ import java.util.List;
 public class CollectionUtils {
 
 	@SafeVarargs
-	public static <E> List<E> immutableList(E... elements) {
+	public static <E> List<E> unmodifiableListOf(E... elements) {
 		return unmodifiableList(asList(elements));
 	}
 }

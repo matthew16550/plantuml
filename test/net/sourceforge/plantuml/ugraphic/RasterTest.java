@@ -7,13 +7,10 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_OFF;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.geom.AffineTransform.getTranslateInstance;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -100,9 +97,9 @@ class RasterTest {
 	@RegisterExtension
 	static final ApprovalTesting approvalTesting = new ApprovalTesting();
 
-	private static final List<Object> ANTIALIAS_OPTIONS = unmodifiableList(asList(
+	private static final Object[] ANTIALIAS_OPTIONS = {
 			VALUE_ANTIALIAS_OFF, VALUE_ANTIALIAS_ON
-	));
+	};
 
 	private void nextRow(Graphics2D g, int down) {
 		g.setTransform(getTranslateInstance(10, g.getTransform().getTranslateY() + down));

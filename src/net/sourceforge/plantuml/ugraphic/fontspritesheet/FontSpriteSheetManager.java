@@ -4,7 +4,7 @@ import static java.awt.Font.BOLD;
 import static java.awt.Font.ITALIC;
 import static java.awt.Font.PLAIN;
 import static java.util.Collections.unmodifiableList;
-import static net.sourceforge.plantuml.utils.CollectionUtils.immutableList;
+import static net.sourceforge.plantuml.utils.CollectionUtils.unmodifiableListOf;
 
 import java.awt.Font;
 import java.awt.geom.Dimension2D;
@@ -27,7 +27,7 @@ public class FontSpriteSheetManager {
 		return INSTANCE;
 	}
 
-	static final List<Integer> FONT_SIZES = immutableList(9, 20);
+	static final List<Integer> FONT_SIZES = unmodifiableListOf(9, 20);
 
 	private final Map<String, FontSpriteSheet> cache = new ConcurrentHashMap<>();
 

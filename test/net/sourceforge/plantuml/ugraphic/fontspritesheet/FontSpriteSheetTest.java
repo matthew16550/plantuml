@@ -5,6 +5,7 @@ import static java.awt.Color.WHITE;
 import static java.awt.Font.ITALIC;
 import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static net.sourceforge.plantuml.graphic.TextBlockUtils.getFontRenderContext;
 import static net.sourceforge.plantuml.test.ImageTestUtils.assertImagesEqual;
@@ -12,7 +13,6 @@ import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetM
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.JETBRAINS_FONT_FAMILY;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.createFontSpriteSheet;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.registerJetBrainsFonts;
-import static net.sourceforge.plantuml.utils.CollectionUtils.immutableList;
 import static net.sourceforge.plantuml.utils.MathUtils.roundUp;
 
 import java.awt.Font;
@@ -120,7 +120,7 @@ class FontSpriteSheetTest {
 			final UFont uFont = UFont.fromFont(font);
 			final StringBounder bounder = FileFormat.PNG.getDefaultStringBounder();
 
-			for (String string : immutableList("", " ", "x", "foo", ALL_CHARS)) {
+			for (String string : asList("", " ", "x", "foo", ALL_CHARS)) {
 				final Dimension2D dimensionFromSheet = sheet.calculateDimension(string);
 				final Dimension2D dimensionFromNormalBounder = bounder.calculateDimension(uFont, string);
 

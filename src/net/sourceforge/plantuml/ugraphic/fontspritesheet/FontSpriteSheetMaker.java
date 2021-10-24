@@ -10,7 +10,8 @@ import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_GASP;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.lang.Math.max;
-import static net.sourceforge.plantuml.utils.CollectionUtils.immutableList;
+import static java.util.Arrays.asList;
+import static net.sourceforge.plantuml.utils.CollectionUtils.unmodifiableListOf;
 import static net.sourceforge.plantuml.utils.MathUtils.roundUp;
 
 import java.awt.Font;
@@ -45,7 +46,7 @@ public class FontSpriteSheetMaker {
 	@VisibleForTesting
 	static final String JETBRAINS_FONT_FAMILY = "JetBrains Mono NL";
 
-	private static final List<String> JETBRAINS_FONT_FILES = immutableList(
+	private static final List<String> JETBRAINS_FONT_FILES = unmodifiableListOf(
 			"JetBrainsMonoNL-Bold.ttf",
 			"JetBrainsMonoNL-BoldItalic.ttf",
 			"JetBrainsMonoNL-Italic.ttf",
@@ -56,7 +57,7 @@ public class FontSpriteSheetMaker {
 		registerJetBrainsFonts();
 
 		for (int size : FontSpriteSheetManager.FONT_SIZES) {
-			for (int style : immutableList(PLAIN, ITALIC, BOLD, BOLD | ITALIC)) {
+			for (int style : asList(PLAIN, ITALIC, BOLD, BOLD | ITALIC)) {
 				final Font font = new Font(JETBRAINS_FONT_FAMILY, style, size);
 				final FontSpriteSheet sheet = createFontSpriteSheet(font);
 				final Path path = Paths.get("testResources").resolve("font-sprite-sheets").resolve(sheet.getPreferredFilename());

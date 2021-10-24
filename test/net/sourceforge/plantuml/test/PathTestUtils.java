@@ -1,6 +1,5 @@
 package net.sourceforge.plantuml.test;
 
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
@@ -25,18 +24,13 @@ public class PathTestUtils {
 	}
 
 	public static List<String> listAllFilesRecursive(Path dir) {
-		try {
-			return glob(dir, "**")
-					.filter(path -> !Files.isDirectory(path))
-					.map(dir::relativize)
-					.map(Path::toString)
-					.map(s -> s.replace('\\', '/'))
-					.sorted()
-					.collect(toList());
-		} catch (Exception e) {
-			throwAsUncheckedException(e);
-			return emptyList();  // this line will never run - but it appeases the compiler
-		}
+		return glob(dir, "**")
+				.filter(path -> !Files.isDirectory(path))
+				.map(dir::relativize)
+				.map(Path::toString)
+				.map(s -> s.replace('\\', '/'))
+				.sorted()
+				.collect(toList());
 	}
 
 	public static Stream<Path> glob(Path dir, String globPattern) {
