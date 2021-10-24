@@ -52,10 +52,11 @@ import net.sourceforge.plantuml.security.ImageIO;
 
 public class PngMetadataReader {
 
-	public static PngMetadataReader create(File file) throws IOException {
+	public static String readPlantUmlMetadata(File file) throws IOException {
 		final ImageInputStream stream = ImageIO.createImageInputStream(file);
-		final ImageReader reader = ImageIO.createImageReader(stream);
-		return new PngMetadataReader(reader.getImageMetadata(0));
+		final ImageReader imageReader = ImageIO.createImageReader(stream);
+		final PngMetadataReader metadataReader = new PngMetadataReader(imageReader.getImageMetadata(0));
+		return metadataReader.findMetadataValue("plantuml");
 	}
 
 	private final IIOMetadata metadata;
@@ -91,10 +92,6 @@ public class PngMetadataReader {
 			throw new IllegalStateException("PNG metadata is missing: " + tag);
 		}
 		return string;
-	}
-
-	public String getPlantUmlMetadata() throws IOException {
-		return findMetadataValue("plantuml");
 	}
 
 	private static String displayMetadata(Node root, String tag) {

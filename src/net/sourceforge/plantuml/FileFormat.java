@@ -275,7 +275,7 @@ public enum FileFormat {
 	public boolean equalsMetadata(String currentMetadata, SFile existingFile) {
 		try {
 			if (this == PNG) {
-				final String previousMetadata = PngMetadataReader.create(existingFile.conv()).getPlantUmlMetadata();
+				final String previousMetadata = PngMetadataReader.readPlantUmlMetadata(existingFile.conv());
 				final boolean sameMetadata = currentMetadata.equals(previousMetadata);
 				return sameMetadata;
 			}

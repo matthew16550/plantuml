@@ -465,7 +465,7 @@ public class Run {
 			// new Metadata().readAndDisplayMetadata(f);
 			System.out.println();
 			error.goOk();
-			final String data = PngMetadataReader.create(f).getPlantUmlMetadata();
+			final String data = PngMetadataReader.readPlantUmlMetadata(f);
 			// File file = SecurityUtils.File("tmp.txt");
 			// PrintWriter pw = SecurityUtils.PrintWriter(file, "UTF-8");
 			// pw.println(NastyEncoder.fromISO_8859_1(data));
