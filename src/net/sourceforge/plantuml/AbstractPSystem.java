@@ -177,7 +177,7 @@ public abstract class AbstractPSystem implements Diagram {
 //					styleBuilder.printMe();
 //				}
 //			}
-			return exportDiagramNow(os, index, fileFormatOption);
+			return exportDiagramNow(os, index, fileFormatOption.withUseTestingFont(isUseTestingFont()));
 		} finally {
 			if (OptionFlags.getInstance().isEnableStats()) {
 				StatsUtilsIncrement.onceMoreGenerate(System.currentTimeMillis() - now, getClass(),

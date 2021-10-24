@@ -61,13 +61,11 @@ import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
 import net.sourceforge.plantuml.ugraphic.color.HColor;
 import net.sourceforge.plantuml.ugraphic.color.HColorGradient;
 import net.sourceforge.plantuml.ugraphic.color.HColorUtils;
-import net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetManager;
 
 public class DriverTextG2d implements UDriver<UText, Graphics2D> {
 
 	private final EnsureVisible visible;
 	private final StringBounder stringBounder;
-	private final FontSpriteSheetManager fontSpriteSheetManager = FontSpriteSheetManager.instance();
 
 	public DriverTextG2d(EnsureVisible visible, StringBounder stringBounder) {
 		this.visible = visible;
@@ -136,13 +134,7 @@ public class DriverTextG2d implements UDriver<UText, Graphics2D> {
 			g2d.setFont(font.getUnderlayingFont());
 			g2d.setColor(mapper.toColor(fontConfiguration.getColor()));
 			
-			if (FontSpriteSheetManager.USE) {
-				fontSpriteSheetManager
-						.findNearestSheet(g2d.getFont())
-						.drawString(g2d, text, (float) x, (float) y);
-			} else {
-				g2d.drawString(text, (float) x, (float) y);
-			}
+			drawString(g2d, text, (float) x, (float) y);
 
 			if (fontConfiguration.containsStyle(FontStyle.UNDERLINE)) {
 				if (extended != null) {
@@ -175,6 +167,11 @@ public class DriverTextG2d implements UDriver<UText, Graphics2D> {
 			}
 		}
 		return width;
+	}
+
+	protected void drawString(Graphics2D g2d, String text, float x, float y) {
+		g2d.drawString(text, x, y);
+		throw new RuntimeException("oops");
 	}
 
 }

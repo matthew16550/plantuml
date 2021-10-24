@@ -11,11 +11,13 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableList;
 import static net.sourceforge.plantuml.graphic.TextBlockUtils.getFontRenderContext;
 import static net.sourceforge.plantuml.test.ImageTestUtils.assertImagesEqual;
+import static net.sourceforge.plantuml.test.PlantUmlTestUtils.exportDiagram;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.ALL_CHARS_IN_SHEET;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.FONT_SPRITE_SHEET_SIZES;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.JETBRAINS_FONT_FAMILY;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.registerJetBrainsFontFiles;
 import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.createFontSpriteSheet;
+import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -24,6 +26,7 @@ import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +59,16 @@ class FontSpriteSheetTest {
 	//
 	// Test Cases
 	//
+
+	@Test
+	void test_class_diagram() {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"class foo",
+				"@enduml"
+		);
+	}
 
 	@ParameterizedTest(name = "{arguments}")
 	@MethodSource("allSheets")
@@ -246,5 +259,16 @@ class FontSpriteSheetTest {
 			}
 		}
 		return unmodifiableList(sheets);
+	}
+
+	private void approve(String... source) {
+		try {
+			final BufferedImage image = exportDiagram(source)
+					.assertNoError()
+					.asImage();
+			approvalTesting.approve(image);
+		} catch (IOException e) {
+			throwAsUncheckedException(e);
+		}
 	}
 }

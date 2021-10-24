@@ -143,7 +143,7 @@ public class ImageBuilder {
 
 	private ImageBuilder(FileFormatOption fileFormatOption) {
 		this.fileFormatOption = fileFormatOption;
-		updateStringBounder();
+		this.stringBounder = fileFormatOption.getDefaultStringBounder(SvgCharSizeHack.NO_HACK);
 	}
 
 	public ImageBuilder annotations(boolean annotations) {
@@ -229,14 +229,7 @@ public class ImageBuilder {
 		seed = diagram.seed();
 		titledDiagram = diagram;
 		warningOrError = diagram.getWarningOrError();
-		updateStringBounder();
 		return this;
-	}
-
-	private void updateStringBounder() {
-		stringBounder = FontSpriteSheetManager.USE
-				? FontSpriteSheetManager.instance().createStringBounder()
-				: fileFormatOption.getDefaultStringBounder(skinParam != null ? skinParam : SvgCharSizeHack.NO_HACK);
 	}
 
 	public ImageData write(OutputStream os) throws IOException {
@@ -476,7 +469,7 @@ public class ImageBuilder {
 		final Graphics2D graphics2D = builder.getGraphics2D();
 
 		final UGraphicG2d ug = new UGraphicG2d(backcolor, colorMapper, stringBounder, graphics2D, scaleFactor,
-				affineTransforms == null ? null : affineTransforms.getFirst(), dx, dy);
+				affineTransforms == null ? null : affineTransforms.getFirst(), dx, dy, fileFormatOption.isUseTestingFont());
 		ug.setBufferedImage(builder.getBufferedImage());
 		final BufferedImage im = ug.getBufferedImage();
 		if (this.backcolor instanceof HColorGradient) {
