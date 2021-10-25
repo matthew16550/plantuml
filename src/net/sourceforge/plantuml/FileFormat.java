@@ -48,7 +48,7 @@ import net.sourceforge.plantuml.braille.BrailleCharFactory;
 import net.sourceforge.plantuml.braille.UGraphicBraille;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.StringBounderRaw;
-import net.sourceforge.plantuml.png.MetadataTag;
+import net.sourceforge.plantuml.png.PngIO;
 import net.sourceforge.plantuml.security.SFile;
 import net.sourceforge.plantuml.svg.SvgGraphics;
 import net.sourceforge.plantuml.ugraphic.UFont;
@@ -279,8 +279,7 @@ public enum FileFormat {
 	public boolean equalsMetadata(String currentMetadata, SFile existingFile) {
 		try {
 			if (this == PNG) {
-				final MetadataTag tag = new MetadataTag(existingFile, "plantuml");
-				final String previousMetadata = tag.getData();
+				final String previousMetadata = PngIO.readPlantUmlMetadata(existingFile.conv());
 				final boolean sameMetadata = currentMetadata.equals(previousMetadata);
 				return sameMetadata;
 			}
@@ -297,7 +296,7 @@ public enum FileFormat {
 				}
 
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return false;
