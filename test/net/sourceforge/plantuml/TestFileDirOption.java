@@ -1,7 +1,7 @@
 package net.sourceforge.plantuml;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static net.sourceforge.plantuml.test.TestUtils.writeUtf8File;
+import static net.sourceforge.plantuml.test.PathTestUtils.writeUtf8File;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.util.Lists.newArrayList;
 
@@ -28,7 +28,7 @@ public class TestFileDirOption {
 	@BeforeEach
 	public void beforeEach() throws Exception {
 
-		writeUtf8File(tempDir.resolve("include.iuml"), INCLUDE);
+		writeUtf8File(INCLUDE, tempDir.resolve("include.iuml"));
 	}
 
 	//

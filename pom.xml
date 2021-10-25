@@ -145,6 +145,11 @@
     <build>
         <sourceDirectory>${project.basedir}/src</sourceDirectory>
         <testSourceDirectory>${project.basedir}/test</testSourceDirectory>
+		<testResources>
+			<testResource>
+				<directory>${project.basedir}/testResources</directory>
+			</testResource>
+		</testResources>
         <resources>
             <resource>
                 <directory>${project.basedir}/src</directory>
