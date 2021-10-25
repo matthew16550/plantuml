@@ -96,6 +96,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.junit-pioneer</groupId>
+			<artifactId>junit-pioneer</artifactId>
+			<version>1.4.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.scilab.forge</groupId>
 			<artifactId>jlatexmath</artifactId>
 			<version>1.0.7</version>
@@ -139,6 +145,11 @@
     <build>
         <sourceDirectory>${project.basedir}/src</sourceDirectory>
         <testSourceDirectory>${project.basedir}/test</testSourceDirectory>
+		<testResources>
+			<testResource>
+				<directory>${project.basedir}/testResources</directory>
+			</testResource>
+		</testResources>
         <resources>
             <resource>
                 <directory>${project.basedir}/src</directory>

@@ -1,1 +1,2 @@
 net.sourceforge.plantuml.test.logger.TestLoggerExtension
+net.sourceforge.plantuml.test.outputs.TestOutputsExtension
