@@ -98,6 +98,14 @@ jobs:
       - name: Test
         run: mvn --batch-mode test
 
+      - name: Upload approval test failures
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.run_number }}-${{ matrix.os }}-java-${{ matrix.java_version }}-approval-test-failures
+          path: test/**/*.failed.*
+          if-no-files-found: ignore
+
       - name: Package
         if: ${{ matrix.release_from_this_build }}
         run: mvn --batch-mode -Dmaven.test.skip=true package
