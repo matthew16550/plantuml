@@ -61,10 +61,10 @@ import net.sourceforge.plantuml.code.Transcoder;
 import net.sourceforge.plantuml.code.TranscoderUtil;
 import net.sourceforge.plantuml.ftp.FtpServer;
 import net.sourceforge.plantuml.picoweb.PicoWebServer;
-import net.sourceforge.plantuml.png.MetadataTag;
+import net.sourceforge.plantuml.png.PngIO;
 import net.sourceforge.plantuml.preproc.Stdlib;
-import net.sourceforge.plantuml.security.SImageIO;
 import net.sourceforge.plantuml.security.SFile;
+import net.sourceforge.plantuml.security.SImageIO;
 import net.sourceforge.plantuml.security.SecurityUtils;
 import net.sourceforge.plantuml.sprite.SpriteGrayLevel;
 import net.sourceforge.plantuml.sprite.SpriteUtils;
@@ -404,7 +404,7 @@ public class Run {
 				if (error.hasError() && option.isFailfastOrFailfast2()) {
 					return;
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -427,9 +427,7 @@ public class Run {
 						}
 						try {
 							manageFileInternal(f, option, error);
-						} catch (IOException e) {
-							e.printStackTrace();
-						} catch (InterruptedException e) {
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 						incDone(error.hasError());
@@ -457,7 +455,7 @@ public class Run {
 	}
 
 	private static void manageFileInternal(File f, Option option, ErrorStatus error)
-			throws IOException, InterruptedException {
+			throws Exception {
 		Log.info("Working on " + f.getPath());
 		if (OptionFlags.getInstance().isExtractFromMetadata()) {
 			System.out.println("------------------------");
@@ -465,7 +463,7 @@ public class Run {
 			// new Metadata().readAndDisplayMetadata(f);
 			System.out.println();
 			error.goOk();
-			final String data = new MetadataTag(f, "plantuml").getData();
+			final String data = PngIO.readPlantUmlMetadata(f);
 			// File file = SecurityUtils.File("tmp.txt");
 			// PrintWriter pw = SecurityUtils.PrintWriter(file, "UTF-8");
 			// pw.println(NastyEncoder.fromISO_8859_1(data));

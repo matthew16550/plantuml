@@ -115,7 +115,7 @@ public class GraphicsSudoku {
 
 		drawInternal(ug);
 		g3d.dispose();
-		PngIO.write(im, os, 96);
+		PngIO.writer().write(im, os);
 		return new ImageDataSimple(im.getWidth(), im.getHeight());
 	}
 

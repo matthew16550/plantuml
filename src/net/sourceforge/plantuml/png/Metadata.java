@@ -36,7 +36,6 @@
 package net.sourceforge.plantuml.png;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
@@ -45,38 +44,28 @@ import javax.imageio.stream.ImageInputStream;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import net.sourceforge.plantuml.security.SImageIO;
 import net.sourceforge.plantuml.security.SFile;
+import net.sourceforge.plantuml.security.SImageIO;
+import net.sourceforge.plantuml.utils.ImageUtils;
 
 public class Metadata {
 
 	public static void main(String[] args) throws IOException {
 		final Metadata meta = new Metadata();
-		final int length = args.length;
-		for (int i = 0; i < length; i++) {
-			meta.readAndDisplayMetadata(new SFile(args[i]));
+		for (String arg : args) {
+			meta.readAndDisplayMetadata(new SFile(arg));
 		}
 	}
 
 	public void readAndDisplayMetadata(SFile file) throws IOException {
 		final ImageInputStream iis = SImageIO.createImageInputStream(file);
-		final Iterator<ImageReader> readers = SImageIO.getImageReaders(iis);
+		final ImageReader reader = ImageUtils.createImageReader(iis);
 
-		if (readers.hasNext()) {
-			// pick the first available ImageReader
-			final ImageReader reader = readers.next();
+		// read metadata of first image
+		final IIOMetadata metadata = reader.getImageMetadata(0);
 
-			// attach source to the reader
-			reader.setInput(iis, true);
-
-			// read metadata of first image
-			final IIOMetadata metadata = reader.getImageMetadata(0);
-
-			final String[] names = metadata.getMetadataFormatNames();
-			final int length = names.length;
-			for (int i = 0; i < length; i++) {
-				displayMetadata(metadata.getAsTree(names[i]));
-			}
+		for (String name : metadata.getMetadataFormatNames()) {
+			displayMetadata(metadata.getAsTree(name));
 		}
 	}
 

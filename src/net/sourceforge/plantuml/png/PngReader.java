@@ -35,10 +35,10 @@
  */
 package net.sourceforge.plantuml.png;
 
-import java.io.FileNotFoundException;
+import net.sourceforge.plantuml.utils.ImageUtils;
+
+import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
 
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
@@ -47,61 +47,38 @@ import javax.imageio.stream.ImageInputStream;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import net.sourceforge.plantuml.security.SFile;
-import net.sourceforge.plantuml.security.SImageIO;
+public class PngReader implements AutoCloseable {
 
-public class MetadataTag {
+	private final ImageInputStream iis;
+	private final ImageReader imageReader;
+	private final IIOMetadata metadata;
 
-	private final Object source;
-	private final String tag;
-
-	public MetadataTag(SFile file, String tag) throws FileNotFoundException {
-		this.source = file.conv();
-		this.tag = tag;
+	public PngReader(ImageInputStream iis) throws IOException {
+		this.iis = iis;
+		this.imageReader = ImageUtils.createImageReader(iis);
+		this.metadata = imageReader.getImageMetadata(0);
 	}
 
-	public MetadataTag(java.io.File file, String tag) {
-		this.source = file;
-		this.tag = tag;
+	@Override
+	public void close() throws Exception {
+		iis.close();
 	}
 
-	public MetadataTag(InputStream is, String tag) {
-		this.source = is;
-		this.tag = tag;
-	}
-
-	public String getData() throws IOException {
-		final ImageInputStream iis = SImageIO.createImageInputStream(source);
-		final Iterator<ImageReader> readers = SImageIO.getImageReaders(iis);
-
-		if (readers.hasNext()) {
-			// pick the first available ImageReader
-			final ImageReader reader = readers.next();
-
-			// attach source to the reader
-			reader.setInput(iis, true);
-
-			// read metadata of first image
-			final IIOMetadata metadata = reader.getImageMetadata(0);
-
-			final String[] names = metadata.getMetadataFormatNames();
-			final int length = names.length;
-			for (int i = 0; i < length; i++) {
-				final String result = displayMetadata(metadata.getAsTree(names[i]));
-				if (result != null) {
-					return result;
-				}
+	public String findMetadataValue(String tag) {
+		for (String name : metadata.getMetadataFormatNames()) {
+			final String result = displayMetadata(metadata.getAsTree(name), tag);
+			if (result != null) {
+				return result;
 			}
 		}
-
 		return null;
 	}
 
-	private String displayMetadata(Node root) {
-		return displayMetadata(root, 0);
+	private static String displayMetadata(Node root, String tag) {
+		return displayMetadata(root, tag, 0);
 	}
 
-	private String displayMetadata(Node node, int level) {
+	private static String displayMetadata(Node node, String tag, int level) {
 		final NamedNodeMap map = node.getAttributes();
 		if (map != null) {
 			final Node keyword = map.getNamedItem("keyword");
@@ -118,7 +95,7 @@ public class MetadataTag {
 		// children, so close current tag
 		while (child != null) {
 			// print children recursively
-			final String result = displayMetadata(child, level + 1);
+			final String result = displayMetadata(child, tag, level + 1);
 			if (result != null) {
 				return result;
 			}
@@ -129,4 +106,23 @@ public class MetadataTag {
 
 	}
 
+	public float getRequiredFloat(String tag) {
+		return Float.parseFloat(getRequiredString(tag));
+	}
+
+	public int getRequiredInt(String tag) {
+		return Integer.parseInt(getRequiredString(tag));
+	}
+
+	public String getRequiredString(String tag) {
+		final String string = findMetadataValue(tag);
+		if (string == null) {
+			throw new RuntimeException("PNG tag is missing: " + tag);
+		}
+		return string;
+	}
+
+	public BufferedImage readImage() throws IOException {
+		return imageReader.read(0);
+	}
 }
