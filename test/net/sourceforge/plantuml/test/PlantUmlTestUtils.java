@@ -2,6 +2,7 @@ package net.sourceforge.plantuml.test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -54,31 +55,39 @@ public class PlantUmlTestUtils {
 			return this;
 		}
 
-		public byte[] asByteArray(FileFormat fileFormat) throws IOException {
+		public byte[] asByteArray(FileFormat fileFormat) {
 			final ByteArrayOutputStream os = new ByteArrayOutputStream();
 			stream(os, fileFormat);
 			return os.toByteArray();
 		}
 
-		public BufferedImage asImage() throws IOException {
+		public BufferedImage asImage() {
 			return asImage(FileFormat.PNG);
 		}
 
-		public BufferedImage asImage(FileFormat fileFormat) throws IOException {
-			return SImageIO.read(asByteArray(fileFormat));
+		public BufferedImage asImage(FileFormat fileFormat) {
+			try {
+				return SImageIO.read(asByteArray(FileFormat.PNG));
+			} catch (IOException e) {
+				throwAsUncheckedException(e);
+				return new BufferedImage(0, 0, 0);  // this line will never run - but it appeases the compiler
+			}
 		}
 
-		public String asString() throws IOException {
+		public String asString() {
 			return asString(FileFormat.UTXT);
 		}
 
-		public String asString(FileFormat fileFormat) throws IOException {
+		public String asString(FileFormat fileFormat) {
 			return new String(asByteArray(fileFormat), UTF_8);
 		}
 
-		public ExportDiagram stream(OutputStream os, FileFormat fileFormat) throws IOException {
-			final FileFormatOption fileFormatOption = new FileFormatOption(fileFormat, metadata);
-			diagram.exportDiagram(os, 0, fileFormatOption);
+		public ExportDiagram stream(OutputStream os, FileFormat fileFormat) {
+			try {
+				diagram.exportDiagram(os, 0, new FileFormatOption(fileFormat, metadata));
+			} catch (IOException e) {
+				throwAsUncheckedException(e);
+			}
 			return this;
 		}
 
