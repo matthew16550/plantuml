@@ -1,0 +1,535 @@
+package net.sourceforge.plantuml.ugraphic.fontspritesheet;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static java.awt.Font.ITALIC;
+import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static java.lang.Math.ceil;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.Collections.unmodifiableList;
+import static net.sourceforge.plantuml.graphic.TextBlockUtils.getFontRenderContext;
+import static net.sourceforge.plantuml.test.ImageTestUtils.assertImagesEqual;
+import static net.sourceforge.plantuml.test.PlantUmlTestUtils.exportDiagram;
+import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.ALL_CHARS_IN_SHEET;
+import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.FONT_SPRITE_SHEET_SIZES;
+import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.JETBRAINS_FONT_FAMILY;
+import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetData.registerJetBrainsFontFiles;
+import static net.sourceforge.plantuml.ugraphic.fontspritesheet.FontSpriteSheetMaker.createFontSpriteSheet;
+
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.font.LineMetrics;
+import java.awt.geom.Dimension2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.assertj.core.api.AutoCloseableSoftAssertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junitpioneer.jupiter.CartesianEnumSource;
+import org.junitpioneer.jupiter.CartesianProductTest;
+import org.junitpioneer.jupiter.CartesianValueSource;
+
+import net.sourceforge.plantuml.AbstractPSystem;
+import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.test.approval.ApprovalTesting;
+import net.sourceforge.plantuml.test.logger.TestLogger;
+import net.sourceforge.plantuml.ugraphic.UFont;
+
+class FontSpriteSheetTest {
+
+	@RegisterExtension
+	static final ApprovalTesting approvalTesting = new ApprovalTesting();
+
+	@BeforeAll
+	static void beforeAll() throws Exception {
+		registerJetBrainsFontFiles();
+	}
+
+	@AfterEach
+	void afterEach() {
+		AbstractPSystem.FORCE_TESTING_FONT = false;
+	}
+
+	//
+	// Test Cases
+	//
+
+	@ParameterizedTest(name = "{arguments}")
+	@MethodSource("allSheets")
+	void test_drawing(FontSpriteSheet sheet) throws Exception {
+		final Dimension2D dimension = sheet.calculateDimension(ALL_CHARS_IN_SHEET);
+		final int width = 4 + (int) ceil(dimension.getWidth());
+		final int height = 4 + (int) ceil(dimension.getHeight());
+
+		final BufferedImage image = new BufferedImage(width, height, TYPE_INT_ARGB);
+		final Graphics2D g = image.createGraphics();
+
+		g.setBackground(WHITE);
+		g.clearRect(0, 0, width, height);
+
+		g.setColor(BLACK);
+		g.translate(2, 2);
+		sheet.drawString(g, ALL_CHARS_IN_SHEET, 0, (float) (dimension.getHeight() - sheet.getDescent()));
+
+		approvalTesting.approve(image);
+	}
+
+	@ParameterizedTest(name = "{arguments}")
+	@MethodSource("allSheetSizes")
+	void test_font_variations(int size) throws Exception {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"!theme plain",
+				"skinparam ActivityBorderColor transparent",
+				"skinparam ActivityFontSize " + size,
+				"skinparam Padding 3",
+				":",
+				"<#transparent,#transparent>\\",
+				"|                   foo | <i>                   foo | <b>                   foo | <b><i>                   foo |".replace(" ", ""),
+				"|               <s> foo | <i>               <s> foo | <b>               <s> foo | <b><i>               <s> foo |".replace(" ", ""),
+				"|               <u> foo | <i>               <u> foo | <b>               <u> foo | <b><i>               <u> foo |".replace(" ", ""),
+				"|               <w> foo | <i>               <w> foo | <b>               <w> foo | <b><i>               <w> foo |".replace(" ", ""),
+				"| <s:blue>          foo | <i> <s:blue>          foo | <b> <s:blue>          foo | <b><i> <s:blue>          foo |".replace(" ", ""),
+				"| <u:blue>          foo | <i> <u:blue>          foo | <b> <u:blue>          foo | <b><i> <u:blue>          foo |".replace(" ", ""),
+				"| <w:blue>          foo | <i> <w:blue>          foo | <b> <w:blue>          foo | <b><i> <w:blue>          foo |".replace(" ", ""),
+				"| <back:blue>       foo | <i> <back:blue>       foo | <b> <back:blue>       foo | <b><i> <back:blue>       foo |".replace(" ", ""),
+				"| <back:blue>   <s> foo | <i> <back:blue>   <s> foo | <b> <back:blue>   <s> foo | <b><i> <back:blue>   <s> foo |".replace(" ", ""),
+				"| <back:blue>   <u> foo | <i> <back:blue>   <u> foo | <b> <back:blue>   <u> foo | <b><i> <back:blue>   <u> foo |".replace(" ", ""),
+				"| <back:blue>   <w> foo | <i> <back:blue>   <w> foo | <b> <back:blue>   <w> foo | <b><i> <back:blue>   <w> foo |".replace(" ", ""),
+				"| <color:green>     foo | <i> <color:green>     foo | <b> <color:green>     foo | <b><i> <color:green>     foo |".replace(" ", ""),
+				"| <color:green> <s> foo | <i> <color:green> <s> foo | <b> <color:green> <s> foo | <b><i> <color:green> <s> foo |".replace(" ", ""),
+				"| <color:green> <u> foo | <i> <color:green> <u> foo | <b> <color:green> <u> foo | <b><i> <color:green> <u> foo |".replace(" ", ""),
+				"| <color:green> <w> foo | <i> <color:green> <w> foo | <b> <color:green> <w> foo | <b><i> <color:green> <w> foo |".replace(" ", ""),
+				";",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_activity() throws Exception {
+		approve(
+				"@startuml",
+				"!pragma layout smetana",
+				"!pragma testing_font",
+				"(*) -> foo",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_activity3() throws Exception {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				":foo;",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_board() throws Exception {
+		approve(
+				"@startboard",
+				"!pragma testing_font",
+				"foo",
+				"@endboard"
+		);
+	}
+
+	@Test
+	void test_diagram_bpm() throws Exception {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startbpm",
+				":foo;",
+				"@endbpm"
+		);
+	}
+
+	@Test
+	void test_diagram_class() throws Exception {
+		approve(
+				"@startuml",
+				"!pragma layout smetana",
+				"!pragma testing_font",
+				"hide circle \n",  // TODO temporary until UCenteredCharacter uses sprite font
+				"class foo",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_creole() throws Exception {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startcreole",
+				"foo",
+				"@endcreole"
+		);
+	}
+
+	@Test
+	void test_diagram_description() throws Exception {
+		approve(
+				"@startuml",
+				"!pragma layout smetana",
+				"!pragma testing_font",
+				"[foo]",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_flow() throws Exception {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startflow",
+				"10 \"foo\"",
+				"@endflow"
+		);
+	}
+
+	@Test
+	void test_diagram_gantt() throws Exception {
+		approve(
+				"@startgantt",
+				"!pragma testing_font",
+				"[foo] lasts 5 days",
+				"@endgantt"
+		);
+	}
+
+	@Test
+	void test_diagram_git() throws Exception {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startgit",
+				"* foo",
+				"@endgit"
+		);
+	}
+
+	@Test
+	void test_diagram_json() throws Exception {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startjson",
+				"[\"foo\"]",
+				"@endjson"
+		);
+	}
+
+	@Test
+	void test_diagram_mindmap() throws Exception {
+		approve(
+				"@startmindmap",
+				"!pragma testing_font",
+				"* foo",
+				"@endmindmap"
+		);
+	}
+
+	@Test
+	void test_diagram_network() throws Exception {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"nwdiag {",
+				"    network {",
+				"        foo ;",
+				"    }",
+				"}",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_salt() throws Exception {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"salt",
+				"{",
+				"  [foo]",
+				"}",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_sequence() throws Exception {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"foo -> foo",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_state() throws Exception {
+		approve(
+				"@startuml",
+				"!pragma layout smetana",
+				"!pragma testing_font",
+				"[*] --> foo",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_stdlib() throws Exception {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startuml",
+				"stdlib c4",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_timing() throws Exception {
+		approve(
+				"@startuml",
+				"!pragma testing_font",
+				"concise foo",
+				"@0",
+				"foo is _",
+				"@100",
+				"foo is _",
+				"@enduml"
+		);
+	}
+
+	@Test
+	void test_diagram_wbs() throws Exception {
+		approve(
+				"@startwbs",
+				"!pragma testing_font",
+				"* foo",
+				"@endwbs"
+		);
+	}
+
+	@Test
+	void test_diagram_welcome() throws Exception {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startuml",
+				"@enduml"
+		);
+	}
+
+//	TODO Non trivial to support Wire Diagrams because WireDiagram.print() uses StringBounder
+//	@Test
+//	void test_diagram_wire() throws Exception {
+//		approve(
+//				"@startwire",
+//				"!pragma testing_font",
+//				"print(\"foo\")",
+//				"@endwire"
+//		);
+//	}
+
+	@Test
+	void test_diagram_yaml() throws Exception {
+		AbstractPSystem.FORCE_TESTING_FONT = true;
+		approve(
+				"@startyaml",
+				"foo: _",
+				"@endyaml"
+		);
+	}
+
+	@CartesianProductTest(name = "{arguments}")
+	@CartesianValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20})
+	@CartesianEnumSource(FontStyle.class)
+	void test_sprite_sheet_creation(int size, FontStyle style) {
+
+		final Font font = new Font(JETBRAINS_FONT_FAMILY, style.value, size);
+
+		final FontSpriteSheet sheet = createFontSpriteSheet(font);
+
+		try (AutoCloseableSoftAssertions softly = new AutoCloseableSoftAssertions()) {
+
+			final LineMetrics lineMetrics = font.getLineMetrics("", getFontRenderContext());
+
+			softly.assertThat(sheet.getAscent())
+					.isEqualTo(lineMetrics.getAscent());
+
+			softly.assertThat(sheet.getDescent())
+					.isEqualTo(lineMetrics.getDescent());
+
+			softly.assertThat(sheet.getLeading())
+					.isEqualTo(lineMetrics.getLeading());
+
+			softly.assertThat(sheet.getName())
+					.isEqualTo(font.getFontName());
+
+			softly.assertThat(sheet.getPointSize())
+					.isEqualTo(size);
+
+			softly.assertThat(sheet.getStrikethroughOffset())
+					.isEqualTo(lineMetrics.getStrikethroughOffset());
+
+			softly.assertThat(sheet.getStrikethroughThickness())
+					.isEqualTo(lineMetrics.getStrikethroughThickness());
+
+			softly.assertThat(sheet.getStyle())
+					.isEqualTo(style.value);
+
+			softly.assertThat(sheet.getUnderlineOffset())
+					.isEqualTo(lineMetrics.getUnderlineOffset());
+
+			softly.assertThat(sheet.getUnderlineThickness())
+					.isEqualTo(lineMetrics.getUnderlineThickness());
+
+			final UFont uFont = UFont.fromFont(font);
+			final StringBounder bounder = FileFormat.PNG.getDefaultStringBounder();
+
+			for (String string : asList("", " ", "x", "foo", ALL_CHARS_IN_SHEET)) {
+				final Dimension2D dimensionFromSheet = sheet.calculateDimension(string);
+				final Dimension2D dimensionFromNormalBounder = bounder.calculateDimension(uFont, string);
+
+				softly.assertThat(dimensionFromSheet.getHeight())
+						.isEqualTo(dimensionFromNormalBounder.getHeight());
+
+				softly.assertThat(dimensionFromSheet.getWidth())
+						.isEqualTo(dimensionFromNormalBounder.getWidth());
+			}
+		}
+	}
+
+	@Test
+	void test_sprite_sheet_read_write(TestLogger logger) throws Exception {
+
+		// Unfortunately all the JetBrains fonts have zero getLeading(), we expect another font on the machine
+		// to have non-zero leading, so it can be properly tested
+		final Font font = stream(getLocalGraphicsEnvironment().getAllFonts())
+				.filter(f -> f.getLineMetrics("x", getFontRenderContext()).getLeading() > 0)
+				.findFirst()
+				.orElseThrow(() -> new IllegalStateException("This test needs a font with non-zero leading"))
+				.deriveFont(ITALIC, 20);
+
+		logger.info("Testing with font '%s'", font.getFontName());
+
+		final FontSpriteSheet original = createFontSpriteSheet(font);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		original.writeAsPNG(baos);
+
+		final ByteArrayInputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
+		final FontSpriteSheet loaded = new FontSpriteSheet(inputStream);
+
+		// isNotZero() & isNotEmpty() ensure we do not overlook a failure because the expected value is the default field value
+		try (AutoCloseableSoftAssertions softly = new AutoCloseableSoftAssertions()) {
+			softly.assertThat(loaded.getAdvance())
+					.isNotZero()
+					.isEqualTo(original.getAdvance());
+
+			softly.assertThat(loaded.getAscent())
+					.isNotZero()
+					.isEqualTo(original.getAscent());
+
+			softly.assertThat(loaded.getCreationMetadata())
+					.isNotEmpty();
+
+			softly.assertThat(loaded.getDescent())
+					.isNotZero()
+					.isEqualTo(original.getDescent());
+
+			softly.assertThat(loaded.getLeading())
+					.isNotZero()
+					.isEqualTo(original.getLeading());
+
+			softly.assertThat(loaded.getName())
+					.isNotEmpty()
+					.isEqualTo(original.getName());
+
+			softly.assertThat(loaded.getPointSize())
+					.isNotZero()
+					.isEqualTo(original.getPointSize());
+
+			softly.assertThat(loaded.getSpriteWidth())
+					.isNotZero()
+					.isEqualTo(original.getSpriteWidth());
+
+			softly.assertThat(loaded.getStrikethroughOffset())
+					.isNotZero()
+					.isEqualTo(original.getStrikethroughOffset());
+
+			softly.assertThat(loaded.getStrikethroughThickness())
+					.isNotZero()
+					.isEqualTo(original.getStrikethroughThickness());
+
+			softly.assertThat(loaded.getStyle())
+					.isNotZero()
+					.isEqualTo(original.getStyle());
+
+			softly.assertThat(loaded.getUnderlineOffset())
+					.isNotZero()
+					.isEqualTo(original.getUnderlineOffset());
+
+			softly.assertThat(loaded.getUnderlineThickness())
+					.isNotZero()
+					.isEqualTo(original.getUnderlineThickness());
+
+			softly.assertThat(loaded.getXOffset())
+					.isNotZero()
+					.isEqualTo(original.getXOffset());
+
+			assertImagesEqual(original.getAlphaImage(), loaded.getAlphaImage());
+		}
+	}
+
+	//
+	// Test DSL
+	//
+
+	// Kludge to give us meaningful test names
+	private enum FontStyle {
+		PLAIN(Font.PLAIN),
+		ITALIC(Font.ITALIC),
+		BOLD(Font.BOLD),
+		BOLD_ITALIC(Font.BOLD | Font.ITALIC);
+
+		private final int value;
+
+		FontStyle(int value) {
+			this.value = value;
+		}
+	}
+
+	private static List<FontSpriteSheet> allSheets() {
+		final FontSpriteSheetManager manager = FontSpriteSheetManager.instance();
+		final List<FontSpriteSheet> sheets = new ArrayList<>();
+		for (int size : FONT_SPRITE_SHEET_SIZES) {
+			for (FontStyle style : FontStyle.values()) {
+				sheets.add(manager.findNearestSheet(new Font(null, style.value, size)));
+			}
+		}
+		return unmodifiableList(sheets);
+	}
+
+	private static List<Integer> allSheetSizes() {
+		return FONT_SPRITE_SHEET_SIZES;
+	}
+
+	private void approve(String... source) throws Exception {
+		final BufferedImage image = exportDiagram(source)
+				.assertNoError()
+				.asImage();
+		approvalTesting.approve(image);
+	}
+}

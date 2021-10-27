@@ -76,8 +76,15 @@ jobs:
         uses: actions/setup-java@v2.3.1
         with:
           java-version: ${{ matrix.java_version }}
-          distribution: temurin
           cache: maven
+
+          # 'temurin' is pre-installed on many GitHub runners so does not cost time to download, we use it when possible.
+          # But the current version 8 (8.0.312+7) does not use Marlin rendering engine so breaks tests that need pixel identical output.
+          # To work around, we use 'zulu' version 8.
+          #
+          # Note there is no proper ternary operator
+          # (https://github.community/t/do-expressions-support-ternary-operators-to-change-their-returned-value/18114/3)
+          distribution: ${{ startsWith(matrix.java_version, '8') && 'zulu' || 'temurin' }}
 
       # Downloading all the dependencies is very log spammy, so we do this in its own step.
       - name: Prime maven cache

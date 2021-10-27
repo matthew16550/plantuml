@@ -5,12 +5,12 @@
  * (C) Copyright 2009-2020, Arnaud Roques
  *
  * Project Info:  http://plantuml.com
- * 
+ *
  * If you like this project or if you find it useful, you can support us at:
- * 
+ *
  * http://plantuml.com/patreon (only 1$ per month!)
  * http://plantuml.com/paypal
- * 
+ *
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -30,7 +30,7 @@
  *
  *
  * Original Author:  Arnaud Roques
- * 
+ *
  *
  */
 package net.sourceforge.plantuml.ugraphic.g2d;
@@ -39,7 +39,6 @@ import static java.lang.Math.max;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -93,7 +92,7 @@ public class DriverTextG2d implements UDriver<UText, Graphics2D> {
 			double y, ColorMapper mapper) {
 		final UFont font = fontConfiguration.getFont();
 		final HColor extended = fontConfiguration.getExtendedColor();
-		
+
 		final Dimension2D dim = stringBounder.calculateDimension(font, text);
 		final double height = max(10, dim.getHeight());
 		final double width = dim.getWidth();
@@ -101,6 +100,7 @@ public class DriverTextG2d implements UDriver<UText, Graphics2D> {
 		final int orientation = 0;
 
 		if (orientation == 90) {
+			// TODO this block has not been updated to support font sprite sheets
 			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 			g2d.setFont(font.getUnderlayingFont());
 			g2d.setColor(mapper.toColor(fontConfiguration.getColor()));
@@ -133,7 +133,7 @@ public class DriverTextG2d implements UDriver<UText, Graphics2D> {
 			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 			g2d.setFont(font.getUnderlayingFont());
 			g2d.setColor(mapper.toColor(fontConfiguration.getColor()));
-			g2d.drawString(text, (float) x, (float) y);
+			drawStringInternal(g2d, text, (float) x, (float) y);
 
 			if (fontConfiguration.containsStyle(FontStyle.UNDERLINE)) {
 				if (extended != null) {
@@ -155,8 +155,7 @@ public class DriverTextG2d implements UDriver<UText, Graphics2D> {
 				}
 			}
 			if (fontConfiguration.containsStyle(FontStyle.STRIKE)) {
-				final FontMetrics fm = g2d.getFontMetrics(font.getUnderlayingFont());
-				final int ypos = (int) (y - fm.getDescent() - 0.5);
+				final int ypos = (int) (y - stringBounder.getDescent(font, text) - 0.5);
 				if (extended != null) {
 					g2d.setColor(mapper.toColor(extended));
 				}
@@ -166,6 +165,10 @@ public class DriverTextG2d implements UDriver<UText, Graphics2D> {
 			}
 		}
 		return width;
+	}
+
+	protected void drawStringInternal(Graphics2D g2d, String text, float x, float y) {
+		g2d.drawString(text, x, y);
 	}
 
 }

@@ -167,6 +167,7 @@
             <resource>
                 <directory>${project.basedir}</directory>
                 <includes>
+					<include>font-sprite-sheets/generated/*.png</include>
                     <include>stdlib/**/*.repx</include>
                     <include>skin/**/*.skin</include>
                     <include>themes/**/*.puml</include>
