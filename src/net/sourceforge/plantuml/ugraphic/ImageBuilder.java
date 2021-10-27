@@ -462,7 +462,7 @@ public class ImageBuilder {
 		final Graphics2D graphics2D = builder.getGraphics2D();
 
 		final UGraphicG2d ug = new UGraphicG2d(backcolor, colorMapper, stringBounder, graphics2D, scaleFactor,
-				affineTransforms == null ? null : affineTransforms.getFirst(), dx, dy);
+				affineTransforms == null ? null : affineTransforms.getFirst(), dx, dy, fileFormatOption.isUseTestingFont());
 		ug.setBufferedImage(builder.getBufferedImage());
 		final BufferedImage im = ug.getBufferedImage();
 		if (this.backcolor instanceof HColorGradient) {

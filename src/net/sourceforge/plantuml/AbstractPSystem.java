@@ -61,10 +61,13 @@ import net.sourceforge.plantuml.version.Version;
 
 public abstract class AbstractPSystem implements Diagram {
 
+	public static boolean FORCE_TESTING_FONT = false;
+
 	private final UmlSource source;
 	private Scale scale;
 	private int splitPagesHorizontal = 1;
 	private int splitPagesVertical = 1;
+	private boolean useTestingFont = false;
 
 	public AbstractPSystem(UmlSource source) {
 		this.source = Objects.requireNonNull(source);
@@ -174,7 +177,7 @@ public abstract class AbstractPSystem implements Diagram {
 //					styleBuilder.printMe();
 //				}
 //			}
-			return exportDiagramNow(os, index, fileFormatOption);
+			return exportDiagramNow(os, index, fileFormatOption.withUseTestingFont(isUseTestingFont()));
 		} finally {
 			if (OptionFlags.getInstance().isEnableStats()) {
 				StatsUtilsIncrement.onceMoreGenerate(System.currentTimeMillis() - now, getClass(),
@@ -203,4 +206,11 @@ public abstract class AbstractPSystem implements Diagram {
 		return ClockwiseTopRightBottomLeft.same(0);
 	}
 
+	public boolean isUseTestingFont() {
+		return FORCE_TESTING_FONT || useTestingFont;
+	}
+
+	public void setUseTestingFont(boolean useTestingFont) {
+		this.useTestingFont = useTestingFont;
+	}
 }

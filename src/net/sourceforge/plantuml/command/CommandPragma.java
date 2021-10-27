@@ -93,6 +93,9 @@ public class CommandPragma extends SingleLineCommand2<TitledDiagram> {
 			if (name.equalsIgnoreCase("layout") && value.equalsIgnoreCase(GraphvizUtils.VIZJS)) {
 				system.getSkinParam().setUseVizJs(true);
 			}
+			if (name.equals("testing_font")) {
+				system.setUseTestingFont(true);
+			}
 		}
 		return CommandExecutionResult.ok();
 	}
