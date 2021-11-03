@@ -49,15 +49,7 @@ public class BaseFile {
 
 	public BaseFile(SFile file) {
 		this.basedir = file.getParentFile();
-		this.basename = extractBasename(file.getName());
-	}
-
-	private static String extractBasename(String name) {
-		final int idx = name.lastIndexOf('.');
-		if (idx == -1) {
-			return name;
-		}
-		return name.substring(0, idx);
+		this.basename = FileUtils.basename(file.getName());
 	}
 
 	@Override

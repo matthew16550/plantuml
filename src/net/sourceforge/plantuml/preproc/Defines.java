@@ -51,6 +51,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.sourceforge.plantuml.AParentFolder;
+import net.sourceforge.plantuml.FileUtils;
 import net.sourceforge.plantuml.Log;
 import net.sourceforge.plantuml.api.ApiWarning;
 import net.sourceforge.plantuml.security.SFile;
@@ -93,7 +94,7 @@ public class Defines implements Truth {
 	public void overrideFilename(String filename) {
 		if (filename != null) {
 			environment.put("filename", filename);
-			environment.put("filenameNoExtension", nameNoExtension(filename));
+			environment.put("filenameNoExtension", FileUtils.basename(filename));
 		}
 	}
 
@@ -143,14 +144,6 @@ public class Defines implements Truth {
 
 	public String getEnvironmentValue(String key) {
 		return this.environment.get(key);
-	}
-
-	private static String nameNoExtension(String name) {
-		final int x = name.lastIndexOf('.');
-		if (x == -1) {
-			return name;
-		}
-		return name.substring(0, x);
 	}
 
 	public void define(String name, List<String> value, boolean emptyParentheses, AParentFolder currentDir) {
