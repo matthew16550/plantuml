@@ -282,6 +282,8 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
 							<argLine>
+								--add-exports java.desktop/sun.java2d.marlin=ALL-UNNAMED
+								--add-exports java.desktop/sun.java2d.pipe=ALL-UNNAMED
 								--add-opens java.base/java.lang=ALL-UNNAMED
 								--add-opens java.base/java.util=ALL-UNNAMED
 							</argLine>

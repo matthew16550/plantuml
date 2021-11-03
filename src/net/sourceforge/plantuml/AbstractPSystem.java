@@ -56,6 +56,7 @@ import net.sourceforge.plantuml.stats.StatsUtilsIncrement;
 import net.sourceforge.plantuml.style.ClockwiseTopRightBottomLeft;
 import net.sourceforge.plantuml.ugraphic.ImageBuilder;
 import net.sourceforge.plantuml.ugraphic.color.NoSuchColorException;
+import net.sourceforge.plantuml.utils.InterestingProperties;
 import net.sourceforge.plantuml.version.License;
 import net.sourceforge.plantuml.version.Version;
 
@@ -76,7 +77,7 @@ public abstract class AbstractPSystem implements Diagram {
 		toAppend.append(Version.versionString());
 		toAppend.append("(" + Version.compileTimeString() + ")\n");
 		toAppend.append("(" + License.getCurrent() + " source distribution)\n");
-		for (String name : OptionPrint.interestingProperties()) {
+		for (String name : InterestingProperties.interestingProperties()) {
 			toAppend.append(name);
 			toAppend.append(BackSlash.CHAR_NEWLINE);
 		}

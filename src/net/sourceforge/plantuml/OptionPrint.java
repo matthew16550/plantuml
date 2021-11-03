@@ -38,19 +38,18 @@ package net.sourceforge.plantuml;
 import java.net.InetAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 
 import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
 import net.sourceforge.plantuml.security.SFile;
 import net.sourceforge.plantuml.security.SecurityProfile;
 import net.sourceforge.plantuml.security.SecurityUtils;
 import net.sourceforge.plantuml.syntax.LanguageDescriptor;
+import net.sourceforge.plantuml.utils.InterestingProperties;
 import net.sourceforge.plantuml.version.License;
 import net.sourceforge.plantuml.version.PSystemVersion;
 import net.sourceforge.plantuml.version.Version;
@@ -181,7 +180,7 @@ public class OptionPrint {
 	public static void printVersion() throws InterruptedException {
 		System.out.println(Version.fullDescription());
 		System.out.println("(" + License.getCurrent() + " source distribution)");
-		for (String v : interestingProperties()) {
+		for (String v : InterestingProperties.interestingProperties()) {
 			System.out.println(v);
 		}
 		for (String v : interestingValues()) {
@@ -194,31 +193,6 @@ public class OptionPrint {
 			System.out.println(s);
 		}
 		exit(errorCode);
-	}
-
-	public static Collection<String> interestingProperties() {
-		final Properties p = System.getProperties();
-//		final List<String> list1 = Arrays.asList("java.runtime.name", "Java Runtime", "java.vm.name", "JVM",
-//				"java.runtime.version", "Java Version", "os.name", "Operating System", "file.encoding",
-//				"Default Encoding", "user.language", "Language", "user.country", "Country");
-//		final List<String> list2 = Arrays.asList("java.runtime.name", "Java Runtime", "java.vm.name", "JVM",
-//				"java.runtime.version", "Java Version", "os.name", "Operating System", /* "os.version", "OS Version", */
-//				"file.encoding", "Default Encoding", "user.language", "Language", "user.country", "Country");
-//		final List<String> all = withIp() ? list1 : list2;
-		final List<String> all;
-		if (SecurityUtils.getSecurityProfile() == SecurityProfile.UNSECURE) {
-			all = Arrays.asList("java.runtime.name", "Java Runtime", "java.vm.name", "JVM", "java.runtime.version",
-					"Java Version", "os.name", "Operating System", "os.version", "OS Version", "file.encoding",
-					"Default Encoding", "user.language", "Language", "user.country", "Country");
-		} else {
-			all = Arrays.asList("java.runtime.name", "Java Runtime", "java.vm.name", "JVM", "file.encoding",
-					"Default Encoding", "user.language", "Language", "user.country", "Country");
-		}
-		final List<String> result = new ArrayList<>();
-		for (int i = 0; i < all.size(); i += 2) {
-			result.add(all.get(i + 1) + ": " + p.getProperty(all.get(i)));
-		}
-		return result;
 	}
 
 	public static Collection<String> interestingValues() {
