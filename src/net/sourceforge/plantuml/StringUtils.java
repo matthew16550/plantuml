@@ -35,6 +35,7 @@
  */
 package net.sourceforge.plantuml;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
@@ -637,5 +638,41 @@ public class StringUtils {
 			return null;
 		final int pos = str.lastIndexOf(separator);
 		return pos == -1 ? str : str.substring(0, pos);
+	}
+
+	public static String truncateStringToByteLength(String s, int maxBytes, String suffix) {
+		requireNonNull(s);
+		if (maxBytes < 0)
+			throw new IllegalArgumentException("maxBytes < 0");
+
+		final int suffixByteLength = suffix.getBytes(UTF_8).length;
+		if (suffixByteLength > maxBytes)
+			throw new IllegalArgumentException("suffix bytes > maxBytes");
+
+		if (maxBytes == 0)
+			return "";
+
+		final byte[] bytes = s.getBytes(UTF_8);
+		if (bytes.length <= maxBytes)
+			return s;
+		
+		if (suffixByteLength == maxBytes)
+			return suffix;
+		
+		final String truncated = new String(bytes, 0, maxBytes-suffixByteLength, UTF_8);
+
+		// ignore the last 4 code points which might be corrupted if maxBytes did not end at a char boundary
+		int pos = truncated.length() - 1;
+		for (int count = 0; count < 4; count++) {
+			if (pos < 0)
+				return suffix;
+
+			if (Character.isSurrogate(truncated.charAt(pos)))
+				pos -= 2;
+			else
+				pos -= 1;
+		}
+
+		return truncated.substring(0, pos + 1) + suffix;
 	}
 }

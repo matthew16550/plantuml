@@ -244,7 +244,7 @@ class TestOutputsTest {
 
 		testOutputs.spam("output.txt").write("foo");
 
-		assertThat(testLoggerCapture.getMessages())
+		assertThat(testLoggerCapture.getLogEvents())
 				.isEmpty();
 	}
 
@@ -268,7 +268,7 @@ class TestOutputsTest {
 					.withMessage("Suppressing spammy output file 'TestOutputsTest.test_spamOrException.3.output.txt'");
 		}
 
-		assertThat(testLoggerCapture.getMessages())
+		assertThat(testLoggerCapture.getLogEvents())
 				.isEmpty();
 	}
 
@@ -284,11 +284,14 @@ class TestOutputsTest {
 		testOutputs.spamOrLogged("output.txt").write("foo");
 
 		if (repetitionInfo.getCurrentRepetition() <= spamLimit) {
-			assertThat(testLoggerCapture.getMessages())
+			assertThat(testLoggerCapture.getLogEvents())
 					.isEmpty();
 		} else {
-			assertThat(testLoggerCapture.getMessages())
-					.containsExactly("Suppressing spammy output file 'TestOutputsTest.test_spamOrLogged.3.output.txt'");
+			assertThat(testLoggerCapture.getLogEvents())
+					.satisfiesExactly(
+							event -> assertThat(event.getMessage())
+									.isEqualTo("Suppressing spammy output file 'TestOutputsTest.test_spamOrLogged.3.output.txt'")
+					);
 		}
 	}
 }

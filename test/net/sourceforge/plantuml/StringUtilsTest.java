@@ -8,6 +8,7 @@ import static net.sourceforge.plantuml.StringUtils.substringAfter;
 import static net.sourceforge.plantuml.StringUtils.substringAfterLast;
 import static net.sourceforge.plantuml.StringUtils.substringBefore;
 import static net.sourceforge.plantuml.StringUtils.substringBeforeLast;
+import static net.sourceforge.plantuml.StringUtils.truncateStringToByteLength;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -141,6 +142,25 @@ class StringUtilsTest {
 	})
 	void test_substringBeforeLast(String input, String expected) {
 		assertThat(substringBeforeLast(input, '.'))
+				.isEqualTo(expected);
+	}
+
+	@ParameterizedTest(name = "{arguments}")
+	@CsvSource({
+			// input           maxBytes   suffix   expected
+			"  ''            , 0        , ''     , ''           ",
+			"  ''            , 1        , ''     , ''           ",
+			"  '1234567890'  , 10       , 'XX'   , '1234567890' ",
+			"  '12345678901' , 10       , 'XX'   , '1234XX'     ",
+			"  'π12345678'   , 10       , 'XX'   , 'π12345678'  ", // " π  " is 2 bytes (CF 80)
+			"  'π123456789'  , 10       , 'XX'   , 'π12XX'      ",
+			"  '⁋1234567'    , 10       , 'XX'   , '⁋1234567'   ", // " ⁋  " is 3 bytes  (E2 81 8B)
+			"  '⁋12345678'   , 10       , 'XX'   , '⁋1XX'       ",
+			"  '🥝123456'     , 10       , 'XX'   , '🥝123456'   ", // " 🥝 " is 4 bytes (F0 9F A5 9D)
+			"  '🥝1234567'    , 10       , 'XX'   , '🥝XX'       ",
+	})
+	void test_truncateStringToByteLength(String input, int maxBytes, String suffix, String expected) {
+		assertThat(truncateStringToByteLength(input, maxBytes, suffix))
 				.isEqualTo(expected);
 	}
 }

@@ -1,1 +1,3 @@
+net.sourceforge.plantuml.test.github.GitHubAnnotationsListener
+net.sourceforge.plantuml.test.logger.impl.TestLoggerExtension
 net.sourceforge.plantuml.test.outputs.TestOutputsExtension
