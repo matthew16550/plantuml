@@ -1,0 +1,4 @@
+*
+!target/*.jar
+target/*-javadoc.jar
+target/*-sources.jar

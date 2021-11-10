@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - master
+      - snapshot-container
   workflow_dispatch:
 
 defaults:
@@ -61,13 +62,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java_version: [ 8, 11, 17 ]
-        os: [ macos-10.15,  macos-11, ubuntu-18.04, ubuntu-20.04, windows-2016, windows-2019, windows-2022 ]
+        #        java_version: [ 8, 11, 17 ]
+        #        os: [ macos-10.15,  macos-11, ubuntu-18.04, ubuntu-20.04, windows-2016, windows-2019, windows-2022 ]
         include:
           - release_from_this_build: true
             os: ubuntu-20.04
             java_version: 8
     runs-on: ${{ matrix.os }}
+    outputs:
+      docker_labels: ${{ steps.release_config.outputs.docker_labels }}
+      docker_tags: ${{ steps.release_config.outputs.docker_tags }}
+      upload_name: ${{ steps.release_config.outputs.upload_name }}
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
@@ -88,8 +93,7 @@ jobs:
         if: needs.workflow_config.outputs.do_release == 'true'
         env:
           POM_VERSION: ${{ needs.workflow_config.outputs.pom_version }}
-        run: |
-          mvn --batch-mode versions:set "-DnewVersion=${POM_VERSION}"
+        run: mvn --batch-mode versions:set "-DnewVersion=${POM_VERSION}"
 
       # Compile / Test / Package are separate steps so the reason for any failure is more obvious in GitHub UI
       - name: Compile
@@ -99,16 +103,70 @@ jobs:
         run: mvn --batch-mode test
 
       - name: Package
-        if: ${{ matrix.release_from_this_build }}
+        if: matrix.release_from_this_build
         run: mvn --batch-mode -Dmaven.test.skip=true package
 
       - name: Upload jar artifacts
-        if: ${{ matrix.release_from_this_build }}
+        if: matrix.release_from_this_build
         uses: actions/upload-artifact@v2
         with:
           # Using github.run_number here to reduce confusion when downloading & comparing artifacts from several builds  
           name: ${{ github.run_number }}-jars
           path: target/*.jar
+
+      - name: Configure release
+        id: release_config
+        if: matrix.release_from_this_build
+        run: |
+          version="$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)"
+
+          echo "::set-output name=docker_labels:: %0A\
+            org.opencontainers.image.description=PlantUML CLI (not plantuml-server).  Beware that SNAPSHOT images are bleeding edge and some will be broken! %0A\
+            org.opencontainers.image.created=$(TZ=utc date +'%Y-%m-%dT%H-%M-%SZ') %0A\
+            org.opencontainers.image.revision=${{ github.event.pull_request.head.sha || github.sha }} %0A\
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }} %0A\
+            org.opencontainers.image.version=${version} %0A\
+          "
+
+          echo "::set-output name=docker_tags:: %0A\
+            ghcr.io/${{ github.repository }}:SNAPSHOT %0A\
+            ghcr.io/${{ github.repository }}:${version} %0A\
+            ghcr.io/${{ github.repository }}:sha-${{ github.event.pull_request.head.sha || github.sha }} %0A\
+          "
+
+          echo "::set-output name=upload_name::${{ github.run_number }}-jars"
+
+  docker_image:
+    needs: [ build ]
+    # TODO This might be annoying on forked repos.  Need some real-world examples before thinking further...
+    # TODO not always
+    if: needs.build.outputs.docker_tags
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to github container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Download jar artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build.outputs.upload_name }}
+          path: target
+
+      - name: Build and push docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: snapshot.Dockerfile
+          push: true
+          labels: ${{ needs.build.outputs.docker_labels }}
+          tags: ${{ needs.build.outputs.docker_tags }}
 
   release:
     needs: [ workflow_config, build ]
@@ -121,7 +179,7 @@ jobs:
       - name: Download jar artifacts
         uses: actions/download-artifact@v2
         with:
-          name: ${{ github.run_number }}-jars
+          name: ${{ needs.build.outputs.upload_name }}
 
       - name: Create release in GitHub
         env:
