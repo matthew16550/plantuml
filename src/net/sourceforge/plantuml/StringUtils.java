@@ -35,8 +35,12 @@
  */
 package net.sourceforge.plantuml;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -76,6 +80,8 @@ public class StringUtils {
 	public static final char PRIVATE_BLOCK = '\uE000';
 
 	public static final char INTERNAL_BOLD = '\uE100';
+
+	public static final String EOL = System.lineSeparator();
 
 	public static String toInternalBoldNumber(String s) {
 		final StringBuilder sb = new StringBuilder();
@@ -553,4 +559,120 @@ public class StringUtils {
 	}
 
 	// http://docs.oracle.com/javase/tutorial/i18n/format/dateFormat.html
+
+	/**
+	 * This can be replaced by String.join() when we move to Java 1.8
+	 */
+	public static String join(CharSequence delimiter, CharSequence... elements) {
+		requireNonNull(delimiter);
+		requireNonNull(elements);
+
+		if (elements.length == 0) return "";
+
+		final StringBuilder b = new StringBuilder();
+		for (int i = 0; i < elements.length; i++) {
+			if (i > 0) b.append(delimiter);
+			b.append(elements[i]);
+		}
+		return b.toString();
+	}
+
+	/**
+	 * This can be replaced by String.join() when we move to Java 1.8
+	 */
+	public static String join(CharSequence delimiter, Iterable<? extends CharSequence> elements) {
+		requireNonNull(delimiter);
+		requireNonNull(elements);
+
+		final Iterator<? extends CharSequence> i = elements.iterator();
+		if (!i.hasNext()) return "";
+
+		final StringBuilder b = new StringBuilder();
+		while(true) {
+			b.append(i.next());
+			if (i.hasNext()) {
+				b.append(delimiter);
+			}
+			else {
+				break;
+			}
+		}
+		return b.toString();
+	}
+
+	public static String multilineString(CharSequence... elements) {
+		return join(EOL, elements);
+	}
+
+	public static String multilineString(Iterable<? extends CharSequence> elements) {
+		return join(EOL, elements);
+	}
+
+	// We follow semantics of org.apache.commons.lang3.StringUtils as the de facto standard
+	public static String substringAfter(String str, char separator) {
+		if (str == null)
+			return null;
+		final int pos = str.indexOf(separator);
+		return pos == -1 ? "" : str.substring(pos+1);
+	}
+	
+	// We follow semantics of org.apache.commons.lang3.StringUtils as the de facto standard
+	public static String substringAfterLast(String str, char separator) {
+		if (str == null)
+			return null;
+		final int pos = str.lastIndexOf(separator);
+		return pos == -1 ? "" : str.substring(pos+1);
+	}
+
+	// We follow semantics of org.apache.commons.lang3.StringUtils as the de facto standard
+	public static String substringBefore(String str, char separator) {
+		if (str == null)
+			return null;
+		final int pos = str.indexOf(separator);
+		return pos == -1 ? str : str.substring(0, pos);
+	}
+
+	// We follow semantics of org.apache.commons.lang3.StringUtils as the de facto standard
+	public static String substringBeforeLast(String str, char separator) {
+		if (str == null)
+			return null;
+		final int pos = str.lastIndexOf(separator);
+		return pos == -1 ? str : str.substring(0, pos);
+	}
+
+	public static String truncateStringToByteLength(String s, int maxBytes, String suffix) {
+		requireNonNull(s);
+		if (maxBytes < 0)
+			throw new IllegalArgumentException("maxBytes < 0");
+
+		final int suffixByteLength = suffix.getBytes(UTF_8).length;
+		if (suffixByteLength > maxBytes)
+			throw new IllegalArgumentException("suffix bytes > maxBytes");
+
+		if (maxBytes == 0)
+			return "";
+
+		final byte[] bytes = s.getBytes(UTF_8);
+		if (bytes.length <= maxBytes)
+			return s;
+		
+		if (suffixByteLength == maxBytes)
+			return suffix;
+		
+		final String truncated = new String(bytes, 0, maxBytes-suffixByteLength, UTF_8);
+
+		// ignore the last 4 code points which might be corrupted if maxBytes did not end at a char boundary
+		int pos = truncated.length() - 1;
+		for (int count = 0; count < 4; count++) {
+			if (pos < 0)
+				return suffix;
+
+			if (Character.isSurrogate(truncated.charAt(pos)))
+				pos -= 2;
+			else
+				pos -= 1;
+		}
+
+		return truncated.substring(0, pos + 1) + suffix;
+	}
 }

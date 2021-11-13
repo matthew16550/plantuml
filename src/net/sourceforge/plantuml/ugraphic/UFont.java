@@ -5,12 +5,12 @@
  * (C) Copyright 2009-2020, Arnaud Roques
  *
  * Project Info:  http://plantuml.com
- * 
+ *
  * If you like this project or if you find it useful, you can support us at:
- * 
+ *
  * http://plantuml.com/patreon (only 1$ per month!)
  * http://plantuml.com/paypal
- * 
+ *
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -30,7 +30,7 @@
  *
  *
  * Original Author:  Arnaud Roques
- * 
+ *
  *
  */
 package net.sourceforge.plantuml.ugraphic;
@@ -57,14 +57,32 @@ public class UFont {
 
 	public String toStringDebug() {
 		final StringBuilder sb = new StringBuilder();
-		sb.append(getPortableFontName());
+		sb.append(getPortableFontName(font));
 		sb.append("/");
 		sb.append(font.getSize());
 		return sb.toString();
 	}
 
+	// Kludge for testing because font names on some machines (only macOS?) do not end with <DOT><STYLE>
+	// See https://github.com/plantuml/plantuml/issues/720
+	private static String getPortableFontName(Font font) {
+		final String name = font.getFontName();
+		if (font.isBold() && font.isItalic())
+			return name.endsWith(".bolditalic") ? name : name + ".bolditalic";
+		else if (font.isBold())
+			return name.endsWith(".bold") ? name : name + ".bold";
+		else if (font.isItalic())
+			return name.endsWith(".italic") ? name : name + ".italic";
+		else
+			return name.endsWith(".plain") ? name : name + ".plain";
+	}
+
 	public UFont(String fontFamily, int fontStyle, int fontSize) {
 		this(buildFont(fontFamily, fontStyle, fontSize), fontFamily);
+	}
+
+	public static UFont fromFont(Font font) {
+		return new UFont(font, font.getFamily());
 	}
 
 	private static Font buildFont(String fontFamily, int fontStyle, int fontSize) {
@@ -166,20 +184,6 @@ public class UFont {
 			return family;
 		}
 		return family;
-	}
-
-	// Kludge for testing because font names on some machines (only macOS?) do not end with <DOT><STYLE>
-	// See https://github.com/plantuml/plantuml/issues/720
-	private String getPortableFontName() {
-		final String name = font.getFontName();
-		if (font.isBold() && font.isItalic())
-			return name.endsWith(".bolditalic") ? name : name + ".bolditalic";
-		else if (font.isBold())
-			return name.endsWith(".bold") ? name : name + ".bold";
-		else if (font.isItalic())
-			return name.endsWith(".italic") ? name : name + ".italic";
-		else
-			return name.endsWith(".plain") ? name : name + ".plain";
 	}
 
 	@Override

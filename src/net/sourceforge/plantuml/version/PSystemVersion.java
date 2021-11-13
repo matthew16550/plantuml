@@ -53,11 +53,12 @@ import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
 import net.sourceforge.plantuml.dedication.PSystemDedication;
 import net.sourceforge.plantuml.preproc.Stdlib;
 import net.sourceforge.plantuml.preproc2.PreprocessorUtils;
-import net.sourceforge.plantuml.security.SImageIO;
 import net.sourceforge.plantuml.security.SFile;
+import net.sourceforge.plantuml.security.SImageIO;
 import net.sourceforge.plantuml.security.SecurityProfile;
 import net.sourceforge.plantuml.security.SecurityUtils;
 import net.sourceforge.plantuml.svek.GraphvizCrash;
+import net.sourceforge.plantuml.utils.InterestingProperties;
 
 public class PSystemVersion extends PlainStringsDiagram {
 
@@ -179,7 +180,7 @@ public class PSystemVersion extends PlainStringsDiagram {
 
 		GraphvizUtils.addDotStatus(strings, true);
 		strings.add(" ");
-		for (String name : OptionPrint.interestingProperties()) {
+		for (String name : InterestingProperties.interestingProperties()) {
 			strings.add(name);
 		}
 		for (String v : OptionPrint.interestingValues()) {

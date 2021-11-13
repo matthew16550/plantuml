@@ -5,12 +5,12 @@
  * (C) Copyright 2009-2020, Arnaud Roques
  *
  * Project Info:  http://plantuml.com
- * 
+ *
  * If you like this project or if you find it useful, you can support us at:
- * 
+ *
  * http://plantuml.com/patreon (only 1$ per month!)
  * http://plantuml.com/paypal
- * 
+ *
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -30,20 +30,17 @@
  *
  *
  * Original Author:  Arnaud Roques
- * 
+ *
  *
  */
 package net.sourceforge.plantuml.graphic.color;
+
+import net.sourceforge.plantuml.StringUtils;
 
 public enum ColorType {
 	TEXT, LINE, BACK, HEADER, ARROW;
 
 	public static ColorType getType(String s) {
-		final int x = s.indexOf('.');
-		if (x != -1) {
-			s = s.substring(0, x);
-		}
-		final ColorType key = ColorType.valueOf(s.toUpperCase());
-		return key;
+		return ColorType.valueOf(StringUtils.substringBefore(s, '.').toUpperCase());
 	}
 }

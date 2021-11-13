@@ -63,6 +63,7 @@ import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UImage;
 import net.sourceforge.plantuml.ugraphic.color.HColor;
 import net.sourceforge.plantuml.ugraphic.color.HColorUtils;
+import net.sourceforge.plantuml.utils.InterestingProperties;
 import net.sourceforge.plantuml.version.PSystemVersion;
 import net.sourceforge.plantuml.version.Version;
 
@@ -185,7 +186,7 @@ public class GraphvizCrash extends AbstractTextBlock implements IEntityImage {
 	}
 
 	public static void addProperties(final List<String> strings) {
-		strings.addAll(OptionPrint.interestingProperties());
+		strings.addAll(InterestingProperties.interestingProperties());
 		strings.addAll(OptionPrint.interestingValues());
 	}
 

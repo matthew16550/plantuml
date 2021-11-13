@@ -87,6 +87,8 @@ public class UGraphicG2d extends AbstractUGraphic<Graphics2D> implements EnsureV
 
 	private final boolean hasAffineTransform;
 
+	private final boolean useTestingFont;
+
 	public final Set<Url> getAllUrlsEncountered() {
 		return Collections.unmodifiableSet(allUrls);
 	}
@@ -113,17 +115,19 @@ public class UGraphicG2d extends AbstractUGraphic<Graphics2D> implements EnsureV
 		this.urls = other.urls;
 		this.allUrls = other.allUrls;
 		this.antiAliasing = other.antiAliasing;
-		register(dpiFactor);
+		this.useTestingFont = other.useTestingFont;
+		register();
 	}
 
 	public UGraphicG2d(HColor defaultBackground, ColorMapper colorMapper, StringBounder stringBounder, Graphics2D g2d, double dpiFactor) {
-		this(defaultBackground, colorMapper, stringBounder, g2d, dpiFactor, null, 0, 0);
+		this(defaultBackground, colorMapper, stringBounder, g2d, dpiFactor, null, 0, 0, false);
 	}
 
 	public UGraphicG2d(HColor defaultBackground, ColorMapper colorMapper, StringBounder stringBounder, Graphics2D g2d, double dpiFactor,
-			AffineTransformation affineTransform, double dx, double dy) {
+			AffineTransformation affineTransform, double dx, double dy, boolean useTestingFont) {
 		super(defaultBackground, colorMapper, stringBounder, g2d);
 		this.hasAffineTransform = affineTransform != null;
+		this.useTestingFont = useTestingFont;
 		this.dpiFactor = dpiFactor;
 		if (dpiFactor != 1.0) {
 			g2d.scale(dpiFactor, dpiFactor);
@@ -134,12 +138,14 @@ public class UGraphicG2d extends AbstractUGraphic<Graphics2D> implements EnsureV
 			}
 			getGraphicObject().transform(affineTransform.getAffineTransform());
 		}
-		register(dpiFactor);
+		register();
 	}
 
-	private void register(double dpiFactor) {
+	private void register() {
 		registerDriver(URectangle.class, new DriverRectangleG2d(dpiFactor, this));
-		if (this.hasAffineTransform || dpiFactor != 1.0) {
+		if (useTestingFont) {
+			registerDriver(UText.class, new DriverTextWithFontSpriteG2d(this, getStringBounder()));
+		} else if (this.hasAffineTransform || dpiFactor != 1.0) {
 			registerDriver(UText.class, new DriverTextAsPathG2d(this, getStringBounder()));
 		} else {
 			registerDriver(UText.class, new DriverTextG2d(this, getStringBounder()));
@@ -208,7 +214,10 @@ public class UGraphicG2d extends AbstractUGraphic<Graphics2D> implements EnsureV
 	@Override
 	public void writeToStream(OutputStream os, String metadata, int dpi) throws IOException {
 		final BufferedImage im = getBufferedImage();
-		PngIO.write(im, os, metadata, dpi);
+		PngIO.writer()
+				.dpi(dpi)
+				.metadata(metadata)
+				.write(im, os);
 	}
 
 	@Override

@@ -185,4 +185,7 @@ public class FileUtils {
 		return sb.toString();
 	}
 
+	public static String basename(String filename) {
+		return StringUtils.substringBeforeLast(filename, '.');
+	}
 }

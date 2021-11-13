@@ -82,7 +82,7 @@ public class PSystemLogo extends AbstractPSystem {
 			tinyJavaLogo.doCommandLine(line);
 		}
 		turtleGraphicsPane.paint(ug);
-		PngIO.write(im, os, 96);
+		PngIO.writer().write(im, os);
 		return new ImageDataSimple(im.getWidth(), im.getHeight());
 	}
 

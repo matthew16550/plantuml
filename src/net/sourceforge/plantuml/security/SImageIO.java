@@ -41,6 +41,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.Iterator;
 
 import javax.imageio.ImageReader;
@@ -54,12 +55,16 @@ public class SImageIO {
 		return javax.imageio.ImageIO.createImageOutputStream(os);
 	}
 
-	public static void write(RenderedImage image, String format, OutputStream os) throws IOException {
-		javax.imageio.ImageIO.write(image, format, os);
+	public static boolean write(RenderedImage image, String format, OutputStream os) throws IOException {
+		return javax.imageio.ImageIO.write(image, format, os);
 	}
 
-	public static void write(RenderedImage image, String format, SFile file) throws IOException {
-		javax.imageio.ImageIO.write(image, format, file.conv());
+	public static boolean write(RenderedImage image, String format, java.io.File file) throws IOException {
+		return javax.imageio.ImageIO.write(image, format, file);
+	}
+
+	public static boolean write(RenderedImage image, String format, SFile file) throws IOException {
+		return javax.imageio.ImageIO.write(image, format, file.conv());
 	}
 
 	public static BufferedImage read(java.io.File file) throws IOException {
@@ -80,6 +85,10 @@ public class SImageIO {
 
 	public static ImageInputStream createImageInputStream(SFile file) throws IOException {
 		return javax.imageio.ImageIO.createImageInputStream(file.conv());
+	}
+
+	public static ImageInputStream createImageInputStream(Path path) throws IOException {
+		return javax.imageio.ImageIO.createImageInputStream(path.toFile());
 	}
 
 	public static ImageInputStream createImageInputStream(Object obj) throws IOException {
