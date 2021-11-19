@@ -1,0 +1,34 @@
+name: Update Snapshot Release
+
+on:
+  push:
+    branches:
+      - snapshot-release-2
+  workflow_dispatch:
+#  workflow_run:
+#    workflows: [ CI ]
+#    types: [ completed ]
+
+concurrency:
+  group: update_snapshot_release
+  cancel-in-progress: true
+
+jobs:
+  update_snapshot_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - uses: actions/github-script@v5
+        with:
+          script: |
+            console.debug({nodeVersion: process.version});
+
+      - name: Find artifact url for newer commit
+        id: artifact
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const script = require('.github/scripts/find_artifact_url_for_newer_commit.js')
+            await script({context, core, github})
