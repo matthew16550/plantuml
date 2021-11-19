@@ -68,8 +68,8 @@ async function find_current_snapshot(context, github) {
 
 async function find_commits_since_snapshot(snapshotDate, context, github) {
 	const response = await github.graphql(`
-		query($owner:String!, $name:String!, snapshotDate:DateTime!) {
-		  repository(owner:$owner, name:$name) {
+		query($owner: String!, $name: String!, $snapshotDate: DateTime!) {
+		  repository(owner: $owner, name:$name) {
 			object(expression: "master") {
 			  ... on Commit {
 				history(first: 100, since: $snapshotDate) {
