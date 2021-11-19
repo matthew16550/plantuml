@@ -1,7 +1,8 @@
 module.exports = async ({context, core, github}) => {
 	core.info("Finding current snapshot ...")
-	const {snapshotDate, snapshotSha} = null //await find_current_snapshot(context, github)
-
+	// const {snapshotDate, snapshotSha} = await find_current_snapshot(context, github)
+	const snapshotDate = null
+	const snapshotSha = null
 	core.info(`Current snapshot: ${snapshotSha || "NONE"}`)
 
 	core.info("Finding commits ...")
