@@ -8,7 +8,7 @@ module.exports = async ({context, core, github}) => {
 		core.info("There is no current snapshot")
 
 	core.info("Finding commits since snapshot ...")
-	const commits = find_commits_since_snapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
+	const commits = find_commits_since_snapshot(snapshotDate || new Date(), context, github)
 
 	for (let commit of commits) {
 		if (commit.oid === snapshotSha) {
