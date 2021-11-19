@@ -27,10 +27,9 @@ module.exports = async ({context, core, github}) => {
 		}
 
 		for (let suite of commit.checkSuites.nodes) {
-			console.log(suite)
 			const run = suite.workflowRun;
 			if (run && run.workflow.name === "CI" && suite.branch && suite.branch.name === "master") {
-				core.info(`Finding artifact from workflow run ${run.url} ...`)
+				core.info(`Finding artifact from ${run.url} ...`)
 				const url = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
 				if (url) {
 					core.notice(`Updating to ${url}\nfrom ${commit.url}`)
