@@ -5,7 +5,7 @@ TAG="snapshot"
 
 gh release delete "${TAG}" -y || true
 
-git tag --force "${TAG}"
+git tag --force "${TAG}" "${SHA}"
 
 git push --force origin "${TAG}"
 
@@ -19,7 +19,7 @@ cat <<-EOF >notes.txt
   ⏱  _Snapshot taken the $(date -u +"%F at %T (UTC)")_
 EOF
 
-gh release create --prerelease --target "${GITHUB_SHA}" --title "${TAG}" --notes-file notes.txt "${TAG}" \
+gh release create --prerelease --target "${SHA}" --title "${TAG}" --notes-file notes.txt "${TAG}" \
   plantuml-SNAPSHOT.jar \
   plantuml-SNAPSHOT-javadoc.jar \
   plantuml-SNAPSHOT-sources.jar

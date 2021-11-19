@@ -22,10 +22,24 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
-      - name: Find artifact url for newer commit
+      - name: Find artifact for snapshot release
         id: artifact
         uses: actions/github-script@v5
         with:
           script: |
-            const script = require('.github/scripts/find_artifact_url_for_newer_commit.js')
+            const script = require('.github/scripts/find_artifact_for_snapshot_release.js')
             await script({context, core, github})
+
+      - name: Download artifacts
+        if: steps.artifact.outputs.result
+        env:
+          URL: ${{ steps.artifact.outputs.result.url }}
+        run: gh run download --help
+#curl -L "${URL}"
+
+      - name: Create snapshot release
+        if: steps.artifact.outputs.result
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.artifact.outputs.result.sha }}
+        run: .github/scripts/release_snapshot.sh
