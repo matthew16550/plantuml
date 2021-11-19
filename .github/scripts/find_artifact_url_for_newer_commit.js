@@ -26,7 +26,7 @@ module.exports = async ({context, core, github}) => {
 				core.info(`${sha} - finding artifact from workflow run ${run.url} ...`)
 				const url = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
 				if (url) {
-					core.info(`${sha} - using ${url}`)
+					core.info(`${sha} - selected ${url}`)
 					return {sha, url}
 				}
 			}
@@ -37,7 +37,7 @@ module.exports = async ({context, core, github}) => {
 
 	// We could look at more commits by paging the find_commits_since_snapshot() query
 	// but this will probably never happen so not implemented
-	core.info("No suitable artifact from the 100 newest commits")
+	core.info(`No suitable artifact from the ${commits.length} newest commits`)
 	return null
 }
 
@@ -100,7 +100,7 @@ async function find_artifact_url_from_workflow_run(runId, context, github) {
 		...context.repo,
 		run_id: runId,
 	});
-	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jars"));
+	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jarsX"));
 	return artifact ? artifact.archive_download_url : null
 }
 
