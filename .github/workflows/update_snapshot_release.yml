@@ -1,11 +1,9 @@
 name: Update Snapshot Release
 
 on:
-  push:
-    branches:
-      - snapshot-release-2
   workflow_run:
     workflows: [ CI ]
+    branches: [ master ]
     types: [ completed ]
 
 concurrency:
