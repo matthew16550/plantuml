@@ -4,7 +4,7 @@ module.exports = async ({context, core, github}) => {
 
 	core.info(`Current snapshot: ${snapshotSha || "NONE"}`)
 
-	const defaultBranch = process.env.GITHUB_REF
+	const defaultBranch = process.env.GITHUB_REF.substring("refs/heads/".length)
 
 	core.info(`Finding commits on ${defaultBranch} branch...`)
 	const commits = await findCommitsSinceSnapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
@@ -23,7 +23,7 @@ module.exports = async ({context, core, github}) => {
 		}
 
 		if (commit.statusCheckRollup.state !== "SUCCESS") {
-			core.info(`Ignoring ${state} commit`)
+			core.info(`Ignoring ${commit.statusCheckRollup.state} commit`)
 			continue
 		}
 
