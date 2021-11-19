@@ -11,8 +11,13 @@ module.exports = async ({context, core, github}) => {
 		const sha = commit.oid;
 		console.info(commit)
 		if (sha === snapshotSha) {
-			core.info(`${sha} - snapshot already at newest possible commit`)
+			core.notice(`${sha} - snapshot is already at the newest possible commit`)
 			return null
+		}
+
+		if (!commit.statusCheckRollup) {
+			core.info(`${sha} - ignoring commit with no status check`)
+			continue
 		}
 
 		if (commit.statusCheckRollup.state !== "SUCCESS") {
@@ -26,18 +31,18 @@ module.exports = async ({context, core, github}) => {
 				core.info(`${sha} - finding artifact from workflow run ${run.url} ...`)
 				const url = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
 				if (url) {
-					core.info(`${sha} - selected ${url}`)
+					core.notice(`Updating to ${url} from ${sha}`)
 					return {sha, url}
 				}
 			}
 		}
 
-		core.info(`${sha} - no suitable artifacts`)
+		core.info(`${sha} - ignoring commit with no suitable artifacts`)
 	}
 
 	// We could look at more commits by paging the find_commits_since_snapshot() query
 	// but this will probably never happen so not implemented
-	core.info(`No suitable artifact from the ${commits.length} newest commits`)
+	core.notice(`No suitable artifact from the ${commits.length} newest commits`)
 	return null
 }
 
