@@ -9,7 +9,7 @@ module.exports = async ({context, core, github}) => {
 
 	for (let commit of commits) {
 		const sha = commit.oid;
-		console.info(commit)
+
 		if (sha === snapshotSha) {
 			core.notice(`${sha} - snapshot is already at the newest possible commit`)
 			return null
@@ -41,7 +41,7 @@ module.exports = async ({context, core, github}) => {
 	}
 
 	// We could look at more commits by paging the find_commits_since_snapshot() query
-	// but this will probably never happen so not implemented
+	// but this will probably never be relevant so not implemented
 	core.notice(`No suitable artifact from the ${commits.length} newest commits`)
 	return null
 }
