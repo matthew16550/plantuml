@@ -8,8 +8,8 @@ module.exports = async ({context, core, github}) => {
 	const commits = await find_commits_since_snapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
 
 	for (let commit of commits) {
-		if (commit.oid === snapshotSha) {
-			core.notice(`${commit.url} - snapshot is already at the newest possible commit`)
+		if (commit.oid === snapshotSha + "X") {
+			core.notice(`Snapshot is already at the newest possible commit\n${commit.url}`)
 			return null
 		}
 
@@ -29,7 +29,7 @@ module.exports = async ({context, core, github}) => {
 				core.info(`${commit.url} - finding artifact from workflow run ${run.url} ...`)
 				const url = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
 				if (url) {
-					core.notice(`Updating to ${url} from ${commit.url}`)
+					core.notice(`Updating to ${url}\nfrom ${commit.url}`)
 					return {
 						sha: commit.oid,
 						url
