@@ -8,41 +8,42 @@ module.exports = async ({context, core, github}) => {
 	const commits = await find_commits_since_snapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
 
 	for (let commit of commits) {
-		const sha = commit.oid;
-
-		if (sha === snapshotSha) {
-			core.notice(`${sha} - snapshot is already at the newest possible commit`)
+		if (commit.oid === snapshotSha) {
+			core.notice(`${commit.url} - snapshot is already at the newest possible commit`)
 			return null
 		}
 
 		if (!commit.statusCheckRollup) {
-			core.info(`${sha} - ignoring commit with no status check`)
+			core.info(`${commit.url} - ignoring commit with no status check`)
 			continue
 		}
 
 		if (commit.statusCheckRollup.state !== "SUCCESS") {
-			core.info(`${sha} - ignoring ${state} commit`)
+			core.info(`${commit.url} - ignoring ${state} commit`)
 			continue
 		}
 
 		for (let suite of commit.checkSuites.nodes) {
 			const run = suite.workflowRun;
 			if (run && run.workflow.name === "CI" && suite.branch.name === "master") {
-				core.info(`${sha} - finding artifact from workflow run ${run.url} ...`)
+				core.info(`${commit.url} - finding artifact from workflow run ${run.url} ...`)
 				const url = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
 				if (url) {
-					core.notice(`Updating to ${url} from ${sha}`)
-					return {sha, url}
+					core.notice(`Updating to ${url} from ${commit.url}`)
+					return {
+						sha: commit.oid,
+						url
+					}
 				}
 			}
 		}
 
-		core.info(`${sha} - ignoring commit with no suitable artifacts`)
+		core.info(`${commit.url} - ignoring commit with no suitable artifacts`)
 	}
 
 	// We could look at more commits by paging the find_commits_since_snapshot() query
 	// but this will probably never be relevant so not implemented
-	core.notice(`No suitable artifact from the ${commits.length} newest commits`)
+	core.warning(`No suitable artifact from ${commits.length} newest commits`)
 	return null
 }
 
@@ -77,6 +78,7 @@ async function find_commits_since_snapshot(snapshotDate, context, github) {
 				  edges {
 					node {
 					  oid
+					  url
 					  statusCheckRollup {
 						state
 					  }
