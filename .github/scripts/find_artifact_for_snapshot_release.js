@@ -1,12 +1,13 @@
 module.exports = async ({context, core, github}) => {
 	core.info("Finding current snapshot ...")
-	// const {snapshotDate, snapshotSha} = await find_current_snapshot(context, github)
-	const snapshotDate = null
-	const snapshotSha = null
+	const {snapshotDate, snapshotSha} = await findCurrentSnapshot(context, github)
+
 	core.info(`Current snapshot: ${snapshotSha || "NONE"}`)
 
-	core.info("Finding commits ...")
-	const commits = await find_commits_since_snapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
+	const defaultBranch = process.env.GITHUB_REF
+
+	core.info(`Finding commits on ${defaultBranch} branch...`)
+	const commits = await findCommitsSinceSnapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
 
 	for (let commit of commits) {
 		core.info(`\nConsidering ${commit.url}`)
@@ -28,17 +29,17 @@ module.exports = async ({context, core, github}) => {
 
 		for (let suite of commit.checkSuites.nodes) {
 			const run = suite.workflowRun;
-			if (run && run.workflow.name === "CI" && suite.branch && suite.branch.name === "master") {
+			if (run && run.workflow.name === "CI" && suite.branch && suite.branch.name === defaultBranch) {
 				core.info(`Finding artifact from ${run.url} ...`)
-				const artifact_name = await find_artifact_name_from_workflow_run(run.databaseId, context, github)
-				if (artifact_name) {
+				const artifactName = await findArtifactNameFromWorkflowRun(run.databaseId, context, github)
+				if (artifactName) {
 					core.notice([
-						`Updating to : ${artifact_name}`,
+						`Updating to : ${artifactName}`,
 						`Run         : ${run.url}`,
 						`Commit      : ${commit.url}`,
 					].join("\n"))
 
-					core.setOutput('artifact_name', artifact_name);
+					core.setOutput('artifact_name', artifactName);
 					core.setOutput('sha', commit.oid);
 					core.setOutput('workflow_run_id', run.databaseId);
 					return
@@ -49,12 +50,12 @@ module.exports = async ({context, core, github}) => {
 		core.info(`Ignoring commit with no suitable artifacts`)
 	}
 
-	// We could look at more commits by paging the find_commits_since_snapshot() query
+	// We could look at more commits by paging the findCommitsSinceSnapshot() query
 	// but this will probably never be relevant so not implemented
 	core.warning(`No suitable artifact from ${commits.length} newest commits`)
 }
 
-async function find_current_snapshot(context, github) {
+async function findCurrentSnapshot(context, github) {
 	const response = await github.graphql(`
 		query ($owner: String!, $name: String!) {
 		  repository(owner: $owner, name: $name) {
@@ -75,11 +76,11 @@ async function find_current_snapshot(context, github) {
 	}
 }
 
-async function find_commits_since_snapshot(snapshotDate, context, github) {
+async function findCommitsSinceSnapshot(snapshotDate, context, github) {
 	const response = await github.graphql(`
-		query($owner: String!, $name: String!, $snapshotDate: GitTimestamp!) {
+		query($owner: String!, $name: String!, $lastCommit: String!, $snapshotDate: GitTimestamp!) {
 		  repository(owner: $owner, name:$name) {
-			object(expression: "master") {
+			object(oid: $lastCommit) {
 			  ... on Commit {
 				history(first: 100, since: $snapshotDate) {
 				  edges {
@@ -103,13 +104,14 @@ async function find_commits_since_snapshot(snapshotDate, context, github) {
 			{
 				owner: context.repo.owner,
 				name: context.repo.repo,
+				lastCommit: process.env.GITHUB_SHA,
 				snapshotDate,
 			}
 	)
 	return response.repository.object.history.edges.map(edge => edge.node)
 }
 
-async function find_artifact_name_from_workflow_run(runId, context, github) {
+async function findArtifactNameFromWorkflowRun(runId, context, github) {
 	const response = await github.rest.actions.listWorkflowRunArtifacts({
 		...context.repo,
 		run_id: runId,
