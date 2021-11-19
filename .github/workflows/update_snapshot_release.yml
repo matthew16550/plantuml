@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Find artifact for snapshot release
         id: artifact
