@@ -1,4 +1,4 @@
-const RELEASE_BRANCH = "master"
+const RELEASE_BRANCH = "snapshot-release-2"
 
 module.exports = async ({context, core, github}) => {
 	core.info("Finding current snapshot ...")
