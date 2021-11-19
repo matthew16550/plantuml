@@ -52,7 +52,7 @@ module.exports = async ({context, core, github}) => {
 
 	// We could look at more commits by paging the findCommitsSinceSnapshot() query
 	// but this will probably never be relevant so not implemented
-	core.warning(`No suitable artifact from ${commits.length} newest commits`)
+	core.setFailed(`No suitable artifact from ${commits.length} newest commits`)
 }
 
 async function findCurrentSnapshot(context, github) {
