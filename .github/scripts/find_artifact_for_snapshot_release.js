@@ -13,7 +13,7 @@ module.exports = async ({context, core, github}) => {
 
 		if (commit.oid === snapshotSha) {
 			core.notice(`Snapshot is already at the newest possible commit\n${commit.url}`)
-			return null
+			return
 		}
 
 		if (!commit.statusCheckRollup) {
@@ -38,10 +38,9 @@ module.exports = async ({context, core, github}) => {
 						`Run         : ${run.url}`,
 					].join("\n"))
 					
-					return {
-						sha: commit.oid,
-						url
-					}
+					core.setOutput('sha', 'commit.oid');
+					core.setOutput('url', 'url');
+					return
 				}
 			}
 		}
@@ -52,7 +51,6 @@ module.exports = async ({context, core, github}) => {
 	// We could look at more commits by paging the find_commits_since_snapshot() query
 	// but this will probably never be relevant so not implemented
 	core.warning(`No suitable artifact from ${commits.length} newest commits`)
-	return null
 }
 
 async function find_current_snapshot(context, github) {
