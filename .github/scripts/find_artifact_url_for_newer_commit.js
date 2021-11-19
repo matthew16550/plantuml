@@ -30,12 +30,17 @@ module.exports = async ({context, core, github}) => {
 			const run = suite.workflowRun;
 			if (run && run.workflow.name === "CI" && suite.branch && suite.branch.name === "master") {
 				core.info(`Finding artifact from ${run.url} ...`)
-				const url = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
+				const {download_url, url} = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
 				if (url) {
-					core.notice(`Updating to ${url}\nfrom ${commit.url}`)
+					core.notice([
+						`Updating to : ${url}`,
+						`Commit      : ${commit.url}`,
+						`Run         : ${run.url}`,
+					].join("\n"))
+					
 					return {
 						sha: commit.oid,
-						url
+						download_url
 					}
 				}
 			}
@@ -113,5 +118,8 @@ async function find_artifact_url_from_workflow_run(runId, context, github) {
 		run_id: runId,
 	});
 	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jars"));
-	return artifact ? artifact.archive_download_url : null
+	return {
+		download_url: artifact ? artifact.archive_download_url : null,
+		url: artifact ? artifact.url : null,
+	}
 }
