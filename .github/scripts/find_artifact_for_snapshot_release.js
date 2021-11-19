@@ -78,7 +78,7 @@ async function findCurrentSnapshot(context, github) {
 
 async function findCommitsSinceSnapshot(snapshotDate, context, github) {
 	const response = await github.graphql(`
-		query($owner: String!, $name: String!, $lastCommit: String!, $snapshotDate: GitTimestamp!) {
+		query($owner: String!, $name: String!, $lastCommit: GitObjectID!, $snapshotDate: GitTimestamp!) {
 		  repository(owner: $owner, name:$name) {
 			object(oid: $lastCommit) {
 			  ... on Commit {
