@@ -57,7 +57,7 @@ async function find_current_snapshot(context, github) {
 				oid
 	  	} } } } `,
 			{
-				owner: context.repo.owner,
+				owner: "plantuml", //context.repo.owner,
 				name: context.repo.repo,
 			}
 	)
@@ -94,7 +94,7 @@ async function find_commits_since_snapshot(snapshotDate, context, github) {
 							  name
 		} } } } } } } } } } }`,
 			{
-				owner: context.repo.owner,
+				owner: "plantuml", //context.repo.owner,
 				name: context.repo.repo,
 				snapshotDate,
 			}
@@ -104,7 +104,9 @@ async function find_commits_since_snapshot(snapshotDate, context, github) {
 
 async function find_artifact_url_from_workflow_run(runId, context, github) {
 	const response = await github.rest.actions.listWorkflowRunArtifacts({
-		...context.repo,
+		// ...context.repo,
+		owner: "plantuml",
+		repo: "plantuml",
 		run_id: runId,
 	});
 	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jarsX"));
