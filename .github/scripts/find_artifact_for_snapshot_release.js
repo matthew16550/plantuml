@@ -17,19 +17,12 @@ module.exports = async ({context, core, github}) => {
 			return
 		}
 
-		if (!commit.statusCheckRollup) {
-			core.info(`Ignore because no status check`)
-			continue
-		}
-
-		if (commit.statusCheckRollup.state !== "SUCCESS") {
-			core.info(`Ignore because ${commit.statusCheckRollup.state}`)
-			continue
-		}
-
 		for (let suite of commit.checkSuites.nodes) {
-			const run = suite.workflowRun;
-			if (run && run.workflow.name === "CI" && suite.branch && suite.branch.name === RELEASE_BRANCH) {
+			const run = suite.workflowRun
+			if (run && run.workflow.name === "CI"
+					&& suite.branch && suite.branch.name === RELEASE_BRANCH
+					&& suite.conclusion === "SUCCESS"
+			) {
 				core.info(`Finding artifact from ${run.url} ...`)
 				const artifactName = await findArtifactNameFromWorkflowRun(run.databaseId, context, github)
 				if (artifactName) {
@@ -87,14 +80,12 @@ async function findCommitsSinceSnapshot(snapshotDate, context, github) {
 					node {
 					  oid
 					  url
-					  statusCheckRollup {
-						state
-					  }
 					  checkSuites(first: 100) {
 						nodes {
 						  branch {
 							name
 						  }
+						  conclusion
 						  workflowRun {
 							databaseId
 							url
