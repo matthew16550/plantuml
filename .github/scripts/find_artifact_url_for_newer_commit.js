@@ -9,25 +9,27 @@ module.exports = async ({context, core, github}) => {
 	const commits = await find_commits_since_snapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
 
 	for (let commit of commits) {
+		core.info(`Considering ${commit.url}`)
+
 		if (commit.oid === snapshotSha) {
 			core.notice(`Snapshot is already at the newest possible commit\n${commit.url}`)
 			return null
 		}
 
 		if (!commit.statusCheckRollup) {
-			core.info(`${commit.url} - ignoring commit with no status check`)
+			core.info(`Ignoring commit with no status check`)
 			continue
 		}
 
 		if (commit.statusCheckRollup.state !== "SUCCESS") {
-			core.info(`${commit.url} - ignoring ${state} commit`)
+			core.info(`Ignoring ${state} commit`)
 			continue
 		}
 
 		for (let suite of commit.checkSuites.nodes) {
 			const run = suite.workflowRun;
 			if (run && run.workflow.name === "CI" && suite.branch.name === "master") {
-				core.info(`${commit.url} - finding artifact from workflow run ${run.url} ...`)
+				core.info(`Finding artifact from workflow run ${run.url} ...`)
 				const url = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
 				if (url) {
 					core.notice(`Updating to ${url}\nfrom ${commit.url}`)
@@ -39,7 +41,7 @@ module.exports = async ({context, core, github}) => {
 			}
 		}
 
-		core.info(`${commit.url} - ignoring commit with no suitable artifacts`)
+		core.info(`Ignoring commit with no suitable artifacts\n`)
 	}
 
 	// We could look at more commits by paging the find_commits_since_snapshot() query
