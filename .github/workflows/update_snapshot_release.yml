@@ -30,6 +30,13 @@ jobs:
             const script = require('.github/scripts/find_artifact_for_snapshot_release.js')
             await script({context, core, github})
 
+      - name: debug
+        env:
+          JSON: ${{ toJSON(steps.artifact.outputs.result) }}
+        run: |
+          gh run download --help
+          echo "$JSON"
+        
       - name: Download artifacts
         if: steps.artifact.outputs.result
         env:
