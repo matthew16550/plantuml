@@ -32,10 +32,11 @@ jobs:
 
       - name: debug
         env:
-          JSON: ${{ toJSON(steps.artifact.outputs.result) }}
+          JSON: ${{ toJSON(steps.artifact.outputs) }}
         run: |
           gh run download --help
           echo "$JSON"
+          gh run download 1474630394 -n 442-jars
         
       - name: Download artifacts
         if: steps.artifact.outputs.result

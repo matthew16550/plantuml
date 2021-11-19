@@ -115,7 +115,6 @@ async function find_artifact_url_from_workflow_run(runId, context, github) {
 		...context.repo,
 		run_id: runId,
 	});
-	console.log(response.data)
 	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jars"));
 	return artifact ? artifact.archive_download_url : null
 }
