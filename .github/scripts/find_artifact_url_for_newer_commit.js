@@ -2,42 +2,37 @@ module.exports = async ({context, core, github}) => {
 	core.info("Finding current snapshot ...")
 	const {snapshotDate, snapshotSha} = await find_current_snapshot(context, github)
 
-	if (snapshotSha)
-		core.info(`Current snapshot: ${snapshotSha}`)
-	else
-		core.info("There is no current snapshot")
+	core.info(`Current snapshot: ${snapshotSha || "NONE"}`)
 
 	core.info("Finding commits ...")
-	core.info(`snapshotDate="${snapshotDate || "1970-01-01T00:00:00Z"}"`)
 	const commits = await find_commits_since_snapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
 
 	for (let commit of commits) {
-		if (commit.oid === snapshotSha) {
-			core.info("Snapshot already at newest possible commit")
+		const sha = commit.oid;
+		
+		if (sha === snapshotSha) {
+			core.info(`${sha} - snapshot already at newest possible commit`)
 			return null
 		}
 
 		if (commit.statusCheckRollup.state !== "SUCCESS") {
-			core.info(`Ignoring ${state} commit ${sha}`)
+			core.info(`${sha} - ignoring ${state} commit`)
 			continue
 		}
 
 		for (let suite of commit.checkSuites.nodes) {
 			const run = suite.workflowRun;
 			if (run && run.workflow.name === "CI" && suite.branch.name === "master") {
-				core.info(`Finding artifact from workflow run ${run.url} ...`)
+				core.info(`${sha} - finding artifact from workflow run ${run.url} ...`)
 				const url = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
 				if (url) {
-					core.info(`Using ${url} for ${sha}`)
-					return {
-						sha: commit.oid,
-						url,
-					}
+					core.info(`${sha} - using ${url}`)
+					return {sha, url}
 				}
 			}
 		}
 
-		core.info(`No suitable artifacts for commit ${sha}`)
+		core.info(`${sha} - no suitable artifacts`)
 	}
 
 	// We could look at more commits by paging the find_commits_since_snapshot() query
@@ -105,6 +100,7 @@ async function find_artifact_url_from_workflow_run(runId, context, github) {
 		...context.repo,
 		run_id: runId,
 	}); // TODO error throws?
+	console.log(response)
 	const artifact = response.artifacts.find(a => a.name.endsWith("-jars"));
 	return artifact ? artifact.archive_download_url : null
 }
