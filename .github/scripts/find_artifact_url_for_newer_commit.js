@@ -1,6 +1,6 @@
 module.exports = async ({context, core, github}) => {
 	core.info("Finding current snapshot ...")
-	const {snapshotDate, snapshotSha} = await find_current_snapshot(context, github)
+	const {snapshotDate, snapshotSha} = null //await find_current_snapshot(context, github)
 
 	core.info(`Current snapshot: ${snapshotSha || "NONE"}`)
 
@@ -8,7 +8,7 @@ module.exports = async ({context, core, github}) => {
 	const commits = await find_commits_since_snapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
 
 	for (let commit of commits) {
-		if (commit.oid === snapshotSha + "X") {
+		if (commit.oid === snapshotSha) {
 			core.notice(`Snapshot is already at the newest possible commit\n${commit.url}`)
 			return null
 		}
@@ -112,9 +112,3 @@ async function find_artifact_url_from_workflow_run(runId, context, github) {
 	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jarsX"));
 	return artifact ? artifact.archive_download_url : null
 }
-
-// https://api.github.com/repos/matthew16550/plantuml/actions/runs/1458211290/artifacts
-
-// https://api.github.com/repos/plantuml/plantuml/releases/tags/snapshot
-
-// https://api.github.com/repos/plantuml/plantuml/check-suites/4389169301
