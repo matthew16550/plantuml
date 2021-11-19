@@ -30,10 +30,10 @@ module.exports = async ({context, core, github}) => {
 			const run = suite.workflowRun;
 			if (run && run.workflow.name === "CI" && suite.branch && suite.branch.name === "master") {
 				core.info(`Finding artifact from ${run.url} ...`)
-				const {download_url, url} = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
-				if (url) {
+				const {download_url, web_url} = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
+				if (download_url) {
 					core.notice([
-						`Updating to : ${url}`,
+						`Updating to : ${web_url}`,
 						`Commit      : ${commit.url}`,
 						`Run         : ${run.url}`,
 					].join("\n"))
@@ -117,9 +117,10 @@ async function find_artifact_url_from_workflow_run(runId, context, github) {
 		repo: "plantuml",
 		run_id: runId,
 	});
+	console.log(response.data)
 	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jars"));
 	return {
 		download_url: artifact ? artifact.archive_download_url : null,
-		url: artifact ? artifact.url : null,
+		web_url: artifact ? artifact.url : null,
 	}
 }
