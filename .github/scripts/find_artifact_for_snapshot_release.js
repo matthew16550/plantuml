@@ -1,12 +1,12 @@
+const RELEASE_BRANCH = "master"
+
 module.exports = async ({context, core, github}) => {
 	core.info("Finding current snapshot ...")
 	const {snapshotDate, snapshotSha} = await findCurrentSnapshot(context, github)
 
 	core.info(`Current snapshot: ${snapshotSha || "NONE"}`)
 
-	const defaultBranch = process.env.GITHUB_REF.substring("refs/heads/".length)
-
-	core.info(`Finding commits on ${defaultBranch} branch...`)
+	core.info(`Finding commits ...`)
 	const commits = await findCommitsSinceSnapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
 
 	for (let commit of commits) {
@@ -29,7 +29,7 @@ module.exports = async ({context, core, github}) => {
 
 		for (let suite of commit.checkSuites.nodes) {
 			const run = suite.workflowRun;
-			if (run && run.workflow.name === "CI" && suite.branch && suite.branch.name === defaultBranch) {
+			if (run && run.workflow.name === "CI" && suite.branch && suite.branch.name === RELEASE_BRANCH) {
 				core.info(`Finding artifact from ${run.url} ...`)
 				const artifactName = await findArtifactNameFromWorkflowRun(run.databaseId, context, github)
 				if (artifactName) {
@@ -39,9 +39,9 @@ module.exports = async ({context, core, github}) => {
 						`Commit      : ${commit.url}`,
 					].join("\n"))
 
-					core.setOutput('artifact_name', artifactName);
-					core.setOutput('sha', commit.oid);
-					core.setOutput('workflow_run_id', run.databaseId);
+					core.setOutput("artifact_name", artifactName);
+					core.setOutput("sha", commit.oid);
+					core.setOutput("workflow_run_id", run.databaseId);
 					return
 				}
 			}
@@ -78,9 +78,9 @@ async function findCurrentSnapshot(context, github) {
 
 async function findCommitsSinceSnapshot(snapshotDate, context, github) {
 	const response = await github.graphql(`
-		query($owner: String!, $name: String!, $lastCommit: GitObjectID!, $snapshotDate: GitTimestamp!) {
+		query($owner: String!, $name: String!, $headCommit: GitObjectID!, $snapshotDate: GitTimestamp!) {
 		  repository(owner: $owner, name:$name) {
-			object(oid: $lastCommit) {
+			object(oid: $headCommit) {
 			  ... on Commit {
 				history(first: 100, since: $snapshotDate) {
 				  edges {
@@ -104,7 +104,7 @@ async function findCommitsSinceSnapshot(snapshotDate, context, github) {
 			{
 				owner: context.repo.owner,
 				name: context.repo.repo,
-				lastCommit: process.env.GITHUB_SHA,
+				headCommit: process.env.GITHUB_SHA,
 				snapshotDate,
 			}
 	)
