@@ -28,10 +28,11 @@ jobs:
         with:
           script: |
             const script = require('.github/scripts/find_artifact_for_snapshot_release.js')
-            await script({context, core, github})
+            return await script({context, core, github})
 
       - name: debug
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           JSON: ${{ toJSON(steps.artifact.outputs) }}
         run: |
           gh run download --help
