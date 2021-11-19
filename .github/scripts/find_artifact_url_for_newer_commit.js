@@ -46,7 +46,7 @@ module.exports = async ({context, core, github}) => {
 
 	// We could look at more commits by paging the find_commits_since_snapshot() query
 	// but this will probably never be relevant so not implemented
-	core.warning(`\nNo suitable artifact from ${commits.length} newest commits`)
+	core.warning(`No suitable artifact from ${commits.length} newest commits`)
 	return null
 }
 
@@ -112,6 +112,6 @@ async function find_artifact_url_from_workflow_run(runId, context, github) {
 		repo: "plantuml",
 		run_id: runId,
 	});
-	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jarsX"));
+	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jars"));
 	return artifact ? artifact.archive_download_url : null
 }
