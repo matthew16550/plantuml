@@ -1,106 +1,110 @@
-const {spawnSync} = require("child_process")
-
 module.exports = async ({context, core, github}) => {
 	core.info("Finding current snapshot ...")
-	const snapshot = await find_current_snapshot_sha(context, github)
+	const {snapshotDate, snapshotSha} = find_current_snapshot(context, github)
 
-	core.info(`Current snapshot: ${snapshot}`)
+	if (snapshotSha)
+		core.info(`Current snapshot: ${snapshotSha}`)
+	else
+		core.info("There is no current snapshot")
 
-	core.info("Finding newer commits ...")
-	const newer_commits = find_newer_commit_shas(snapshot)
+	core.info("Finding commits since snapshot ...")
+	const commits = find_commits_since_snapshot(snapshotDate || 0, context, github)
 
-	if (!newer_commits) {
-		core.info("Snapshot already at newest commit")
-		return null
-	}
-
-	core.info(`Newer commits:\n${newer_commits.join("\n")}`)
-
-	for (let sha of newer_commits) {
-		core.info(`Finding data for ${sha} ...`)
-		const {state, workflowRuns} = await find_commit_data(sha, context, github)
-
-		if (!state) {
-			core.error(`Commit ${sha} not found`)
-			continue
+	for (let commit of commits) {
+		if (commit.oid === snapshotSha) {
+			core.info("Snapshot already at newest possible commit")
+			return null
 		}
 
-		if (state !== "SUCCESS") {
+		if (commit.statusCheckRollup.state !== "SUCCESS") {
 			core.info(`Ignoring ${state} commit ${sha}`)
 			continue
 		}
 
-		for (let run of workflowRuns) {
-			core.info(`Finding artifact from workflow run ${run.url} ...`)
-			const url = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
-			
-			if (url) {
-				core.info(`Using ${url} for ${sha}`)
-				return url
+		for (let suite of commit.checkSuites.nodes) {
+			const run = suite.workflowRun;
+			if (run && run.workflow.name === "CI" && suite.branch.name === "master") {
+				core.info(`Finding artifact from workflow run ${run.url} ...`)
+				const url = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
+				if (url) {
+					core.info(`Using ${url} for ${sha}`)
+					return {
+						sha: commit.oid,
+						url,
+					}
+				}
 			}
 		}
-		
-		console.info(`Ignoring ${sha} because no suitable artifact found`)
+
+		core.info(`No suitable artifacts for commit ${sha}`)
 	}
 
-	core.info(`No newer artifact found`)
+	// We could look at more commits by paging the find_commits_since_snapshot() query
+	// but this will probably never happen so not implemented
+	core.info("No suitable artifact from the 100 newest commits")
 	return null
 }
 
-async function find_current_snapshot_sha(context, github) {
-	return await github.rest.repos.getReleaseByTag({
-		...context.repo,
-		tag: "snapshot",
-	}).target_commitish
-}
-
-function find_newer_commit_shas(snapshot) {
-	const result = spawnSync("git", ["rev-list", `${snapshot}..HEAD`])  // result is ordered newest first
-	if (result.error)
-		throw result.error
-	return result.stdout.split(/\n/) 	// TODO empty list ?
-}
-
-async function find_commit_data(sha, context, github) {
+async function find_current_snapshot(context, github) {
 	const response = await github.graphql(`
-				query($owner:String!, $name:String!, sha:String!) {
-				  repository(owner:$owner, name:$name) {
-					object(oid: sha) {
-					  ... on Commit {
-						statusCheckRollup {
-						  state
-						}
-						checkSuites(first:100) {
-						  nodes {
-							workflowRun {
-							  databaseId
-							  url
-							}
-						  }
-						}
-					  }
-					}
-				  }
-				}`,
+		query ($owner: String!, $name: String!) {
+		  repository(owner: $owner, name: $name) {
+			release(tagName: "snapshot") {
+			  tagCommit {
+				committedDate
+				oid
+	  	} } } } `,
 			{
 				owner: context.repo.owner,
 				name: context.repo.repo,
-				sha,
-			}) // TODO errors throw ?
-
-	const object = response.data.repository.object;
+			}
+	)
+	const release = response.repository.release
 	return {
-		state: object ? object.statusCheckRollup.state : null,
-		workflowRuns: object ? object.checkSuites.nodes.flatMap(node => node.workflowRun).filter(!!run) : []
+		snapshotDate: release ? release.tagCommit.committedDate : null,
+		snapshotSha: release ? release.tagCommit.oid : null,
 	}
+}
+
+async function find_commits_since_snapshot(snapshotDate, context, github) {
+	const response = await github.graphql(`
+		query($owner:String!, $name:String!, snapshotDate:DateTime!) {
+		  repository(owner:$owner, name:$name) {
+			object(expression: "master") {
+			  ... on Commit {
+				history(first: 100, since: $snapshotDate) {
+				  edges {
+					node {
+					  oid
+					  statusCheckRollup {
+						state
+					  }
+					  checkSuites(first: 100) {
+						nodes {
+						  branch {
+							name
+						  }
+						  workflowRun {
+							databaseId
+							url
+							workflow {
+							  name
+		} } } } } } } } } } }`,
+			{
+				owner: context.repo.owner,
+				name: context.repo.repo,
+				snapshotDate,
+			}
+	)
+	return response.repository.object.history.edges.map(edge => edge.node)
 }
 
 async function find_artifact_url_from_workflow_run(runId, context, github) {
 	const response = await github.rest.actions.listWorkflowRunArtifacts({
 		...context.repo,
 		run_id: runId,
-	});// TODO error throws?
-	let artifact = response.artifacts.find(a => a.name.endsWith("-jars"));
+	}); // TODO error throws?
+	const artifact = response.artifacts.find(a => a.name.endsWith("-jars"));
 	return artifact ? artifact.archive_download_url : null
 }
 
