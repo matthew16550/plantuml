@@ -98,10 +98,10 @@ async function find_commits_since_snapshot(snapshotDate, context, github) {
 async function find_artifact_url_from_workflow_run(runId, context, github) {
 	const response = await github.rest.actions.listWorkflowRunArtifacts({
 		...context.repo,
-		run_id: runId,
+		run_id: 123,
 	}); // TODO error throws?
 	console.log(response)
-	const artifact = response.artifacts.find(a => a.name.endsWith("-jars"));
+	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jars"));
 	return artifact ? artifact.archive_download_url : null
 }
 
