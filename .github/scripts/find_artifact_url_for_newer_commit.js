@@ -27,7 +27,7 @@ module.exports = async ({context, core, github}) => {
 		}
 
 		for (let suite of commit.checkSuites.nodes) {
-			core.info(suite)
+			console.log(suite)
 			const run = suite.workflowRun;
 			if (run && run.workflow.name === "CI" && suite.branch.name === "master") {
 				core.info(`Finding artifact from workflow run ${run.url} ...`)
