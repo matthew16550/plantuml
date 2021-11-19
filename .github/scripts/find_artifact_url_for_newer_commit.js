@@ -9,7 +9,7 @@ module.exports = async ({context, core, github}) => {
 
 	for (let commit of commits) {
 		const sha = commit.oid;
-		
+		console.info(commit)
 		if (sha === snapshotSha) {
 			core.info(`${sha} - snapshot already at newest possible commit`)
 			return null
