@@ -18,12 +18,12 @@ module.exports = async ({context, core, github}) => {
 		}
 
 		if (!commit.statusCheckRollup) {
-			core.info(`Ignoring commit with no status check`)
+			core.info(`Ignore because no status check`)
 			continue
 		}
 
 		if (commit.statusCheckRollup.state !== "SUCCESS") {
-			core.info(`Ignoring ${commit.statusCheckRollup.state} commit`)
+			core.info(`Ignore because ${commit.statusCheckRollup.state}`)
 			continue
 		}
 
@@ -47,7 +47,7 @@ module.exports = async ({context, core, github}) => {
 			}
 		}
 
-		core.info(`Ignoring commit with no suitable artifacts`)
+		core.info(`Ignore because no suitable artifacts`)
 	}
 
 	// We could look at more commits by paging the findCommitsSinceSnapshot() query
