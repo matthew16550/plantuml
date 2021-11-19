@@ -9,7 +9,7 @@ module.exports = async ({context, core, github}) => {
 	const commits = await find_commits_since_snapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
 
 	for (let commit of commits) {
-		core.info(`Considering ${commit.url}`)
+		core.info(`\nConsidering ${commit.url}`)
 
 		if (commit.oid === snapshotSha) {
 			core.notice(`Snapshot is already at the newest possible commit\n${commit.url}`)
@@ -41,12 +41,12 @@ module.exports = async ({context, core, github}) => {
 			}
 		}
 
-		core.info(`Ignoring commit with no suitable artifacts\n`)
+		core.info(`Ignoring commit with no suitable artifacts`)
 	}
 
 	// We could look at more commits by paging the find_commits_since_snapshot() query
 	// but this will probably never be relevant so not implemented
-	core.warning(`No suitable artifact from ${commits.length} newest commits`)
+	core.warning(`\nNo suitable artifact from ${commits.length} newest commits`)
 	return null
 }
 
