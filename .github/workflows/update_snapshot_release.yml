@@ -30,26 +30,27 @@ jobs:
             const script = require('.github/scripts/find_artifact_for_snapshot_release.js')
             await script({context, core, github})
 
-      - name: debug
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          JSON: ${{ toJSON(steps.artifact.outputs) }}
-        run: |
-          gh run download --help
-          echo "$JSON"
-          gh run download 1474630394 -n 442-jars
-          ls -lR
+#      - name: debug
+#        env:
+#          GITHUB_TOKEN: ${{ github.token }}
+#          JSON: ${{ toJSON(steps.artifact.outputs) }}
+#        run: |
+#          gh run download --help
+#          echo "$JSON"
+#          gh run download 1474630394 -n 442-jars
+#          ls -lR
         
       - name: Download artifacts
-        if: steps.artifact.outputs.result
+        if: steps.artifact.outputs.artifact_name
         env:
-          URL: ${{ steps.artifact.outputs.result.url }}
-        run: gh run download --help
-#curl -L "${URL}"
+          ARTIFACT_NAME: ${{ steps.artifact.outputs.artifact_name }}
+          GITHUB_TOKEN: ${{ github.token }}
+          WORKFLOW_RUN_ID: ${{ steps.artifact.outputs.workflow_run_id }}
+        run: gh run download "${WORKFLOW_RUN_ID}" -n "${ARTIFACT_NAME}"
 
       - name: Create snapshot release
-        if: steps.artifact.outputs.result
+        if: steps.artifact.outputs.artifact_name
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          SHA: ${{ steps.artifact.outputs.result.sha }}
+          SHA: ${{ steps.artifact.outputs.sha }}
         run: .github/scripts/release_snapshot.sh

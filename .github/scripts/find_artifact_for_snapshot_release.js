@@ -30,16 +30,17 @@ module.exports = async ({context, core, github}) => {
 			const run = suite.workflowRun;
 			if (run && run.workflow.name === "CI" && suite.branch && suite.branch.name === "master") {
 				core.info(`Finding artifact from ${run.url} ...`)
-				const url = await find_artifact_url_from_workflow_run(run.databaseId, context, github)
-				if (url) {
+				const artifact_name = await find_artifact_name_from_workflow_run(run.databaseId, context, github)
+				if (artifact_name) {
 					core.notice([
-						`Updating to : ${url}`,
-						`Commit      : ${commit.url}`,
+						`Updating to : ${artifact_name}`,
 						`Run         : ${run.url}`,
+						`Commit      : ${commit.url}`,
 					].join("\n"))
-					
-					core.setOutput('sha', 'commit.oid');
-					core.setOutput('url', 'url');
+
+					core.setOutput('artifact_name', artifact_name);
+					core.setOutput('sha', commit.oid);
+					core.setOutput('workflow_run_id', run.databaseId);
 					return
 				}
 			}
@@ -108,11 +109,11 @@ async function find_commits_since_snapshot(snapshotDate, context, github) {
 	return response.repository.object.history.edges.map(edge => edge.node)
 }
 
-async function find_artifact_url_from_workflow_run(runId, context, github) {
+async function find_artifact_name_from_workflow_run(runId, context, github) {
 	const response = await github.rest.actions.listWorkflowRunArtifacts({
 		...context.repo,
 		run_id: runId,
 	});
 	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jars"));
-	return artifact ? artifact.archive_download_url : null
+	return artifact ? artifact.name : null
 }
