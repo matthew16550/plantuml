@@ -117,8 +117,8 @@ jobs:
           RUN_ID: ${{ steps.config.outputs.run_id }}
           SNAPSHOT_SHA: ${{ steps.config.outputs.sha }}
           TAG: snapshot
-        shell: bash -ex
         run: |
+          set -x
           gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
 
           cat <<-EOF >release-notes.txt

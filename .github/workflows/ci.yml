@@ -133,8 +133,8 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           SNAPSHOT_SHA: ${{ github.sha }}
           TAG: ${{ github.event.ref }}
-        shell: bash -ex
         run: |
+          set -x
           gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
 
           mv plantuml.jar         "plantuml-${RELEASE_VERSION}.jar"
