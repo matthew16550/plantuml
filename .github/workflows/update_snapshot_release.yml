@@ -143,7 +143,7 @@ jobs:
           cat <<-EOF >release-notes.txt
             This is a pre-release of the latest development work.
             ⚠️  **It is not ready for general use** ⚠️
-            ⏱  _Snapshot taken the $(date -u +"%F at %T (UTC)")_
+            ⏱  _Snapshot taken $(date -u +"%F at %T (UTC)")_
           EOF
 
       - name: Create release
