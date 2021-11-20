@@ -134,7 +134,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh release delete -y "${TAG}" || true
+          set +e
+          gh release delete "${TAG}"
           git push --delete origin "${TAG}"
           git tag --delete "${TAG}"
 
