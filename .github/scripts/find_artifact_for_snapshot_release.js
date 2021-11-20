@@ -2,17 +2,61 @@ const RELEASE_BRANCH = "snapshot-release-2"
 
 module.exports = async ({context, core, github}) => {
 	core.info("Finding current snapshot ...")
-	const {snapshotDate, snapshotSha} = await findCurrentSnapshot(context, github)
+
+	const currentSnapshot = (
+			await github.graphql(`
+				query ($owner: String!, $repo: String!) {
+				  repository(owner: $owner, name: $repo) {
+					release(tagName: "snapshot") {
+					  tagCommit {
+						committedDate
+						oid
+				} } } } `, ...context.repo
+			)
+	).repository.release
+
+	const snapshotSha = currentSnapshot ? currentSnapshot.tagCommit.oid : null
 
 	core.info(`Current snapshot: ${snapshotSha || "NONE"}`)
 
-	core.info(`Finding commits ...`)
-	const commits = await findCommitsSinceSnapshot(snapshotDate || "1970-01-01T00:00:00Z", context, github)
+	core.info(`Finding newest commits ...`)
+
+	const commits = (
+			await github.graphql(`
+				query($owner: String!, $repo: String!, $head: GitObjectID!, $since: GitTimestamp!) {
+				  repository(owner: $owner, name: $repo) {
+					object(oid: $head) {
+					  ... on Commit {
+						history(first: 100, since: $since) {
+						  edges {
+							node {
+							  oid
+							  url
+							  checkSuites(first: 100) {
+								nodes {
+								  branch {
+									name
+								  }
+								  conclusion
+								  workflowRun {
+									databaseId
+									runNumber
+									url
+									workflow {
+									  name
+				} } } } } } } } } } }`,
+					{
+						...context.repo,
+						head: `refs/heads/${RELEASE_BRANCH}`,
+						since: currentSnapshot ? currentSnapshot.tagCommit.committedDate : "1970-01-01T00:00:00Z",
+					}
+			)
+	).repository.object.history.edges.map(edge => edge.node)
 
 	for (let commit of commits) {
 		core.info(`\nConsidering ${commit.url}`)
 
-		if (commit.oid === snapshotSha) {
+		if (snapshotSha && snapshotSha === commit.oid) {
 			core.notice(`Snapshot is already at the newest possible commit\n${commit.url}`)
 			return
 		}
@@ -23,90 +67,19 @@ module.exports = async ({context, core, github}) => {
 					&& suite.branch && suite.branch.name === RELEASE_BRANCH
 					&& suite.conclusion === "SUCCESS"
 			) {
-				core.info(`Finding artifact from ${run.url} ...`)
-				const artifactName = await findArtifactNameFromWorkflowRun(run.databaseId, context, github)
-				if (artifactName) {
-					core.notice([
-						`Updating to : ${artifactName}`,
-						`Run         : ${run.url}`,
-						`Commit      : ${commit.url}`,
-					].join("\n"))
-
-					core.setOutput("artifact_name", artifactName);
-					core.setOutput("sha", commit.oid);
-					core.setOutput("workflow_run_id", run.databaseId);
-					return
-				}
+				core.notice([
+					`Updating to`,
+					`Commit : ${commit.url}`,
+					`Run    : ${run.url}`,
+				].join("\n"))
+				core.setOutput("artifact_name", `${run.runNumber}-jars`);
+				core.setOutput("sha", commit.oid);
+				core.setOutput("workflow_run_id", run.databaseId);
+				return
 			}
 		}
-
-		core.info(`Ignore because no suitable artifacts`)
 	}
 
-	// We could look at more commits by paging the findCommitsSinceSnapshot() query
-	// but this will probably never be relevant so not implemented
+	// We could look at more commits by paging the history() query but it should never be relevant so not implemented
 	core.setFailed(`No suitable artifact from ${commits.length} newest commits`)
-}
-
-async function findCurrentSnapshot(context, github) {
-	const response = await github.graphql(`
-		query ($owner: String!, $name: String!) {
-		  repository(owner: $owner, name: $name) {
-			release(tagName: "snapshot") {
-			  tagCommit {
-				committedDate
-				oid
-	  	} } } } `,
-			{
-				owner: context.repo.owner,
-				name: context.repo.repo,
-			}
-	)
-	const release = response.repository.release
-	return {
-		snapshotDate: release ? release.tagCommit.committedDate : null,
-		snapshotSha: release ? release.tagCommit.oid : null,
-	}
-}
-
-async function findCommitsSinceSnapshot(snapshotDate, context, github) {
-	const response = await github.graphql(`
-		query($owner: String!, $name: String!, $headCommit: GitObjectID!, $snapshotDate: GitTimestamp!) {
-		  repository(owner: $owner, name:$name) {
-			object(oid: $headCommit) {
-			  ... on Commit {
-				history(first: 100, since: $snapshotDate) {
-				  edges {
-					node {
-					  oid
-					  url
-					  checkSuites(first: 100) {
-						nodes {
-						  branch {
-							name
-						  }
-						  conclusion
-						  workflowRun {
-							databaseId
-							url
-							workflow {
-							  name
-		} } } } } } } } } } }`,
-			{
-				owner: context.repo.owner,
-				name: context.repo.repo,
-				headCommit: process.env.GITHUB_SHA,
-				snapshotDate,
-			}
-	)
-	return response.repository.object.history.edges.map(edge => edge.node)
-}
-
-async function findArtifactNameFromWorkflowRun(runId, context, github) {
-	const response = await github.rest.actions.listWorkflowRunArtifacts({
-		...context.repo,
-		run_id: runId,
-	});
-	const artifact = response.data.artifacts.find(a => a.name.endsWith("-jars"));
-	return artifact ? artifact.name : null
 }
