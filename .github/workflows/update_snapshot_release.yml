@@ -15,10 +15,6 @@ concurrency:
 jobs:
   config:
     runs-on: ubuntu-latest
-    outputs:
-      artifact_name: ${{ steps.config.outputs.artifact_name }}
-      run_id: ${{ steps.config.outputs.run_id }}
-      sha: ${{ steps.config.outputs.sha }}
     steps:
       - name: Configure workflow
         id: config
@@ -104,55 +100,42 @@ jobs:
             // We could look at more commits by paging the history() query but it should never be relevant so not implemented
             core.setFailed(`Nothing found from ${commits.length} newest commits`)
 
-  update:
-    needs: [ config ]
-    if: needs.config.outputs.sha
-    runs-on: ubuntu-latest
-    env:
-      ARTIFACT_NAME: ${{ needs.config.outputs.artifact_name }}
-      RUN_ID: ${{ needs.config.outputs.run_id }}
-      SNAPSHOT_SHA: ${{ needs.config.outputs.sha }}
-      TAG: snapshot
-    steps:
       - name: Checkout the repository
+        if: steps.config.outputs.sha
         uses: actions/checkout@v2
         with:
-          ref: ${{ needs.config.outputs.sha }}
+          ref: ${{ steps.config.outputs.sha }}
 
-      - name: Download jars
+      - name: Create release
+        if: steps.config.outputs.sha
         env:
+          ARTIFACT_NAME: ${{ steps.config.outputs.artifact_name }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
-
-      - name: Rename jars
+          RELEASE_VERSION: SNAPSHOT
+          RUN_ID: ${{ steps.config.outputs.run_id }}
+          SNAPSHOT_SHA: ${{ steps.config.outputs.sha }}
+          TAG: snapshot
+        shell: bash -ex
         run: |
-          mv plantuml.jar         plantuml-SNAPSHOT.jar
-          mv plantuml-javadoc.jar plantuml-SNAPSHOT-javadoc.jar
-          mv plantuml-sources.jar plantuml-SNAPSHOT-sources.jar
+          gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
 
-      - name: Remove old snapshot
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          gh release delete "${TAG}" || true
-          git push --delete origin "${TAG}" || true
-          git tag --delete "${TAG}" || true
-
-      - name: Create release notes
-        run: |
           cat <<-EOF >release-notes.txt
             This is a pre-release of the latest development work.
             ⚠️  **It is not ready for general use** ⚠️
             ⏱  _Snapshot taken $(date -u +"%F at %T (UTC)")_
           EOF
+          
+          gh release delete "${TAG}" || true
+          git push --delete origin "${TAG}" || true
+          git tag --delete "${TAG}" || true
 
-      - name: Create release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
+          mv plantuml.jar         "plantuml-${RELEASE_VERSION}.jar"
+          mv plantuml-javadoc.jar "plantuml-${RELEASE_VERSION}-javadoc.jar"
+          mv plantuml-sources.jar "plantuml-${RELEASE_VERSION}-sources.jar"
+
           gh release create --prerelease --target "${SNAPSHOT_SHA}" --title "${TAG}" --notes-file release-notes.txt "${TAG}" \
-            plantuml-SNAPSHOT.jar \
-            plantuml-SNAPSHOT-javadoc.jar \
-            plantuml-SNAPSHOT-sources.jar
+            "plantuml-${RELEASE_VERSION}.jar" \
+            "plantuml-${RELEASE_VERSION}-javadoc.jar" \
+            "plantuml-${RELEASE_VERSION}-sources.jar"
 
           echo "::notice title=::Snapshot released at ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG}"

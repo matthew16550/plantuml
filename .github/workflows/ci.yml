@@ -125,14 +125,25 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
-      - name: Download jar artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: ${{ github.run_number }}-jars
-
       - name: Create release in GitHub
         env:
+          ARTIFACT_NAME: ${{ github.run_number }}-jars
           GITHUB_TOKEN: ${{ github.token }}
-          POM_VERSION: ${{ needs.workflow_config.outputs.pom_version }}
+          RELEASE_VERSION: ${{ needs.workflow_config.outputs.pom_version }}
+          RUN_ID: ${{ github.run_id }}
+          SNAPSHOT_SHA: ${{ github.sha }}
           TAG: ${{ github.event.ref }}
-        run: .github/scripts/release.sh
+        shell: bash -ex
+        run: |
+          gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
+
+          mv plantuml.jar         "plantuml-${RELEASE_VERSION}.jar"
+          mv plantuml-javadoc.jar "plantuml-${RELEASE_VERSION}-javadoc.jar"
+          mv plantuml-sources.jar "plantuml-${RELEASE_VERSION}-sources.jar"
+
+          gh release create --target "${SNAPSHOT_SHA}" --title "${TAG}" "${TAG}" \
+            "plantuml-${RELEASE_VERSION}.jar" \
+            "plantuml-${RELEASE_VERSION}-javadoc.jar" \
+            "plantuml-${RELEASE_VERSION}-sources.jar"
+
+          echo "::notice title=::Released at ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG} 🎉"
