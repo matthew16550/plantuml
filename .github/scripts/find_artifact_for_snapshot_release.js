@@ -23,9 +23,9 @@ module.exports = async ({context, core, github}) => {
 
 	const commits = (
 			await github.graphql(`
-				query($owner: String!, $repo: String!, $head: GitObjectID!, $since: GitTimestamp!) {
+				query($owner: String!, $repo: String!, $head: String!, $since: GitTimestamp!) {
 				  repository(owner: $owner, name: $repo) {
-					object(oid: $head) {
+					object(expression: $head) {
 					  ... on Commit {
 						history(first: 100, since: $since) {
 						  edges {
