@@ -134,10 +134,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          set +e
-          gh release delete "${TAG}"
-          git push --delete origin "${TAG}"
-          git tag --delete "${TAG}"
+          gh release delete "${TAG}" || true
+          git push --delete origin "${TAG}" || true
+          git tag --delete "${TAG}" || true
 
       - name: Create release notes
         run: |
