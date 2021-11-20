@@ -11,7 +11,7 @@ module.exports = async ({context, core, github}) => {
 					  tagCommit {
 						committedDate
 						oid
-				} } } } `, ...context.repo
+				} } } } `, context.repo
 			)
 	).repository.release
 
