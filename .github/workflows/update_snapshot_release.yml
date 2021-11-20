@@ -38,6 +38,7 @@ jobs:
             				  tagCommit {
             					committedDate
             					oid
+                                url
             			} } } } `, context.repo
             		)
             ).repository.release
@@ -84,7 +85,7 @@ jobs:
             	core.info(`\nConsidering ${commit.url}`)
 
             	if (snapshotSha && snapshotSha === commit.oid) {
-            		core.notice(`Snapshot is already at the newest possible commit\n${commit.url}`)
+            		core.notice(`Snapshot is already at the newest possible commit\n${currentSnapshot.url}`)
             		return
             	}
 
