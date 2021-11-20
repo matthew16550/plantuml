@@ -1,4 +1,4 @@
-name: Update Snapshot Release
+name: Snapshot Release
 
 on:
   push:
@@ -9,11 +9,11 @@ on:
     types: [ completed ]
 
 concurrency:
-  group: update_snapshot_release
+  group: snapshot_release
   cancel-in-progress: true
 
 jobs:
-  config:
+  snapshot_release:
     runs-on: ubuntu-latest
     steps:
       - name: Configure job
@@ -102,11 +102,11 @@ jobs:
             // We could look at more commits by paging the history() query but it should never be relevant so not implemented
             core.setFailed(`Nothing found from ${commits.length} newest commits`)
 
-#      - name: Checkout the repository
-#        if: steps.config.outputs.sha
-#        uses: actions/checkout@v2
-#        with:
-#          ref: ${{ steps.config.outputs.sha }}
+      #      - name: Checkout the repository
+      #        if: steps.config.outputs.sha
+      #        uses: actions/checkout@v2
+      #        with:
+      #          ref: ${{ steps.config.outputs.sha }}
 
       - name: Create release
         if: steps.config.outputs.sha
@@ -119,6 +119,7 @@ jobs:
           TAG: snapshot
         run: |
           set -x
+          mkdir .git
           gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
 
           cat <<-EOF >release-notes.txt
@@ -126,7 +127,7 @@ jobs:
             ⚠️  **It is not ready for general use** ⚠️
             ⏱  _Snapshot taken $(date -u +"%F at %T (UTC)")_
           EOF
-          
+
           gh release delete "${TAG}" || true
           git push --delete origin "${TAG}" || true
           git tag --delete "${TAG}" || true
