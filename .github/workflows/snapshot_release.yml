@@ -102,11 +102,11 @@ jobs:
             // We could look at more commits by paging the history() query but it should never be relevant so not implemented
             core.setFailed(`Nothing found from ${commits.length} newest commits`)
 
-      #      - name: Checkout the repository
-      #        if: steps.config.outputs.sha
-      #        uses: actions/checkout@v2
-      #        with:
-      #          ref: ${{ steps.config.outputs.sha }}
+      - name: Checkout the repository
+        if: steps.config.outputs.sha
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ steps.config.outputs.sha }}
 
       - name: Create release
         if: steps.config.outputs.sha
@@ -119,7 +119,6 @@ jobs:
           TAG: snapshot
         run: |
           set -x
-          mkdir .git
           gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
 
           cat <<-EOF >release-notes.txt
