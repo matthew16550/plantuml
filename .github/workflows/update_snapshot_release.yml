@@ -14,33 +14,147 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  update_snapshot_release:
+  config:
     runs-on: ubuntu-latest
+    outputs:
+      artifact_name: ${{ steps.config.outputs.artifact_name }}
+      run_id: ${{ steps.config.outputs.run_id }}
+      sha: ${{ steps.config.outputs.sha }}
+    steps:
+      - name: Configure workflow
+        id: config
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const RELEASE_BRANCH = "snapshot-release-2"
+
+            core.info("Finding current snapshot ...")
+
+            const currentSnapshot = (
+            		await github.graphql(`
+            			query ($owner: String!, $repo: String!) {
+            			  repository(owner: $owner, name: $repo) {
+            				release(tagName: "snapshot") {
+            				  tagCommit {
+            					committedDate
+            					oid
+            			} } } } `, context.repo
+            		)
+            ).repository.release
+
+            const snapshotSha = currentSnapshot ? currentSnapshot.tagCommit.oid : null
+
+            core.info(`Current snapshot: ${snapshotSha || "NONE"}`)
+
+            core.info(`Finding newest commits ...`)
+
+            const commits = (
+            		await github.graphql(`
+            			query($owner: String!, $repo: String!, $head: String!, $since: GitTimestamp!) {
+            			  repository(owner: $owner, name: $repo) {
+            				object(expression: $head) {
+            				  ... on Commit {
+            					history(first: 100, since: $since) {
+            					  edges {
+            						node {
+            						  oid
+            						  url
+            						  checkSuites(first: 100) {
+            							nodes {
+            							  branch {
+            								name
+            							  }
+            							  conclusion
+            							  workflowRun {
+            								databaseId
+            								runNumber
+            								url
+            								workflow {
+            								  name
+            			} } } } } } } } } } }`,
+            				{
+            					...context.repo,
+            					head: `refs/heads/${RELEASE_BRANCH}`,
+            					since: currentSnapshot ? currentSnapshot.tagCommit.committedDate : "1970-01-01T00:00:00Z",
+            				}
+            		)
+            ).repository.object.history.edges.map(edge => edge.node)
+
+            for (let commit of commits) {
+            	core.info(`\nConsidering ${commit.url}`)
+
+            	if (snapshotSha && snapshotSha === commit.oid) {
+            		core.notice(`Snapshot is already at the newest possible commit\n${commit.url}`)
+            		return
+            	}
+
+            	for (let suite of commit.checkSuites.nodes) {
+            		const run = suite.workflowRun
+            		if (run && run.workflow.name === "CI"
+            				&& suite.branch && suite.branch.name === RELEASE_BRANCH
+            				&& suite.conclusion === "SUCCESS"
+            		) {
+            			core.notice([
+            				`Updating to`,
+            				`Commit : ${commit.url}`,
+            				`Run    : ${run.url}`,
+            			].join("\n"))
+            			core.setOutput("artifact_name", `${run.runNumber}-jars`);
+            			core.setOutput("run_id", run.databaseId);
+            			core.setOutput("sha", commit.oid);
+            			return
+            		}
+            	}
+            }
+
+            // We could look at more commits by paging the history() query but it should never be relevant so not implemented
+            core.setFailed(`Nothing found from ${commits.length} newest commits`)
+
+  update:
+    needs: [ config ]
+    if: needs.config.outputs.sha
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACT_NAME: ${{ needs.config.outputs.artifact_name }}
+      RUN_ID: ${{ needs.config.outputs.run_id }}
+      SNAPSHOT_SHA: ${{ needs.config.outputs.sha }}
+      TAG: snapshot
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          ref: ${{ needs.config.outputs.sha }}
 
-      - name: Find artifact for snapshot release
-        id: artifact
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const script = require('.github/scripts/find_artifact_for_snapshot_release.js')
-            await script({context, core, github})
+      - name: Download jars
+        run: gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
 
-      - name: Download artifact
-        if: steps.artifact.outputs.artifact_name
+      - name: Rename jars
+        run: |
+          mv plantuml.jar         plantuml-SNAPSHOT.jar
+          mv plantuml-javadoc.jar plantuml-SNAPSHOT-javadoc.jar
+          mv plantuml-sources.jar plantuml-SNAPSHOT-sources.jar
+
+      - name: Remove old snapshot
+        run: |
+          gh release delete "${TAG}"
+          git push --delete origin "${TAG}"
+          git tag --delete "${TAG}"
+
+      - name: Create release notes
+        run: |
+          cat <<-EOF >release-notes.txt
+            This is a pre-release of the latest development work.
+            ⚠️  **It is not ready for general use** ⚠️
+            ⏱  _Snapshot taken the $(date -u +"%F at %T (UTC)")_
+          EOF
+
+      - name: Create release
         env:
-          ARTIFACT_NAME: ${{ steps.artifact.outputs.artifact_name }}
           GITHUB_TOKEN: ${{ github.token }}
-          WORKFLOW_RUN_ID: ${{ steps.artifact.outputs.workflow_run_id }}
-        run: gh run download "${WORKFLOW_RUN_ID}" -n "${ARTIFACT_NAME}"
+        run: |
+          gh release create --prerelease --target "${SNAPSHOT_SHA}" --title "${TAG}" --notes-file release-notes.txt "${TAG}" \
+            plantuml-SNAPSHOT.jar \
+            plantuml-SNAPSHOT-javadoc.jar \
+            plantuml-SNAPSHOT-sources.jar
 
-      - name: Create snapshot release
-        if: steps.artifact.outputs.artifact_name
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          SHA: ${{ steps.artifact.outputs.sha }}
-        run: .github/scripts/release_snapshot.sh
+          echo "::notice title=::Snapshot released at ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG}"

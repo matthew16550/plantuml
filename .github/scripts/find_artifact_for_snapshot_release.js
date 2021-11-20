@@ -1,6 +1,6 @@
-const RELEASE_BRANCH = "snapshot-release-2"
 
 module.exports = async ({context, core, github}) => {
+	const RELEASE_BRANCH = "snapshot-release-2"
 	core.info("Finding current snapshot ...")
 
 	const currentSnapshot = (
@@ -81,5 +81,5 @@ module.exports = async ({context, core, github}) => {
 	}
 
 	// We could look at more commits by paging the history() query but it should never be relevant so not implemented
-	core.setFailed(`No suitable artifact from ${commits.length} newest commits`)
+	core.setFailed(`Nothing found from ${commits.length} newest commits`)
 }
