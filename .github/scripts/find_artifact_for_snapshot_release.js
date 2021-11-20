@@ -1,4 +1,3 @@
-
 module.exports = async ({context, core, github}) => {
 	const RELEASE_BRANCH = "snapshot-release-2"
 	core.info("Finding current snapshot ...")
@@ -68,7 +67,7 @@ module.exports = async ({context, core, github}) => {
 					&& suite.conclusion === "SUCCESS"
 			) {
 				core.notice([
-					`Updating to`,
+					`Updating to run #${run.runNumber}`,
 					`Commit : ${commit.url}`,
 					`Run    : ${run.url}`,
 				].join("\n"))

@@ -62,9 +62,6 @@ jobs:
             						  url
             						  checkSuites(first: 100) {
             							nodes {
-            							  branch {
-            								name
-            							  }
             							  conclusion
             							  workflowRun {
             								databaseId
@@ -82,7 +79,7 @@ jobs:
             ).repository.object.history.edges.map(edge => edge.node)
 
             for (let commit of commits) {
-            	core.info(`\nConsidering ${commit.url}`)
+            	core.info(`Considering ${commit.url}`)
 
             	if (snapshotSha && snapshotSha === commit.oid) {
             		core.notice(`Snapshot is already at the newest possible commit ${currentSnapshot.url}`)
@@ -91,15 +88,12 @@ jobs:
 
             	for (let suite of commit.checkSuites.nodes) {
             		const run = suite.workflowRun
-            		if (run && run.workflow.name === "CI"
-            				&& suite.branch && suite.branch.name === RELEASE_BRANCH
-            				&& suite.conclusion === "SUCCESS"
-            		) {
+            		if (run && run.workflow.name === "CI" && suite.conclusion === "SUCCESS") {
             			core.notice([
-            				`Updating to`,
-            				`Commit : ${commit.url}`,
-            				`Run    : ${run.url}`,
-            			].join("\n"))
+                            `Updating to run #${run.runNumber}`,
+                            `Commit : ${commit.url}`,
+                            `Run    : ${run.url}`,
+                        ].join("\n"))
             			core.setOutput("artifact_name", `${run.runNumber}-jars`);
             			core.setOutput("run_id", run.databaseId);
             			core.setOutput("sha", commit.oid);
@@ -127,6 +121,8 @@ jobs:
           ref: ${{ needs.config.outputs.sha }}
 
       - name: Download jars
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
 
       - name: Rename jars
@@ -136,6 +132,8 @@ jobs:
           mv plantuml-sources.jar plantuml-SNAPSHOT-sources.jar
 
       - name: Remove old snapshot
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           gh release delete "${TAG}"
           git push --delete origin "${TAG}"
