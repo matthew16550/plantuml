@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows: [ CI ]
-    branches: [ snapshot-release-2 ]
     types: [ completed ]
 
 concurrency:
@@ -135,7 +134,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh release delete "${TAG}" || true
+          gh release delete -y "${TAG}" || true
           git push --delete origin "${TAG}"
           git tag --delete "${TAG}"
 
