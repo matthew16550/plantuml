@@ -11,7 +11,7 @@ on:
 concurrency:
   group: snapshot_release
   cancel-in-progress: true
-
+ 
 jobs:
   snapshot_release:
     runs-on: ubuntu-latest
