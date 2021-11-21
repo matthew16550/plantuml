@@ -35,7 +35,7 @@
 
     <groupId>net.sourceforge.plantuml</groupId>
     <artifactId>plantuml</artifactId>
-    <version>4-ML-SNAPSHOT</version>
+    <version>4-ML</version>
     <packaging>jar</packaging>
 
     <name>PlantUML</name>
@@ -76,8 +76,8 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<maven.compiler.testSource>1.8</maven.compiler.testSource>
 		<maven.compiler.testTarget>1.8</maven.compiler.testTarget>
-		<scm.connection>scm:git:origin</scm.connection>
-<!--		<scm.connection>scm:git:https://github.com/matthew16550/plantuml.git</scm.connection>-->
+<!--		<scm.connection>scm:git:origin</scm.connection>-->
+		<scm.connection>scm:git:https://github.com/matthew16550/plantuml.git</scm.connection>
 	</properties>
 
 	<dependencyManagement>
@@ -135,7 +135,7 @@
 		<connection>${scm.connection}</connection>
 		<developerConnection>${scm.connection}</developerConnection>
 		<url>https://github.com/plantuml/plantuml</url>
-	  <tag>v3-ML</tag>
+	  <tag>v4-ML</tag>
   </scm>
 
     <issueManagement>
