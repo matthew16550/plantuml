@@ -89,7 +89,8 @@ jobs:
 
           # (We match against github.repository_owner as a kludge so that forked repos can release themselves when testing the workflow)
 
-          if [[ "${GITHUB_EVENT_NAME}" == "push" && "${GITHUB_REF}" == "refs/tags/v${POM_VERSION}" && \
+          if [[ "${GITHUB_EVENT_NAME}" == "push" \
+                && "${GITHUB_REF}" == "refs/tags/v${POM_VERSION}" \
                 && ( "${GITHUB_ACTOR}" == "arnaudroques" || "${ACTOR}" == "${GITHUB_REPOSITORY_OWNER}" ) \
              ]]; then
             echo "::notice title=::This run will release '${POM_VERSION}'"
