@@ -35,7 +35,7 @@
 
     <groupId>net.sourceforge.plantuml</groupId>
     <artifactId>plantuml</artifactId>
-    <version>1.2021.15</version>
+    <version>1.2021.16-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>PlantUML</name>
@@ -129,7 +129,7 @@
 		<connection>scm:git:https://github.com/plantuml/plantuml.git</connection>
 		<developerConnection>scm:git:https://github.com/plantuml/plantuml.git</developerConnection>
 		<url>https://github.com/plantuml/plantuml</url>
-	  <tag>v1.2021.15</tag>
+	  <tag>HEAD</tag>
   </scm>
 
     <issueManagement>
