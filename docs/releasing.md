@@ -17,3 +17,6 @@ PlantUML is released to other places, currently that happens outside of GitHub a
 [1]: https://github.com/plantuml/plantuml/releases
 [2]: https://github.com/plantuml/plantuml/actions/workflows/ci.yml
 [3]: https://stackoverflow.com/questions/12278660/adding-tags-to-a-pull-request
+
+
+the commit has to be a separate push
