@@ -35,7 +35,7 @@
 
     <groupId>net.sourceforge.plantuml</groupId>
     <artifactId>plantuml</artifactId>
-    <version>2-ML-SNAPSHOT</version>
+    <version>2-ML</version>
     <packaging>jar</packaging>
 
     <name>PlantUML</name>
@@ -76,6 +76,7 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<maven.compiler.testSource>1.8</maven.compiler.testSource>
 		<maven.compiler.testTarget>1.8</maven.compiler.testTarget>
+		<scm.connection>scm:git:https://github.com/matthew16550/plantuml.git</scm.connection>
 	</properties>
 
 	<dependencyManagement>
@@ -89,7 +90,6 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	
 	
     <dependencies>
         <dependency>
@@ -131,10 +131,10 @@
     </licenses>
 
 	<scm>
-		<connection>scm:git:https://github.com/matthew16550/plantuml.git</connection>
-		<developerConnection>scm:git:https://github.com/matthew16550/plantuml.git</developerConnection>
+		<connection>${scm.connection}</connection>
+		<developerConnection>${scm.connection}</developerConnection>
 		<url>https://github.com/plantuml/plantuml</url>
-	  <tag>HEAD</tag>
+	  <tag>v2-ML</tag>
   </scm>
 
     <issueManagement>
