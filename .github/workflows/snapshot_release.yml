@@ -1,11 +1,12 @@
 name: Ensure snapshot release is up to date
 
 on:
-#  push:
-#    branches: [ snapshot-release-2 ]
+  #  push:
+  #    branches: [ snapshot-release-2 ]
   workflow_dispatch:
   workflow_run:
     workflows: [ CI ]
+    branches: [ snapshot-release-2 ]
     types: [ completed ]
 
 concurrency:
@@ -19,7 +20,7 @@ jobs:
         env:
           EVENT: ${{ toJSON(github.event) }}
         run: echo "${EVENT}"
-        
+
       - name: Configure job
         id: config
         uses: actions/github-script@v5
@@ -87,7 +88,7 @@ jobs:
             		core.notice(`Snapshot is already at the newest possible commit ${currentSnapshot.url}`)
             		return
             	}
-            
+
             	if (commit.message.startsWith("[maven-release-plugin] prepare release ")) {
             		core.info("Ignoring release commit")
             		continue

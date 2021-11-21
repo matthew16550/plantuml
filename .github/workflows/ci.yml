@@ -16,7 +16,7 @@ jobs:
   # We run the tests on many OS / Java combinations but also the Compile step because some users build
   # their own jars from source, so it is good for CI to check that is working on all combinations.
   build:
-    if: "!( github.event.name == 'push' && startsWith(github.event.commits[0].message, '[maven-release-plugin] prepare release ') )"
+    if: "!( github.event_name == 'push' && startsWith(github.event.commits[0].message, '[maven-release-plugin] prepare release ') )"
     strategy:
       fail-fast: false
       matrix:
@@ -32,7 +32,7 @@ jobs:
     steps:
       - name: debug
         run: |
-          echo ${{ github.event.name == 'push' }}
+          echo ${{ github.event_name == 'push' }}
           echo ${{ github.event.commits[0].message }}
           echo ${{ startsWith(github.event.commits[0].message, '[maven-release-plugin] prepare release ') }}
           
@@ -143,4 +143,4 @@ jobs:
             "plantuml-${RELEASE_VERSION}-javadoc.jar" \
             "plantuml-${RELEASE_VERSION}-sources.jar"
 
-          echo "::notice title=::Released at ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG} 🎉"
+          echo "::notice title=::Released ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG} 🎉"
