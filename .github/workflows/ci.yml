@@ -30,7 +30,7 @@ jobs:
       release_version: ${{ steps.configure_release.outputs.release_version }}
     steps:
       - run: |
-          echo "1 ${{ toJSON(github.event.commits) }}"
+          echo "1 ${{ toJSON(github.event.commits[0]) }}"
           echo "2 {{ github.event.commits.0.[message] }}"
           echo "one_commit {{ github.event.commits.1 == null }}"
           exit 1
