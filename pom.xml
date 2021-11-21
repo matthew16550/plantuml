@@ -35,7 +35,7 @@
 
     <groupId>net.sourceforge.plantuml</groupId>
     <artifactId>plantuml</artifactId>
-    <version>9-ML</version>
+    <version>10-ML</version>
     <packaging>jar</packaging>
 
     <name>PlantUML</name>
@@ -135,7 +135,7 @@
 		<connection>${scm.connection}</connection>
 		<developerConnection>${scm.connection}</developerConnection>
 		<url>https://github.com/plantuml/plantuml</url>
-	  <tag>v9-ML</tag>
+	  <tag>v10-ML</tag>
   </scm>
 
     <issueManagement>
