@@ -29,11 +29,6 @@ jobs:
     outputs:
       release_version: ${{ steps.configure_release.outputs.release_version }}
     steps:
-      - run: |
-          echo "msg ${{ toJSON(github.event.commits) }}"
-          echo "one_commit ${{ github.event.commits[1] == null }}"
-          exit 1
-          
       - name: Checkout the repository
         uses: actions/checkout@v2
 
@@ -83,12 +78,14 @@ jobs:
         env:
           ACTOR: ${{ github.actor }}
           COMMIT_MESSAGE: ${{ github.event.commits[0].message }}
+          ONE_COMMIT: ${{ github.event.commits[1] == null }}
         run: |
           POM_VERSION="$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' exec:exec)"
 
           cat <<-EOF
             ::group::Debug Info
             GITHUB_EVENT_NAME       : '${GITHUB_EVENT_NAME}'
+            ONE_COMMIT              : '${ONE_COMMIT}'
             COMMIT_MESSAGE          : '${COMMIT_MESSAGE}'
             ACTOR                   : '${ACTOR}'
             GITHUB_REPOSITORY_OWNER : '${GITHUB_REPOSITORY_OWNER}'
@@ -99,6 +96,7 @@ jobs:
           # (We match against github.repository_owner as a kludge so that forked repos can release themselves when testing the workflow)
 
           if [[ "${GITHUB_EVENT_NAME}" == "push" \
+                && "${ONE_COMMIT}" == true \
                 && "${COMMIT_MESSAGE}" == "[maven-release-plugin] prepare release ${POM_VERSION}" \
                 && ( "${ACTOR}" == "arnaudroques" || "${ACTOR}" == "${GITHUB_REPOSITORY_OWNER}" ) \
              ]]; then
