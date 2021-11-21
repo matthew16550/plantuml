@@ -1,8 +1,8 @@
 name: Snapshot Release
 
 on:
-  push:
-    branches: [ snapshot-release-2 ]
+#  push:
+#    branches: [ snapshot-release-2 ]
   workflow_dispatch:
   workflow_run:
     workflows: [ CI ]
@@ -11,7 +11,7 @@ on:
 concurrency:
   group: snapshot_release
   cancel-in-progress: true
- 
+
 jobs:
   snapshot_release:
     runs-on: ubuntu-latest
@@ -55,6 +55,7 @@ jobs:
             					history(first: 100, since: $since) {
             					  edges {
             						node {
+                                      message
             						  oid
             						  url
             						  checkSuites(first: 100) {
@@ -80,6 +81,11 @@ jobs:
 
             	if (snapshotSha && snapshotSha === commit.oid) {
             		core.notice(`Snapshot is already at the newest possible commit ${currentSnapshot.url}`)
+            		return
+            	}
+            
+            	if (commit.message.startsWith("[maven-release-plugin] prepare release ")) {
+            		core.notice("Ignoring release commit")
             		return
             	}
 

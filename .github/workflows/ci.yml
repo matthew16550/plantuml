@@ -6,7 +6,7 @@ on:
     types: [ opened, synchronize, reopened ]
   push:
     branches:
-      - master
+      - snapshot-release-2
   workflow_dispatch:
 
 defaults:
