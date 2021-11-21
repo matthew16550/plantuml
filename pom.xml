@@ -35,7 +35,7 @@
 
     <groupId>net.sourceforge.plantuml</groupId>
     <artifactId>plantuml</artifactId>
-    <version>7-ML-SNAPSHOT</version>
+    <version>7-ML</version>
     <packaging>jar</packaging>
 
     <name>PlantUML</name>
@@ -135,7 +135,7 @@
 		<connection>${scm.connection}</connection>
 		<developerConnection>${scm.connection}</developerConnection>
 		<url>https://github.com/plantuml/plantuml</url>
-	  <tag>v3-ML</tag>
+	  <tag>v7-ML</tag>
   </scm>
 
     <issueManagement>
@@ -251,7 +251,7 @@
                 <artifactId>maven-release-plugin</artifactId>
 				<version>3.0.0-M4</version>
                 <configuration>
-					<preparationGoals>clean </preparationGoals>
+<!--					<preparationGoals>validate</preparationGoals>-->
 					<tagNameFormat>v@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
