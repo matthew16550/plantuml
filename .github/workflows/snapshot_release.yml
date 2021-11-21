@@ -84,15 +84,15 @@ jobs:
             	}
             
             	if (commit.message.startsWith("[maven-release-plugin] prepare release ")) {
-            		core.notice("Ignoring release commit")
-            		return
+            		core.info("Ignoring release commit")
+            		continue
             	}
 
             	for (let suite of commit.checkSuites.nodes) {
             		const run = suite.workflowRun
             		if (run && run.workflow.name === "CI" && suite.conclusion === "SUCCESS") {
                         if (run.runNumber > 451) {
-                          core.notice("TODO skipping >451")
+                          core.info("TODO skipping >451")
                           continue
                         }
             			core.notice([
@@ -109,7 +109,7 @@ jobs:
             }
 
             // We could look at more commits by paging the history() query but it should never be relevant so not implemented
-            core.setFailed(`Nothing found from ${commits.length} newest commits`)
+            core.warning(`Nothing found from ${commits.length} newest commits`)
 
       - name: Checkout the repository
         if: steps.config.outputs.sha
