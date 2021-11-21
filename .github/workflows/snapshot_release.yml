@@ -1,4 +1,4 @@
-name: Snapshot Release
+name: Ensure snapshot release is up to date
 
 on:
 #  push:
