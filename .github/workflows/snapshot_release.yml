@@ -91,6 +91,10 @@ jobs:
             	for (let suite of commit.checkSuites.nodes) {
             		const run = suite.workflowRun
             		if (run && run.workflow.name === "CI" && suite.conclusion === "SUCCESS") {
+                        if (run.runNumber > 451) {
+                          core.notice("TODO skipping >451")
+                          continue
+                        }
             			core.notice([
                             `Updating to run #${run.runNumber}`,
                             `Commit : ${commit.url}`,
