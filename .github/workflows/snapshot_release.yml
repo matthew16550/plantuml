@@ -96,7 +96,7 @@ jobs:
                           continue
                         }
             			core.notice([
-                            `Updating to run #${run.runNumber}`,
+                            `Updating to run [#${run.runNumber}](${run.url})`,
                             `Commit : ${commit.url}`,
                             `Run    : ${run.url}`,
                         ].join("\n"))
