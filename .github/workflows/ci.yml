@@ -91,7 +91,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/scripts/configure_snapshot_refresh.js')
-            await script({context, core, github}))
+            await script({context, core, github})
 
       - name: Checkout the repository
         if: steps.config.outputs.sha

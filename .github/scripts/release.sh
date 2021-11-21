@@ -2,6 +2,7 @@
 set -ex
 
 cat <<-EOF >release-notes.txt
+
 EOF
 
 mv plantuml.jar         "plantuml-${RELEASE_VERSION}.jar"
