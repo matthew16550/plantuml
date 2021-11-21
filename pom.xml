@@ -126,8 +126,8 @@
     </licenses>
 
 	<scm>
-		<connection>scm:git:https://github.com/plantuml/plantuml.git</connection>
-		<developerConnection>scm:git:https://github.com/plantuml/plantuml.git</developerConnection>
+		<connection>scm:git:https://github.com/matthew16550/plantuml.git</connection>
+		<developerConnection>scm:git:https://github.com/matthew16550/plantuml.git</developerConnection>
 		<url>https://github.com/plantuml/plantuml</url>
 	  <tag>HEAD</tag>
   </scm>
