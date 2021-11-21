@@ -252,6 +252,7 @@
 				<version>3.0.0-M4</version>
                 <configuration>
 					<preparationGoals>validate</preparationGoals>
+					<pushChanges>false</pushChanges>
 					<tagNameFormat>v@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
