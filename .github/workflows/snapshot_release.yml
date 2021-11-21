@@ -91,15 +91,7 @@ jobs:
             	for (let suite of commit.checkSuites.nodes) {
             		const run = suite.workflowRun
             		if (run && run.workflow.name === "CI" && suite.conclusion === "SUCCESS") {
-                        if (run.runNumber > 451) {
-                          core.info("TODO skipping >451")
-                          continue
-                        }
-            			core.notice([
-                            `Updating to run [#${run.runNumber}](${run.url})`,
-                            `Commit : ${commit.url}`,
-                            `Run    : ${run.url}`,
-                        ].join("\n"))
+            			core.notice(`Updating to run #${run.runNumber} ${run.url}\n(commit ${commit.url})`)
             			core.setOutput("artifact_name", `${run.runNumber}-jars`);
             			core.setOutput("run_id", run.databaseId);
             			core.setOutput("sha", commit.oid);
