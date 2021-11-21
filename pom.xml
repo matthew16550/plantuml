@@ -35,7 +35,7 @@
 
     <groupId>net.sourceforge.plantuml</groupId>
     <artifactId>plantuml</artifactId>
-    <version>2-ML</version>
+    <version>3-ML-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>PlantUML</name>
@@ -134,7 +134,7 @@
 		<connection>${scm.connection}</connection>
 		<developerConnection>${scm.connection}</developerConnection>
 		<url>https://github.com/plantuml/plantuml</url>
-	  <tag>v2-ML</tag>
+	  <tag>HEAD</tag>
   </scm>
 
     <issueManagement>
