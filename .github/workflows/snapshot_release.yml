@@ -15,6 +15,11 @@ jobs:
   snapshot_release:
     runs-on: ubuntu-latest
     steps:
+      - name: debug
+        env:
+          EVENT: ${{ toJSON(github.event) }}
+        run: echo "${EVENT}"
+        
       - name: Configure job
         id: config
         uses: actions/github-script@v5
