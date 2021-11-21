@@ -109,18 +109,23 @@ jobs:
         with:
           ref: ${{ steps.config.outputs.sha }}
 
-      - name: Create release
+      - name: Download jars
         if: steps.config.outputs.sha
         env:
           ARTIFACT_NAME: ${{ steps.config.outputs.artifact_name }}
           GITHUB_TOKEN: ${{ github.token }}
-          RELEASE_VERSION: SNAPSHOT
           RUN_ID: ${{ steps.config.outputs.run_id }}
-          SNAPSHOT_SHA: ${{ steps.config.outputs.sha }}
+        run: gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
+
+      - name: Create release
+        if: steps.config.outputs.sha
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: SNAPSHOT
+          RELEASE_SHA: ${{ steps.config.outputs.sha }}
           TAG: snapshot
         run: |
           set -x
-          gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
 
           cat <<-EOF >release-notes.txt
             This is a pre-release of the latest development work.
@@ -136,7 +141,7 @@ jobs:
           mv plantuml-javadoc.jar "plantuml-${RELEASE_VERSION}-javadoc.jar"
           mv plantuml-sources.jar "plantuml-${RELEASE_VERSION}-sources.jar"
 
-          gh release create --prerelease --target "${SNAPSHOT_SHA}" --title "${TAG}" --notes-file release-notes.txt "${TAG}" \
+          gh release create --prerelease --target "${RELEASE_SHA}" --title "${TAG}" --notes-file release-notes.txt "${TAG}" \
             "plantuml-${RELEASE_VERSION}.jar" \
             "plantuml-${RELEASE_VERSION}-javadoc.jar" \
             "plantuml-${RELEASE_VERSION}-sources.jar"

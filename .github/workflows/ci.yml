@@ -13,44 +13,6 @@ defaults:
     shell: bash
 
 jobs:
-  workflow_config:
-    runs-on: ubuntu-latest
-    outputs:
-      do_release: ${{ steps.config.outputs.do_release }}
-      pom_version: ${{ steps.config.outputs.pom_version }}
-    steps:
-      - name: Configure workflow
-        id: config
-        env:
-          ACTOR: ${{ github.actor }}
-          EVENT_ACTION: ${{ github.event.action }}
-          REF_TYPE: ${{ github.event.ref_type }}
-          REF: ${{ github.event.ref }}
-        run: |
-          cat <<-EOF
-            ::group::Debug Info
-            GITHUB_EVENT_NAME       : '${GITHUB_EVENT_NAME}'
-            EVENT_ACTION            : '${EVENT_ACTION}'
-            REF_TYPE                : '${REF_TYPE}'
-            REF                     : '${REF}'
-            ACTOR                   : '${ACTOR}'
-            GITHUB_REPOSITORY_OWNER : '${GITHUB_REPOSITORY_OWNER}'
-            ::endgroup::
-          EOF
-
-          # Do a release when a git tag starting with 'v' has been created by a suitable user.
-          # (We match against github.repository_owner as a kludge so that forked repos can release themselves when testing the workflow)
-
-          if [[ "${GITHUB_EVENT_NAME}" == "create" && "${REF_TYPE}" == "tag" && "${REF}" == v* && \
-                ( "${ACTOR}" == "arnaudroques" || "${ACTOR}" == "${GITHUB_REPOSITORY_OWNER}" ) \
-             ]]; then
-            echo "::notice title=::This run will release '${REF}'"
-            echo "::set-output name=do_release::true"
-            echo "::set-output name=pom_version::${REF#v}"  # pom_version is the tag without the 'v' prefix
-          else
-            echo "This run will NOT make a release"
-          fi
-
   # We run the tests on many OS / Java combinations but also the Compile step because some users build
   # their own jars from source, so it is good for CI to check that is working on all combinations.
   build:
@@ -58,13 +20,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-#        java_version: [ 8, 11, 17 ]
-#        os: [ macos-10.15,  macos-11, ubuntu-18.04, ubuntu-20.04, windows-2016, windows-2019, windows-2022 ]
+        #        java_version: [ 8, 11, 17 ]
+        #        os: [ macos-10.15,  macos-11, ubuntu-18.04, ubuntu-20.04, windows-2016, windows-2019, windows-2022 ]
         include:
           - release_from_this_build: true
             os: ubuntu-20.04
             java_version: 8
     runs-on: ${{ matrix.os }}
+    outputs:
+      release_version: ${{ steps.configure_release.outputs.release_version }}
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
@@ -79,13 +43,6 @@ jobs:
       # Downloading all the dependencies is very log spammy, so we do this in its own step.
       - name: Prime maven cache
         run: mvn --batch-mode dependency:go-offline
-
-      # POM version is usually a -SNAPSHOT at this point, if this is a release then we use the version derived from the tag
-      - name: Set POM version
-        if: needs.workflow_config.outputs.do_release == 'true'
-        env:
-          POM_VERSION: ${{ needs.workflow_config.outputs.pom_version }}
-        run: mvn --batch-mode versions:set "-DnewVersion=${POM_VERSION}"
 
       # Compile / Test / Package are separate steps so the reason for any failure is more obvious in GitHub UI
       - name: Compile
@@ -116,31 +73,64 @@ jobs:
             !target/*-javadoc.jar
             !target/*-sources.jar
 
+      - name: Configure release job
+        id: configure_release
+        if: matrix.release_from_this_build
+        env:
+          ACTOR: ${{ github.actor }}
+          REF_TYPE: ${{ github.event.ref_type }}
+          REF: ${{ github.event.ref }}
+        run: |
+          POM_VERSION="$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' exec:exec)
+
+          cat <<-EOF
+            ::group::Debug Info
+            GITHUB_EVENT_NAME       : '${GITHUB_EVENT_NAME}'
+            REF                     : '${REF}'
+            ACTOR                   : '${ACTOR}'
+            GITHUB_REPOSITORY_OWNER : '${GITHUB_REPOSITORY_OWNER}'
+            POM_VERSION             : '${POM_VERSION}'
+            ::endgroup::
+          EOF
+
+          # (We match against github.repository_owner as a kludge so that forked repos can release themselves when testing the workflow)
+
+          if [[ "${GITHUB_EVENT_NAME}" == "push" && "${REF}" == "refs/tags/v${POM_VERSION}" && \
+                ( "${ACTOR}" == "arnaudroques" || "${ACTOR}" == "${GITHUB_REPOSITORY_OWNER}" ) \
+             ]]; then
+            echo "::notice title=::This run will release '${POM_VERSION}'"
+            echo "::set-output name=release_version::${POM_VERSION}"
+          else
+            echo "This run will NOT make a release"
+          fi
+
   release:
-    needs: [ workflow_config, build ]
-    if: needs.workflow_config.outputs.do_release == 'true'
+    needs: [ build ]
+    if: needs.build.outputs.release_version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
+      - name: Download jars
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ github.run_number }}-jars
+
       - name: Create release in GitHub
         env:
-          ARTIFACT_NAME: ${{ github.run_number }}-jars
           GITHUB_TOKEN: ${{ github.token }}
-          RELEASE_VERSION: ${{ needs.workflow_config.outputs.pom_version }}
-          RUN_ID: ${{ github.run_id }}
-          SNAPSHOT_SHA: ${{ github.sha }}
-          TAG: ${{ github.event.ref }}
+          RELEASE_VERSION: ${{ needs.build.outputs.release_version }}
+          RELEASE_SHA: ${{ github.sha }}
+          TAG: v${{ needs.build.outputs.release_version }}
         run: |
           set -x
-          gh run download "${RUN_ID}" -n "${ARTIFACT_NAME}"
 
           mv plantuml.jar         "plantuml-${RELEASE_VERSION}.jar"
           mv plantuml-javadoc.jar "plantuml-${RELEASE_VERSION}-javadoc.jar"
           mv plantuml-sources.jar "plantuml-${RELEASE_VERSION}-sources.jar"
 
-          gh release create --target "${SNAPSHOT_SHA}" --title "${TAG}" "${TAG}" \
+          gh release create --target "${RELEASE_SHA}" --title "${TAG}" "${TAG}" \
             "plantuml-${RELEASE_VERSION}.jar" \
             "plantuml-${RELEASE_VERSION}-javadoc.jar" \
             "plantuml-${RELEASE_VERSION}-sources.jar"

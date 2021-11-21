@@ -246,8 +246,7 @@
 				<version>3.0.0-M4</version>
                 <configuration>
 					<preparationGoals>validate</preparationGoals>
-					<remoteTagging>false</remoteTagging>
-<!--					<tagNameFormat>v@{project.version}</tagNameFormat>-->
+					<tagNameFormat>v@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
 			<plugin>
