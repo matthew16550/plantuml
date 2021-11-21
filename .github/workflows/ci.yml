@@ -80,7 +80,7 @@ jobs:
           REF_TYPE: ${{ github.event.ref_type }}
           REF: ${{ github.event.ref }}
         run: |
-          POM_VERSION="$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' exec:exec)
+          POM_VERSION="$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' exec:exec)"
 
           cat <<-EOF
             ::group::Debug Info
