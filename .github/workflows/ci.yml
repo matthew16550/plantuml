@@ -30,7 +30,7 @@ jobs:
       release_version: ${{ steps.configure_release.outputs.release_version }}
     steps:
       - run: |
-          echo "msg ${{ github.event.commits[0].message }}"
+          echo "msg ${{ toJSON(github.event.commits) }}"
           echo "one_commit ${{ github.event.commits[1] == null }}"
           exit 1
           
@@ -99,7 +99,7 @@ jobs:
           # (We match against github.repository_owner as a kludge so that forked repos can release themselves when testing the workflow)
 
           if [[ "${GITHUB_EVENT_NAME}" == "push" \
-                && "${COMMIT_MESSAGE}" == "[maven-release-plugin] prepare release "* \
+                && "${COMMIT_MESSAGE}" == "[maven-release-plugin] prepare release ${POM_VERSION}" \
                 && ( "${ACTOR}" == "arnaudroques" || "${ACTOR}" == "${GITHUB_REPOSITORY_OWNER}" ) \
              ]]; then
             echo "::notice title=::This run will release '${POM_VERSION}'"
