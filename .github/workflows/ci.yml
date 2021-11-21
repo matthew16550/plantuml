@@ -112,6 +112,15 @@ jobs:
           echo "::notice title=::This run will release '${POM_VERSION}'"
           echo "::set-output name=release_version::${POM_VERSION}"
 
+  refresh_snapshot_release:
+    needs: [ build ]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/snapshot-release-2' && !needs.build.outputs.release_version
+    concurrency:
+      group: refresh_snapshot_release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/snapshot_release
+      
   release:
     needs: [ build ]
     if: needs.build.outputs.release_version
