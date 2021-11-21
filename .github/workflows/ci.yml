@@ -16,7 +16,6 @@ jobs:
   # We run the tests on many OS / Java combinations but also the Compile step because some users build
   # their own jars from source, so it is good for CI to check that is working on all combinations.
   build:
-    needs: workflow_config
     strategy:
       fail-fast: false
       matrix:
