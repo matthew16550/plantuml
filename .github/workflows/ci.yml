@@ -1,7 +1,6 @@
 name: CI
 
 on:
-  create:
   pull_request:
     types: [ opened, synchronize, reopened ]
   push:
