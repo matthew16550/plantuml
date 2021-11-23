@@ -16,7 +16,8 @@ jobs:
   # We run the tests on many OS / Java combinations but also the Compile step because some users build
   # their own jars from source, so it is good for CI to check that is working on all combinations.
   build:
-    if: "!( github.event_name == 'push' && startsWith(github.event.commits[0].message, '[maven-release-plugin] prepare release ') )"
+    if: "false"
+#    if: "!( github.event_name == 'push' && startsWith(github.event.commits[0].message, '[maven-release-plugin] prepare release ') )"
     strategy:
       fail-fast: false
       matrix:
@@ -104,7 +105,7 @@ jobs:
         run: .github/scripts/configure_release_job.sh
 
   refresh_snapshot:
-    needs: [ build ]
+#    needs: [ build ]
     concurrency:
       group: refresh_snapshot
     runs-on: ubuntu-latest

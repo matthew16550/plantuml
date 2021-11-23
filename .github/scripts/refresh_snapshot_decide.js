@@ -63,7 +63,7 @@ async function packageVersionExists(name, version, context, github) {
 			await github.graphql(`
 					query($owner: String!, $repo: String!, $name: String!, $version: String!) {
 					  repository(owner: $owner, name: $repo) {
-						packages(first: 1, names: $name) {
+						packages(first: 1, names: [$name]) {
 						  nodes {
 							version(version: $version) {
 							  id
