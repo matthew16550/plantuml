@@ -32,13 +32,17 @@ module.exports = async ({context, core, github}) => {
 }
 
 async function findCurrentSnapshot(context, github) {
-	const currentSnapshot = (
-			await github.rest.repos.getReleaseByTag({
-				...context.repo,
-				tag: "snapshot",
-			})
-	).target_commitish  // todo null?
-	return currentSnapshot;
+	try {
+		const response = await github.rest.repos.getReleaseByTag({
+			...context.repo,
+			tag: "snapshot",
+		})
+		return response.target_commitish
+	} catch (error) {
+		if (error.status === 404)
+			return null;
+		throw error
+	}
 }
 
 async function findNewestCommits(head, context, github) {

@@ -106,11 +106,17 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const response = await github.rest.repos.getReleaseByTag({
+            try {
+              const response = await github.rest.repos.getReleaseByTag({
                 ...context.repo,
                 tag: "snapshot",
-            })
-            console.log(response)
+              })
+              console.log(response)
+            } catch (error) {
+              if (error.status === 404)
+                return null;
+              throw error
+            }
 
       - name: Decide if the snapshot needs refreshing
         id: decide
