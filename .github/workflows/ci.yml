@@ -24,6 +24,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
+          set -x
           #PACKAGE_POM_STATUS=$( curl -o /dev/null --silent --head --write-out '%{http_code}'
           #  "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@maven.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/plantuml/net/sourceforge/plantuml/plantuml/${GITHUB_SHA}/plantuml-${GITHUB_SHA}.jar"
           #)
