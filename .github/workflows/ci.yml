@@ -13,11 +13,66 @@ defaults:
     shell: bash
 
 jobs:
+  workflow_config:
+    runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.config.outputs.release_version }}
+      publish_sha_versioned_package: ${{ steps.config.outputs.publish_sha_versioned_package }}
+    steps:
+      - name: Configure workflow
+        id: config
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          POM_VERSION="$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' exec:exec)"
+
+          PACKAGE_POM_STATUS=$( curl -o /dev/null --silent --head --write-out '%{http_code}'
+            "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@maven.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/plantuml/net/sourceforge/plantuml/plantuml/${GITHUB_SHA}/plantuml-${GITHUB_SHA}.jar"
+          )
+        
+          cat <<-EOF
+          GITHUB_EVENT_NAME       : '${GITHUB_EVENT_NAME}'
+          GITHUB_REF              : '${GITHUB_REF}'
+          GITHUB_ACTOR            : '${GITHUB_ACTOR}'
+          GITHUB_REPOSITORY_OWNER : '${GITHUB_REPOSITORY_OWNER}'
+          POM_VERSION             : '${POM_VERSION}'
+          PACKAGE_POM_STATUS      : '${PACKAGE_POM_STATUS}'
+          EOF
+        
+          if [[ "${GITHUB_EVENT_NAME}" !~ push|workflow_dispatch ]]; then
+            echo "This run will not publish because wrong event type"
+            exit 0
+          fi
+        
+          if [[ "${GITHUB_REF}" == "refs/heads/snapshot-release-2" ]]; then
+            if [[ "${PACKAGE_POM_STATUS}" == 200 ]]; then
+              echo "::notice title=::This run will not publish a sha versioned package because one already exists"
+            else
+              echo "::notice title=::This run will publish a sha versioned package"
+              echo "::set-output name=publish_sha_versioned_package::true}"
+            fi
+            exit 0
+          fi
+
+          if [[ "${GITHUB_REF}" != "refs/tags/v${POM_VERSION}" ]]; then
+            echo "This run will not publish a release because not a matching version tag"
+            exit 0
+          fi
+        
+          # We match against GITHUB_REPOSITORY_OWNER as a kludge so that forked repos can release themselves when testing the workflow
+          if [[ "${GITHUB_ACTOR}" == "arnaudroques" || "${GITHUB_ACTOR}" == "${GITHUB_REPOSITORY_OWNER}" ]]; then
+            echo "This run will not publish a release because wrong actor"
+            exit 0
+          fi
+        
+          echo "::notice title=::This run will release '${POM_VERSION}'"
+          echo "::set-output name=release_version::${POM_VERSION}"
+        
   # We run the tests on many OS / Java combinations but also the Compile step because some users build
   # their own jars from source, so it is good for CI to check that is working on all combinations.
   build:
-    if: "false"
-#    if: "!( github.event_name == 'push' && startsWith(github.event.commits[0].message, '[maven-release-plugin] prepare release ') )"
+    needs: [ workflow_config ]
+    if: "!( github.event_name == 'push' && startsWith(github.event.commits[0].message, '[maven-release-plugin] prepare release ') )"
     strategy:
       fail-fast: false
       matrix:
@@ -45,8 +100,8 @@ jobs:
       - name: Prime maven cache
         run: mvn --batch-mode dependency:go-offline
 
-      - name: Set pom version for snapshot TODO
-        if: matrix.release_from_this_build
+      - name: Set pom version to git sha
+        if: matrix.release_from_this_build && needs.workflow_config.outputs.publish_sha_versioned_package
         run: mvn versions:set "-DnewVersion=${GITHUB_SHA}"
 
       # Compile / Test / Package are separate steps so the reason for any failure is more obvious in GitHub UI
@@ -69,32 +124,17 @@ jobs:
           name: ${{ github.run_number }}-jars
           path: target/*.jar
 
-      - name: Deploy sha versioned package to Github Packages
-        if: matrix.release_from_this_build && github.event_name == 'push' && github.ref == 'refs/heads/snapshot-release-2'
+      - name: Publish package to Github Packages
+        if: matrix.release_from_this_build && needs.workflow_config.outputs.publish_sha_versioned_package
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           mvn --batch-mode package deploy:deploy \
-            -DaltDeploymentRepository=github::https://maven.pkg.github.com/matthew16550/plantuml \
-            -Dmaven.test.skip=true
-
-      - name: Upload jar artifact (only simple jar - without javadoc or sources)
-        if: ${{ matrix.release_from_this_build }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: plantuml-jar
-          path: |
-            target/*.jar
-            !target/*-javadoc.jar
-            !target/*-sources.jar
-
-      - name: Configure release job
-        id: configure_release
-        if: matrix.release_from_this_build
-        run: .github/scripts/configure_release_job.sh
+            "-DaltDeploymentRepository=github::https://maven.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/plantuml" \
+            "-Dmaven.test.skip=true"
 
   refresh_snapshot:
-#    needs: [ build ]
+    needs: [ build ]
     concurrency:
       group: refresh_snapshot
     runs-on: ubuntu-latest
@@ -102,36 +142,13 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
-      - name: debug
-        uses: actions/github-script@v5
-        with:
-          script: |
-            try {
-              const response = await github.rest.repos.getReleaseByTag({
-                ...context.repo,
-                tag: "snapshot",
-              })
-              console.log(response)
-            } catch (error) {
-              if (error.status === 404)
-                return null;
-              throw error
-            }
-
-      - name: Decide if the snapshot needs refreshing
+      - name: Decide if the snapshot release needs refreshing
         id: decide
         uses: actions/github-script@v5
         with:
           script: |
             const script = require('.github/scripts/refresh_snapshot_decide.js')
             await script({context, core, github})
-
-#      - name: Write .netrc file
-#        if: steps.decide.outputs.new_sha
-#        env:
-#          LOGIN: ${{ github.repository_owner }}
-#          PASSWORD: ${{ github.token }}
-#        run: echo "machine maven.pkg.github.com login $LOGIN password $PASSWORD" >> ~/.netrc
 
       - name: Refresh snapshot release
         if: steps.decide.outputs.new_sha
@@ -141,8 +158,8 @@ jobs:
         run: .github/scripts/refresh_snapshot.sh
 
   release:
-    needs: [ build ]
-    if: needs.build.outputs.release_version
+    needs: [ workflow_config, build ]
+    if: needs.workflow_config.outputs.release_version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
@@ -156,7 +173,12 @@ jobs:
       - name: Create release in GitHub
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          RELEASE_VERSION: ${{ needs.build.outputs.release_version }}
-          RELEASE_SHA: ${{ github.sha }}
-          TAG: v${{ needs.build.outputs.release_version }}
-        run: .github/scripts/release.sh
+          RELEASE_VERSION: ${{ needs.workflow_config.outputs.release_version }}
+          TAG: v${{ needs.workflow_config.outputs.release_version }}
+        run: |
+          gh release create --target "${GITHUB_SHA}" --title "${TAG}" --notes '' "${TAG}" \
+            "plantuml-${RELEASE_VERSION}.jar" \
+            "plantuml-${RELEASE_VERSION}-javadoc.jar" \
+            "plantuml-${RELEASE_VERSION}-sources.jar"
+
+          echo "::notice title=::Released ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG} 🎉"
