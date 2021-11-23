@@ -73,8 +73,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          cat ~/.m2/settings.xml
-          mvn -X --batch-mode package deploy:deploy \
+          mvn --batch-mode package deploy:deploy \
             -DaltDeploymentRepository=github::https://maven.pkg.github.com/matthew16550/plantuml \
             -Dmaven.test.skip=true
 
@@ -99,23 +98,26 @@ jobs:
       group: refresh_snapshot
     runs-on: ubuntu-latest
     steps:
-      - name: Configure job
-        id: config
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Decide if the snapshot needs refreshing
+        id: decide
         uses: actions/github-script@v5
         with:
           script: |
-            const script = require('.github/scripts/refresh_snapshot_configure.js')
+            const script = require('.github/scripts/refresh_snapshot_decide.js')
             await script({context, core, github})
 
 #      - name: Write .netrc file
-#        if: steps.config.outputs.new_sha
+#        if: steps.decide.outputs.new_sha
 #        env:
 #          LOGIN: ${{ github.repository_owner }}
 #          PASSWORD: ${{ github.token }}
 #        run: echo "machine maven.pkg.github.com login $LOGIN password $PASSWORD" >> ~/.netrc
 
       - name: Refresh snapshot release
-        if: steps.config.outputs.new_sha
+        if: steps.decide.outputs.new_sha
         env:
           GITHUB_TOKEN: ${{ github.token }}
           RELEASE_SHA: ${{ steps.config.outputs.new_sha }}
