@@ -37,7 +37,7 @@ jobs:
           PACKAGE_POM_STATUS      : '${PACKAGE_POM_STATUS}'
           EOF
         
-          if [[ "${GITHUB_EVENT_NAME}" =~ push|workflow_dispatch
+          if [[ "${GITHUB_EVENT_NAME}" =~ "push|workflow_dispatch" \
                 && "${GITHUB_REF_NAME}" == "branch" && "${GITHUB_REF_TYPE}" == "snapshot-release-2" ]]; then
             if [[ "${PACKAGE_POM_STATUS}" == 200 ]]; then
               echo "::notice title=::This run will not publish a sha versioned package because one already exists"
@@ -49,7 +49,7 @@ jobs:
           fi
        
           # We match against GITHUB_REPOSITORY_OWNER as a kludge so that forked repos can release themselves when testing the workflow
-          if [[ "${GITHUB_EVENT_NAME}" == push && "${GITHUB_REF_NAME}" == "tag" && "${GITHUB_REF_TYPE}" == v* 
+          if [[ "${GITHUB_EVENT_NAME}" == push && "${GITHUB_REF_NAME}" == "tag" && "${GITHUB_REF_TYPE}" == v* \
                 && ("${GITHUB_ACTOR}" == "arnaudroques" || "${GITHUB_ACTOR}" == "${GITHUB_REPOSITORY_OWNER}") ]]; then
             RELEASE_VERSION="${GITHUB_REF_NAME#v*}"
             echo "::notice title=::This run will release '${RELEASE_VERSION}'"
