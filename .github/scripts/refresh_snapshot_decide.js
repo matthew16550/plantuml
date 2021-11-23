@@ -48,7 +48,7 @@ async function findNewestCommits(head, context, github) {
           			  repository(owner: $owner, name: $repo) {
           				object(expression: $head) {
           				  ... on Commit {
-          					history(first: 100, since: $since) {
+          					history(first: 100) {
 							  nodes {
 								oid
 								url
