@@ -3,7 +3,7 @@ set -ex
 
 TAG=snapshot
 
-url="https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@maven.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/plantuml/net/sourceforge/plantuml/plantuml/${RELEASE_SHA}/plantuml-${RELEASE_SHA}"
+url="https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@maven.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/plantuml/net/sourceforge/plantuml/plantuml/${RELEASE_SHA}-SNAPSHOT/plantuml-${RELEASE_SHA}-SNAPSHOT"
 
 # auth is read from the .netrc file
 wget -q "${url}.jar"         -O plantuml-SNAPSHOT.jar 

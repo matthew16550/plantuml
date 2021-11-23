@@ -20,7 +20,7 @@ module.exports = async ({context, core, github}) => {
 			return
 		}
 
-		if (await packageVersionExists("net.sourceforge.plantuml.plantuml", sha, context, github)) {
+		if (await packageVersionExists("net.sourceforge.plantuml.plantuml", `${sha}-SNAPSHOT`, context, github)) {
 			core.notice(`Updating snapshot to ${commit.url})`)
 			core.setOutput("new_sha", sha);
 			return
