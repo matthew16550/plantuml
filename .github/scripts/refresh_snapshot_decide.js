@@ -37,7 +37,7 @@ async function findCurrentSnapshot(context, github) {
 			...context.repo,
 			tag: "snapshot",
 		})
-		return response.target_commitish
+		return response.data.target_commitish
 	} catch (error) {
 		if (error.status === 404)
 			return null;

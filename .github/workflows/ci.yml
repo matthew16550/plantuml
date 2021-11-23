@@ -137,7 +137,7 @@ jobs:
         if: steps.decide.outputs.new_sha
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          RELEASE_SHA: ${{ steps.config.outputs.new_sha }}
+          RELEASE_SHA: ${{ steps.decide.outputs.new_sha }}
         run: .github/scripts/refresh_snapshot.sh
 
   release:
