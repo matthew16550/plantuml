@@ -138,7 +138,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           RELEASE_SHA: ${{ steps.config.outputs.new_sha }}
-          REPO_OWNER: ${{ github.repository_owner }}
         run: .github/scripts/refresh_snapshot.sh
 
   release:

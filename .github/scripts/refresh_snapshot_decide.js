@@ -21,14 +21,14 @@ module.exports = async ({context, core, github}) => {
 		}
 
 		if (await packageVersionExists("net.sourceforge.plantuml.plantuml", sha, context, github)) {
-			core.notice(`Updating to ${commit.url})`)
+			core.notice(`Updating snapshot to ${commit.url})`)
 			core.setOutput("new_sha", sha);
 			return
 		}
 	}
 
 	// We could look at more commits by paging the history() query but usually it should not be relevant so not implemented yet
-	core.warning(`Nothing found from ${commits.length} newest commits`)
+	core.warning(`No possible snapshot packages found from ${commits.length} newest commits`)
 }
 
 async function findCurrentSnapshot(context, github) {
