@@ -70,7 +70,7 @@ async function packageVersionExists(name, version, context, github) {
 					} } } } }`,
 					{...context.repo, name, version}
 			)
-	).response.repository.packages.nodes
+	).repository.packages.nodes
 
 	return packages.length && packages[0].version
 }

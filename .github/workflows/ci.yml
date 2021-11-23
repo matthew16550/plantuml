@@ -31,17 +31,6 @@ jobs:
     outputs:
       release_version: ${{ steps.configure_release.outputs.release_version }}
     steps:
-      - name: debug
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const response = await github.rest.repos.getReleaseByTag({
-                ...context.repo,
-                tag: "snapshot",
-            })
-            
-            console.log(response)
-            
       - name: Checkout the repository
         uses: actions/checkout@v2
 
@@ -112,6 +101,16 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
+
+      - name: debug
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const response = await github.rest.repos.getReleaseByTag({
+                ...context.repo,
+                tag: "snapshot",
+            })
+            console.log(response)
 
       - name: Decide if the snapshot needs refreshing
         id: decide
