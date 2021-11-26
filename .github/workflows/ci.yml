@@ -7,10 +7,10 @@ on:
     branches: [ snapshot-release-2 ]
   workflow_dispatch:
     inputs:
-      build_scheduler:
-        description: Passed in from build_scheduler
+      publish_snapshot:
+        description: TODO
         required: false
-        default: ""
+        default: "false"
       release_version:
         description: Version to release
         required: false
@@ -145,15 +145,15 @@ jobs:
 #        with:
 #          name: ${{ github.run_number }}-jars
 
-      - name: Publish to Github Packages
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          mvn --batch-mode package deploy:deploy \
-            "-DaltDeploymentRepository=github::https://maven.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/plantuml" \
-            "-Dmaven.test.skip=true"
-
-          echo "::notice title=::Published 'TODO'"
+#      - name: Publish to Github Packages
+#        env:
+#          GITHUB_TOKEN: ${{ github.token }}
+#        run: |
+#          mvn --batch-mode package deploy:deploy \
+#            "-DaltDeploymentRepository=github::https://maven.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/plantuml" \
+#            "-Dmaven.test.skip=true"
+#
+#          echo "::notice title=::Published 'TODO'"
           
 #  refresh_snapshot:
 #    needs: [ publish_sha_versioned_package ]

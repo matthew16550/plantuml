@@ -26,12 +26,11 @@ jobs:
           script: |
             const script = require('.github/scripts/build_scheduler.js')
             await script({
-              branchRef: "refs/heads/snapshot-release-2"
-              markRef: "refs/tags/build_scheduler"
-              workflowPath: ".github/workflows/ci.yaml"
+              branchRef: "refs/heads/snapshot-release-2",
+              markRef: "refs/tags/build_scheduler",
+              workflowPath: ".github/workflows/ci.yaml",
               workflowInputs: {
-                build_scheduler: true,
+                publish_snapshot: "true",
               },
-              context, core, github
+              context, core, github,
             })
-            
