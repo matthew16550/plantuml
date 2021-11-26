@@ -3,8 +3,8 @@ name: CI
 on:
   pull_request:
     types: [ opened, synchronize, reopened ]
-  push:
-    branches: [ snapshot-release-2 ]
+#  push:
+#    branches: [ snapshot-release-2 ]
   workflow_dispatch:
     inputs:
       publish_snapshot:

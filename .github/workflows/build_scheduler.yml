@@ -28,7 +28,7 @@ jobs:
             await script({
               branchRef: "refs/heads/snapshot-release-2",
               markRef: "refs/tags/build_scheduler",
-              workflowPath: ".github/workflows/ci.yaml",
+              workflowPath: ".github/workflows/ci.yml",
               workflowInputs: {
                 publish_snapshot: "true",
               },

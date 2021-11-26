@@ -12,7 +12,15 @@ class BuildScheduler {
 	}
 
 	async schedule() {
-		const workFlowId = await this.findWorkflowId()
+		const workflow = await this.findWorkflow()
+		
+		this.core.info(`Target Workflow : ${workflow.html_url}`) // TODO notice
+		this.core.info(`State           : ${workflow.state}`)
+		
+		if (workflow.state !== "active") {
+			this.core.warning("Workflow not active so the scheduler will do nothing")
+			return
+		}
 
 		const markedCommit = await this.findMarkedCommit()
 
@@ -23,11 +31,11 @@ class BuildScheduler {
 
 		this.core.notice(`Mark '${this.markRef}' points to ${markedCommit.url}`)
 
-		const runs = await this.findWorkflowRuns(workFlowId, markedCommit.sha)
+		const runs = await this.findWorkflowRuns(workFlow.id, markedCommit.sha)
 
 		if (runs.length === 0) {
 			this.core.notice(`'${this.workflowPath}' has no runs for the marked commit`)
-			await this.triggerRun(workFlowId, markedCommit)
+			await this.triggerRun(workFlow.id, markedCommit)
 			return
 		}
 
@@ -44,7 +52,7 @@ class BuildScheduler {
 		const nextCommit = await this.findCommitAfter(markedCommit.sha)
 
 		if (nextCommit) {
-			await this.triggerRun(workFlowId, nextCommit)
+			await this.triggerRun(workFlow.id, nextCommit)
 			return
 		}
 
@@ -66,7 +74,7 @@ class BuildScheduler {
 		return response.repository.object
 	}
 
-	async findWorkflowId() {
+	async findWorkflow() {
 		this.core.info(`Finding '${this.workflowPath}' workflow ...`)
 		const opts = this.github.rest.actions.listRepoWorkflows.endpoint.merge({
 			...this.context.repo,
@@ -74,10 +82,8 @@ class BuildScheduler {
 		const workflows = await this.github.paginate(opts)
 		for (const workflow of workflows) {
 			console.log(workflow)
-			if (workflow.path === this.workflowPath) {
-				this.core.info(`The workflow is ${workflow.html_url}`)
-				return workflow.id
-			}
+			if (workflow.path === this.workflowPath)
+				return workflow
 		}
 		throw new Error(`Workflow not found: '${this.workflowPath}'`)
 	}
