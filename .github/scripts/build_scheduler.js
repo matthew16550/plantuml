@@ -25,17 +25,17 @@ class BuildScheduler {
 		const markedCommit = await this.findMarkedCommit()
 
 		if (!markedCommit) {
-			this.core.setFailed(`Mark '${this.markRef}' not found'`)
+			this.core.setFailed(`Mark not found: '${this.markRef}'`)
 			return
 		}
 
 		this.core.notice(`Mark '${this.markRef}' points to ${markedCommit.url}`)
 
-		const runs = await this.findWorkflowRuns(workFlow.id, markedCommit.sha)
+		const runs = await this.findWorkflowRuns(workflow.id, markedCommit.sha)
 
 		if (runs.length === 0) {
 			this.core.notice(`'${this.workflowPath}' has no runs for the marked commit`)
-			await this.triggerRun(workFlow.id, markedCommit)
+			await this.triggerRun(workflow.id, markedCommit)
 			return
 		}
 
@@ -52,7 +52,7 @@ class BuildScheduler {
 		const nextCommit = await this.findCommitAfter(markedCommit.sha)
 
 		if (nextCommit) {
-			await this.triggerRun(workFlow.id, nextCommit)
+			await this.triggerRun(workflow.id, nextCommit)
 			return
 		}
 
@@ -180,7 +180,7 @@ class BuildScheduler {
 		while (history && history.pageInfo.hasNextPage)
 	}
 
-	async triggerRun(workFlowId, commit) {
+	async triggerRun(workflowId, commit) {
 		this.core.info(`Setting '${this.markRef}' to ${commit.sha} ...`)
 
 		await this.github.rest.git.updateRef({
@@ -194,7 +194,7 @@ class BuildScheduler {
 
 		await this.github.rest.actions.createWorkflowDispatch({
 			...this.context.repo,
-			workflow_id: workFlowId,
+			workflow_id: workflowId,
 			ref: this.markRef,
 			inputs: this.workflowInputs,
 		})
