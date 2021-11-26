@@ -80,12 +80,10 @@ class BuildScheduler {
 			...this.context.repo,
 		})
 		const workflows = await this.github.paginate(opts)
-		for (const workflow of workflows) {
-			console.log(workflow)
-			if (workflow.path === this.workflowPath)
-				return workflow
-		}
-		throw new Error(`Workflow not found: '${this.workflowPath}'`)
+		const result = workflows.find(w => w.path === this.workflowPath)
+		if (!result)
+			throw new Error(`Workflow not found: '${this.workflowPath}'`)
+		return result
 	}
 
 	async findWorkflowRuns(workflowId, sha) {
@@ -103,7 +101,7 @@ class BuildScheduler {
 	}
 
 	async* queryCheckSuites(sha) {
-		let commit = null
+		let object = null
 		do {
 			let response = await this.github.graphql(`
 					query($owner: String!, $repo: String!, $sha: GitObjectID!, $cursor: String) {
@@ -122,15 +120,15 @@ class BuildScheduler {
 					{
 						...this.context.repo,
 						sha,
-						cursor: commit ? commit.pageInfo.endCursor : null,
+						cursor: object ? object.checkSuites.pageInfo.endCursor : null,
 					}
 			)
 			console.log(response)
-			commit = response.repository.object
-			if (commit)
-				yield* commit.checkSuites.nodes
+			object = response.repository.object
+			if (object)
+				yield* object.checkSuites.nodes
 		}
-		while (commit && commit.pageInfo.hasNextPage)
+		while (object && object.checkSuites.pageInfo.hasNextPage)
 	}
 
 	async findCommitAfter(currentSha) {
