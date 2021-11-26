@@ -178,6 +178,12 @@ class BuildScheduler {
 	}
 
 	async triggerRun(workflowId, commit) {
+		const temp = await this.github.rest.git.getRef({
+			...this.context.repo,
+			ref: this.markRef.substring("refs/".length),
+		});
+		console.log(temp)
+		
 		this.core.info(`Setting '${this.markRef}' to ${commit.sha} ...`)
 
 		await this.github.rest.git.updateRef({
