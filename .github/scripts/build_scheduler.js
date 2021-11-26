@@ -3,7 +3,7 @@ const COMPLETED_STATUS = "COMPLETED"
 class BuildScheduler {
 	constructor(args) {
 		this.branchRef = args.branchRef
-		this.markRef = args.markerRef
+		this.markRef = args.markRef
 		this.workflowPath = args.workflowPath
 		this.workflowInputs = args.workflowInputs
 		this.context = args.context
@@ -33,10 +33,10 @@ class BuildScheduler {
 
 		this.core.notice(
 				`'${this.workflowPath}' has these runs for the commit:\n`
-				+ workflowRuns.map(run => `${run.status.padEnd(11)} ${run.url}`).join("\n")
+				+ runs.map(run => `${run.status.padEnd(11)} ${run.url}`).join("\n")
 		)
 
-		if (workflowRuns.some(run => run.status !== COMPLETED_STATUS)) {
+		if (runs.some(run => run.status !== COMPLETED_STATUS)) {
 			this.core.notice(`Some run(s) not ${COMPLETED_STATUS} so the scheduler will do nothing`)
 			return
 		}
@@ -68,17 +68,17 @@ class BuildScheduler {
 
 	async findWorkflowId() {
 		this.core.info(`Finding '${this.workflowPath}' workflow ...`)
-		const opts = github.rest.actions.listRepoWorkflows.endpoint.merge({
-			...context.repo,
+		const opts = this.github.rest.actions.listRepoWorkflows.endpoint.merge({
+			...this.context.repo,
 		})
-		const workflows = await github.paginate(opts)
+		const workflows = await this.github.paginate(opts)
 		for (const workflow of workflows) {
-			if (workflow.path === WORKFLOW_PATH) {
+			if (workflow.path === this.workflowPath) {
 				this.core.info(`The workflow is ${workflow.html_url}`)
 				return workflow.id
 			}
 		}
-		throw new Error(`Workflow not found: '${WORKFLOW_PATH}'`)
+		throw new Error(`Workflow not found: '${this.workflowPath}'`)
 	}
 
 	async findWorkflowRuns(workflowId, sha) {
@@ -86,7 +86,7 @@ class BuildScheduler {
 		const result = []
 		for await (const suite of this.queryCheckSuites(sha)) {
 			if (suite.workflowRun && suite.workflowRun.workflow.databaseId === workflowId) {
-				workflowRuns.push({
+				result.push({
 					status: suite.status,
 					url: suite.workflowRun.url
 				})
@@ -144,7 +144,7 @@ class BuildScheduler {
 	async* queryBranchHistoryNewestFirst() {
 		let history = null
 		do {
-			const response = await github.graphql(`
+			const response = await this.github.graphql(`
 					query($owner: String!, $repo: String!, $branchRef: String!, $cursor: String) {
 					  repository(owner: $owner, name: $repo) {
 						object(expression: $branchRef) {
