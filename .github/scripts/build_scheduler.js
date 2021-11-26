@@ -2,6 +2,11 @@ const COMPLETED_STATUS = "COMPLETED"
 
 class BuildScheduler {
 	constructor(args) {
+		if (!args.branchRef.startsWith("refs/heads/"))
+			throw new Error("branchRef must start with 'refs/heads/'")
+		if (!args.markRef.startsWith("refs/"))
+			throw new Error("markRef must start with 'refs/'")
+		
 		this.branchRef = args.branchRef
 		this.markRef = args.markRef
 		this.workflowPath = args.workflowPath
@@ -123,7 +128,6 @@ class BuildScheduler {
 						cursor: object ? object.checkSuites.pageInfo.endCursor : null,
 					}
 			)
-			console.log(response)
 			object = response.repository.object
 			if (object)
 				yield* object.checkSuites.nodes
@@ -165,7 +169,6 @@ class BuildScheduler {
 						cursor: history ? history.pageInfo.endCursor : null,
 					}
 			)
-			console.log(response)
 			if (response.repository.object == null)
 				throw new Error(`No commit found for '${this.branchRef}'`)
 			history = response.repository.object.history
@@ -179,7 +182,7 @@ class BuildScheduler {
 
 		await this.github.rest.git.updateRef({
 			...this.context.repo,
-			ref: this.markRef,
+			ref: this.markRef.substring("refs/".length),
 			sha: commit.sha,
 			force: true,
 		});
