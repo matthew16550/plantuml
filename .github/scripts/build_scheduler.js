@@ -118,11 +118,7 @@ class BuildScheduler {
 								  url
 								  workflow {
 									databaseId
-								  }
-								}
-							  }
-							}
-					} } } } } }`,
+					} } } } } } } }`,
 					{
 						...this.context.repo,
 						sha,
