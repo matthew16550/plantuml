@@ -73,6 +73,7 @@ class BuildScheduler {
 		})
 		const workflows = await this.github.paginate(opts)
 		for (const workflow of workflows) {
+			console.log(workflow)
 			if (workflow.path === this.workflowPath) {
 				this.core.info(`The workflow is ${workflow.html_url}`)
 				return workflow.id
