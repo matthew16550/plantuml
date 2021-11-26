@@ -5,8 +5,20 @@ on:
     types: [ opened, synchronize, reopened ]
   push:
     branches: [ snapshot-release-2 ]
-    tags: [ v* ]
   workflow_dispatch:
+    inputs:
+      build_scheduler:
+        description: Passed in from build_scheduler
+        required: false
+        default: ""
+      release_version:
+        description: Version to release
+        required: false
+        default: ""
+      sha:
+        description: SHA of commit to build
+        required: false
+        default: ""
 
 defaults:
   run:
@@ -80,35 +92,39 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
-
-      - name: Set up java
-        uses: actions/setup-java@v2.3.1
         with:
-          java-version: ${{ matrix.java_version }}
-          distribution: temurin
-          cache: maven
+          ref: ${{ github.event.inputs.sha || github.sha }}
+#      - name: Set up java
+#        uses: actions/setup-java@v2.3.1
+#        with:
+#          java-version: ${{ matrix.java_version }}
+#          distribution: temurin
+#          cache: maven
 
       # Downloading all the dependencies is very log spammy, so we do this in its own step.
-      - name: Prime maven cache
-        run: mvn --batch-mode dependency:go-offline
+#      - name: Prime maven cache
+#        run: mvn --batch-mode dependency:go-offline
 
-      - name: Set pom version to git sha
-        if: matrix.release_from_this_build && needs.workflow_config.outputs.publish_sha_versioned_package
-        run: mvn versions:set "-DnewVersion=${GITHUB_SHA}-SNAPSHOT"
+#      - name: Set pom version
+#        if: needs.workflow_config.outputs.set_pom_version
+#        env:
+#          POM_VERSION: ${{ needs.workflow_config.outputs.set_pom_version }}
+#        run: mvn versions:set "-DnewVersion=${POM_VERSION}"
 
       # Compile / Test / Package are separate steps so the reason for any failure is more obvious in GitHub UI
-      - name: Compile
-        run: mvn --batch-mode compile
+#      - name: Compile
+#        run: mvn --batch-mode compile
 
-      - name: Test
-        run: mvn --batch-mode test
+#      - name: Test
+#        run: mvn --batch-mode test
 
-      # todo release here?
       - name: Package
         if: matrix.release_from_this_build
-        run: mvn --batch-mode -Dmaven.test.skip=true package
+        # todo sign
+        run: touch plantuml-SNAPSHOT.jar plantuml-SNAPSHOT-javadoc.jar plantuml-SNAPSHOT-sources.jar
+#        mvn --batch-mode -Dmaven.test.skip=true package
 
-      - name: Upload jar artifacts
+      - name: Upload artifacts
         if: matrix.release_from_this_build
         uses: actions/upload-artifact@v2
         with:
@@ -116,8 +132,20 @@ jobs:
           name: ${{ github.run_number }}-jars
           path: target/*.jar
 
-      - name: Publish package to Github Packages
-        if: matrix.release_from_this_build && needs.workflow_config.outputs.publish_sha_versioned_package
+#  publish_sha_versioned_package:
+#    needs: [ workflow_config, build ]
+#    if: needs.workflow_config.outputs.publish_sha_versioned_package
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout the repository
+#        uses: actions/checkout@v2
+#
+#      - name: Download jars
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: ${{ github.run_number }}-jars
+
+      - name: Publish to Github Packages
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
@@ -125,29 +153,31 @@ jobs:
             "-DaltDeploymentRepository=github::https://maven.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/plantuml" \
             "-Dmaven.test.skip=true"
 
-  refresh_snapshot:
-    needs: [ build ]
-    concurrency:
-      group: refresh_snapshot
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v2
-
-      - name: Decide if the snapshot release needs refreshing
-        id: decide
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const script = require('.github/scripts/refresh_snapshot_decide.js')
-            await script({context, core, github})
-
-      - name: Refresh snapshot release
-        if: steps.decide.outputs.new_sha
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          RELEASE_SHA: ${{ steps.decide.outputs.new_sha }}
-        run: .github/scripts/refresh_snapshot.sh
+          echo "::notice title=::Published 'TODO'"
+          
+#  refresh_snapshot:
+#    needs: [ publish_sha_versioned_package ]
+#    concurrency:
+#      group: refresh_snapshot
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout the repository
+#        uses: actions/checkout@v2
+#
+#      - name: Decide if the snapshot release needs refreshing
+#        id: decide
+#        uses: actions/github-script@v5
+#        with:
+#          script: |
+#            const script = require('.github/scripts/refresh_snapshot_decide.js')
+#            await script({context, core, github})
+#
+#      - name: Refresh snapshot release
+#        if: steps.decide.outputs.new_sha
+#        env:
+#          GITHUB_TOKEN: ${{ github.token }}
+#          RELEASE_SHA: ${{ steps.decide.outputs.new_sha }}
+#        run: .github/scripts/refresh_snapshot.sh
 
   release:
     needs: [ workflow_config, build ]
