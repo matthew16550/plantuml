@@ -1,6 +1,5 @@
 #! /usr/bin/env bash
 set -ex
-tree target
 
 nexus_dir="../nexus-staging/deferred/net/sourceforge/plantuml/plantuml/${STAGING_VERSION}"
 release_dir="target/github_release"
@@ -15,5 +14,3 @@ ln -s "${nexus_dir}/plantuml-${STAGING_VERSION}-javadoc.jar"     "${release_dir}
 ln -s "${nexus_dir}/plantuml-${STAGING_VERSION}-javadoc.jar.asc" "${release_dir}/plantuml-${RELEASE_VERSION}-javadoc.jar.asc"
 ln -s "${nexus_dir}/plantuml-${STAGING_VERSION}-sources.jar"     "${release_dir}/plantuml-${RELEASE_VERSION}-sources.jar"
 ln -s "${nexus_dir}/plantuml-${STAGING_VERSION}-sources.jar.asc" "${release_dir}/plantuml-${RELEASE_VERSION}-sources.jar.asc"
-
-tree target

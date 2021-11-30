@@ -9,11 +9,11 @@ on:
   workflow_dispatch:
     inputs:
       use_sha:
-        description: Choose a particular commit to build\n(optional, 40 digit long-sha)
+        description: Choose a particular commit to build (optional, 40 digit long-sha)
         required: false
         default: ""
       release_version:
-        description: Version to release\n(optional, formatted like "1.20xx.x")
+        description: Version to release (optional, formatted like "1.20xx.x")
         required: false
         default: ""
 
@@ -154,6 +154,7 @@ jobs:
             "-Dgpg.passphrase=${PASSPHRASE}" \
             "-Dmaven.test.skip=true" \
             "-DskipRemoteStaging=true" \
+            "-DskipStaging=true" \
             -P release \
             deploy
 
