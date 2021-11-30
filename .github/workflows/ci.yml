@@ -134,21 +134,19 @@ jobs:
       # Alas, the repeated "matrix.release_from_this_build" tests are messy but do not see a simple way to avoid them
       # See https://github.com/actions/runner/issues/662
 
-      - name: Setup gpg
+      - name: Package & sign
         if: matrix.release_from_this_build
         env:
-          JAR_SIGNING_KEY: ${{ secrets.JAR_SIGNING_KEY }}
-        run: echo "${JAR_SIGNING_KEY}" | gpg --batch --import --import-options import-show
-
-      - name: Package
-        if: matrix.release_from_this_build
-        env:
-          JAR_SIGNING_KEY_ID: ${{ secrets.JAR_SIGNING_KEY_ID }}
-          JAR_SIGNING_PASSPHRASE: ${{ secrets.JAR_SIGNING_PASSPHRASE }}
+          GPG_KEY: ${{ secrets.JAR_SIGNING_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.JAR_SIGNING_PASSPHRASE }}
         run: |
+          echo "${GPG_KEY}" | gpg --batch --import --import-options import-show
+          
+          key_id="$(echo "${GPG_KEY}" | gpg --batch --show-keys --with-colons | awk -F: '$1 == "sec" { print $5 }')"
+          
           mvn --batch-mode \
-            "-Dgpg.keyname=${JAR_SIGNING_KEY_ID}" \
-            "-Dgpg.passphrase=${JAR_SIGNING_PASSPHRASE}" \
+            "-Dgpg.keyname=${key_id}" \
+            "-Dgpg.passphrase=${GPG_PASSPHRASE}" \
             "-Dmaven.test.skip=true" \
             package javadoc:jar gpg:sign
 
