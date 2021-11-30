@@ -10,7 +10,7 @@ git commit -m "Release ${RELEASE_VERSION}"
 git tag "${TAG}"
 
 git push origin "${TAG}"
-          
+
 gh release create --title "${TAG}" "${TAG}" \
   "plantuml-${RELEASE_VERSION}.pom" \
   "plantuml-${RELEASE_VERSION}.pom.asc" \
