@@ -154,7 +154,6 @@ jobs:
             "-Dgpg.passphrase=${PASSPHRASE}" \
             "-Dmaven.test.skip=true" \
             "-DskipRemoteStaging=true" \
-            "-DskipStaging=true" \
             -P release \
             deploy
 
@@ -245,4 +244,4 @@ jobs:
         env:
           OSSRH_USERNAME: todo
           OSSRH_PASSWORD: todo
-        run: mvn --batch-mode -DautoReleaseAfterClose=true -P release nexus-staging:deploy-staged
+        run: mvn --batch-mode -P release nexus-staging:deploy-staged
