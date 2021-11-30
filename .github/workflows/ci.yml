@@ -50,7 +50,7 @@ jobs:
             core.info(`context.ref        '${context.ref}'`)
             core.info(`context.repo.owner '${context.repo.owner}'`)
             core.info("inputs:")
-            core.info(JSON.stringify(inputs, space:2))
+            core.info(JSON.stringify(inputs, null, 2))
 
             const release_version = inputs.release_version
             const use_sha = inputs.use_sha
