@@ -177,7 +177,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: ${{ github.run_number }}-nexus-staging
-          path: target
+          path: target/nexus-staging
 
       - name: Prepare snapshot release
         env:
@@ -224,7 +224,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: ${{ github.run_number }}-nexus-staging
-          path: target
+          path: target/nexus-staging
 
       - name: Prepare github release
         env:
