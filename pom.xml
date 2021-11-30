@@ -191,19 +191,10 @@
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.2.0</version>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <javadoc.opts>-Xdoclint:none</javadoc.opts>
-              <additionalparam>-Xdoclint:none</additionalparam>
-              <doclint>none</doclint>
-            </configuration>
-          </execution>
-        </executions>
+        <configuration>
+          <doclint>none</doclint>
+          <quiet>true</quiet>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
