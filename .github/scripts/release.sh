@@ -3,6 +3,14 @@ set -ex
 
 TAG="v${RELEASE_VERSION}"
 
+cp -f "plantuml-${RELEASE_VERSION}.pom" pom.xml
+git add pom.xml
+git commit -m "Release ${RELEASE_VERSION}"
+
+git tag "${TAG}"
+
+git push origin "${TAG}"
+          
 gh release create --title "${TAG}" "${TAG}" \
   "plantuml-${RELEASE_VERSION}.pom" \
   "plantuml-${RELEASE_VERSION}.pom.asc" \
