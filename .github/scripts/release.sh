@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 set -ex
 
-mv plantuml.jar         "plantuml-${POM_VERSION}.jar"
-mv plantuml-javadoc.jar "plantuml-${POM_VERSION}-javadoc.jar"
-mv plantuml-sources.jar "plantuml-${POM_VERSION}-sources.jar"
+TAG="v${RELEASE_VERSION}"
 
-gh release create --target "${GITHUB_SHA}" "${TAG}" \
-  "plantuml-${POM_VERSION}.jar" \
-  "plantuml-${POM_VERSION}-javadoc.jar" \
-  "plantuml-${POM_VERSION}-sources.jar"
+gh release create --title "${TAG}" "${TAG}" \
+  "plantuml-${RELEASE_VERSION}.pom" \
+  "plantuml-${RELEASE_VERSION}.pom.asc" \
+  "plantuml-${RELEASE_VERSION}.jar" \
+  "plantuml-${RELEASE_VERSION}.jar.asc" \
+  "plantuml-${RELEASE_VERSION}-javadoc.jar" \
+  "plantuml-${RELEASE_VERSION}-javadoc.jar.asc" \
+  "plantuml-${RELEASE_VERSION}-sources.jar" \
+  "plantuml-${RELEASE_VERSION}-sources.jar.asc" \
+  "plantuml-${RELEASE_VERSION}-timestamp.lock"
 
 echo "::notice title=::Released at ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG} 🎉"
