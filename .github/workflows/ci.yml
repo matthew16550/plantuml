@@ -245,4 +245,4 @@ jobs:
         env:
           OSSRH_USERNAME: todo
           OSSRH_PASSWORD: todo
-        run: mvn --batch-mode -DautoReleaseAfterClose=true -P release deploy-staged
+        run: mvn --batch-mode -DautoReleaseAfterClose=true -P release nexus-staging:deploy-staged
