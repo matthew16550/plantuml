@@ -212,8 +212,8 @@ jobs:
       - name: Set up java
         uses: actions/setup-java@v2.3.1
         with:
-          java-version: 17
-          distribution: zulu
+          java-version: 11
+          distribution: adopt  # todo
           cache: maven
           server-id: ossrh
           server-username: OSSRH_USERNAME
@@ -245,7 +245,7 @@ jobs:
           OSSRH_USERNAME: todo
           OSSRH_PASSWORD: todo
         run: |
-          # mvn --batch-mode -P release nexus-staging:deploy-staged
+          mvn --batch-mode -P release nexus-staging:deploy-staged
           mvn -q \
             -Dexec.args='::notice title=::Released at https://search.maven.org/artifact/${project.groupId}/${project.artifactId}/${project.version}/jar 🎉' \
             -Dexec.executable=echo --non-recursive exec:exec
