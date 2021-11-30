@@ -61,7 +61,7 @@ jobs:
               throw new Error(`Invalid use_sha '${use_sha}'`)
 
             // Which commit to use
-            core.setOutput("use_sha", use_sha ? use_sha : github.sha)
+            core.setOutput("use_sha", use_sha ? use_sha : context.sha)
 
             // Release a new version
             if (release_version) {
@@ -112,7 +112,7 @@ jobs:
 
       # Downloading all the dependencies is very log spammy, so we do this in its own step.
       - name: Prime maven cache
-        run: mvn --batch-mode dependency:go-offline
+        run: mvn --batch-mode -P release dependency:go-offline
 
       - name: Set POM version
         if: needs.workflow_config.outputs.do_release == 'true'
@@ -218,7 +218,7 @@ jobs:
           server-password: OSSRH_PASSWORD
 
       - name: Prime maven cache
-        run: mvn --batch-mode dependency:go-offline
+        run: mvn --batch-mode -P release dependency:go-offline
 
       - name: Download artifacts
         uses: actions/download-artifact@v2

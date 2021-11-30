@@ -1,16 +1,6 @@
 #! /usr/bin/env bash
 set -ex
 
-if [[ -z "${FROM_VERSION}" ]]; then
-  echo "FROM_VERSION required"
-  exit 1
-fi
-
-if [[ -z "${TO_VERSION}" ]]; then
-  echo "TO_VERSION required"
-  exit 1
-fi
-
 from_dir="target/nexus-staging/deferred/net/sourceforge/plantuml/plantuml/${FROM_VERSION}"
 to_dir="target/github_release_staging"
 
