@@ -52,7 +52,7 @@ jobs:
             if (workflow_dispatch)
               core.info("workflow_dispatch inputs:\n"+ JSON.stringify(context.payload.inputs, null, 2))
 
-            const {release_version, use_sha} = workflow_dispatch ? context.payload.inputs : null
+            const {release_version, use_sha} = workflow_dispatch ? context.payload.inputs : {}
 
             if (release_version && !release_version.match(/^1\.20[0-9][0-9]\.[0-9]+$/))
               throw new Error(`Invalid release_version '${release_version}'`)
