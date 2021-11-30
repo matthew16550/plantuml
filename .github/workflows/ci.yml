@@ -181,8 +181,8 @@ jobs:
 
       - name: Prepare snapshot release
         env:
-          FROM_VERSION: 0-SNAPSHOT
-          TO_VERSION: SNAPSHOT
+          STAGING_VERSION: 0-SNAPSHOT
+          RELEASE_VERSION: SNAPSHOT
         run: .github/scripts/prepare_github_release.sh
 
       - name: Deploy to github
@@ -228,8 +228,8 @@ jobs:
 
       - name: Prepare github release
         env:
-          FROM_VERSION: ${{ needs.workflow_config.outputs.release_version }}
-          TO_VERSION: ${{ needs.workflow_config.outputs.release_version }}
+          STAGING_VERSION: ${{ needs.workflow_config.outputs.release_version }}
+          RELEASE_VERSION: ${{ needs.workflow_config.outputs.release_version }}
         run: .github/scripts/prepare_github_release.sh
 
       - name: Deploy to github
