@@ -19,7 +19,6 @@ git tag --force "${TAG}"
 git push --force origin "${TAG}"
 
 gh release create \
-  --repo "${GITHUB_REPOSITORY}" \
   --prerelease \
   --target "${USE_SHA}" \
   --title "${TAG}" \

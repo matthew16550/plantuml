@@ -16,7 +16,6 @@ git tag "${TAG}"
 git push origin "${TAG}"
 
 gh release create \
-  --repo "${GITHUB_REPOSITORY}" \
   --title "${TAG}" \
   --notes-file notes.txt \
   "${TAG}" target/github_release/*
