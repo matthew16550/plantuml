@@ -15,6 +15,10 @@ git tag "${TAG}"
 
 git push origin "${TAG}"
 
-gh release create --title "${TAG}" --notes-file notes.txt "${TAG}" target/github_release/*
+gh release create \
+  --repo "${GITHUB_REPOSITORY}" \
+  --title "${TAG}" \
+  --notes-file notes.txt \
+  "${TAG}" target/github_release/*
 
 echo "::notice title=::Released at ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG} 🎉"

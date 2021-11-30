@@ -171,8 +171,10 @@ jobs:
     if: needs.workflow_config.outputs.do_snapshot_release == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v2
+#      - name: Checkout the repository
+#        uses: actions/checkout@v2
+#        with:
+#          ref: ${{ needs.workflow_config.outputs.use_sha }}
 
       - name: Download artifacts
         uses: actions/download-artifact@v2
@@ -200,7 +202,7 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
         with:
-          ref: refs/tags/v${{ needs.workflow_config.outputs.release_version }}
+          ref: ${{ needs.workflow_config.outputs.use_sha }}
 
       - name: Configure Git
         run: |

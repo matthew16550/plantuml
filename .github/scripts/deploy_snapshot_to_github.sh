@@ -18,6 +18,12 @@ git tag --force "${TAG}"
 
 git push --force origin "${TAG}"
 
-gh release create --prerelease --target "${USE_SHA}" --title "${TAG}" --notes-file notes.txt "${TAG}" target/github_release/*
+gh release create \
+  --repo "${GITHUB_REPOSITORY}" \
+  --prerelease \
+  --target "${USE_SHA}" \
+  --title "${TAG}" \
+  --notes-file notes.txt \
+  "${TAG}" target/github_release/*
 
 echo "::notice title=release snapshot::Snapshot released at ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG} and taken the ${DATE_TIME_UTC}"
