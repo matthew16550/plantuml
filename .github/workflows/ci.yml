@@ -42,18 +42,17 @@ jobs:
               context.repo.owner, // kludge so that forked repos can release themselves when testing the workflow
             ])
 
-            const workflow_dispatch = context.eventName === "workflow_dispatch"
-            const inputs = workflow_dispatch ? context.payload.inputs : {}
-
             core.info(`context.eventName  '${context.eventName}'`)
             core.info(`context.actor      '${context.actor}'`)
             core.info(`context.ref        '${context.ref}'`)
             core.info(`context.repo.owner '${context.repo.owner}'`)
-            core.info("inputs:")
-            core.info(JSON.stringify(inputs, null, 2))
 
-            const release_version = inputs.release_version
-            const use_sha = inputs.use_sha
+            const workflow_dispatch = context.eventName === "workflow_dispatch"
+            
+            if (workflow_dispatch)
+              core.info("workflow_dispatch inputs:\n"+ JSON.stringify(context.payload.inputs, null, 2))
+
+            const {release_version, use_sha} = workflow_dispatch ? context.payload.inputs : null
 
             if (release_version && !release_version.match(/^1\.20[0-9][0-9]\.[0-9]+$/))
               throw new Error(`Invalid release_version '${release_version}'`)
@@ -65,7 +64,7 @@ jobs:
             core.setOutput("use_sha", use_sha ? use_sha : github.sha)
 
             // Release a new version
-            if (workflow_dispatch && context.payload.inputs.release_version) {
+            if (release_version) {
               if (!AUTHORIZED_RELEASERS.has(context.actor))
                 throw new Error(`Sorry, '${context.actor}' is not authorized to make a release`)
 
