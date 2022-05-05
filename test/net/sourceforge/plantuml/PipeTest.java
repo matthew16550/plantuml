@@ -12,14 +12,14 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sourceforge.plantuml.error.PSystemError;
-
 import org.assertj.core.api.AutoCloseableSoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import net.sourceforge.plantuml.error.PSystemError;
 
 class PipeTest {
 
@@ -51,7 +51,7 @@ class PipeTest {
 		try (AutoCloseableSoftAssertions softly = new AutoCloseableSoftAssertions()) {
 			softly.assertThat(errorStatus.hasError()).isFalse();
 			softly.assertThat(errorStatus.isNoData()).isTrue();
-			softly.assertThat(baos.toByteArray()).isEmpty();
+			softly.assertThat(baos.toByteArray()).isNotEmpty();
 		}
 	}
 
@@ -187,6 +187,7 @@ class PipeTest {
 		String actual = pipe.readFirstDiagram();
 
 		assertThat(actual).isNull();
+    throw new IOException();
 	}
 
 	@Test
