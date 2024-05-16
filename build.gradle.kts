@@ -36,7 +36,7 @@ dependencies {
 	testImplementation("org.xmlunit:xmlunit-core:2.9.+")
 	if (JavaVersion.current().isJava8) {
 		testImplementation("org.mockito:mockito-core:4.+")
-		testImplementation("org.mockito:mockito-junit-jupiter:4.+")
+		testImplementation("org.mockito:mockito-junit-jupiter:5.+")
 	} else {
 		testImplementation("org.mockito:mockito-core:5.+")
 		testImplementation("org.mockito:mockito-junit-jupiter:5.+")
