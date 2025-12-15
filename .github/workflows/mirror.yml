@@ -21,8 +21,8 @@ jobs:
 
       - name: 'Push'
         env:
-          CODEBERG_MIRROR_USERNAME="${{ secrets.CODEBERG_MIRROR_USERNAME }}"
-          CODEBERG_MIRROR_PASSWORD="${{ secrets.CODEBERG_MIRROR_PASSWORD }}"
+          CODEBERG_MIRROR_USERNAME: ${{ secrets.CODEBERG_MIRROR_USERNAME }}
+          CODEBERG_MIRROR_PASSWORD: ${{ secrets.CODEBERG_MIRROR_PASSWORD }}
         run: |
           git remote add mirror "https://${CODEBERG_MIRROR_USERNAME}:${CODEBERG_MIRROR_PASSWORD}@codeberg.org/${GITHUB_REPOSITORY}.git"
           git push --mirror mirror
