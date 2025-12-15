@@ -4,6 +4,10 @@ on:
   push:
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   mirror_to_codeberg:
     name: 'Mirror repo to Codeberg'
