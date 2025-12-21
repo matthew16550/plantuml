@@ -1,0 +1,49 @@
+name: 'Mirror to other repos'
+
+on:
+  schedule:
+    # Triggered by cron and not by pushes etc to avoid race conditions when several pushes happen close together.
+    # This time is arbitrarily chosen.
+    # As recommended in [1] the minutes are not on the hour so the event is less likely to be dropped.
+    # [1]: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule
+    - cron: "37 1 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: mirror-repo
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  mirror_to_codeberg:
+    name: 'Mirror to Codeberg'
+    runs-on: ubuntu-latest
+
+    # Forgejo has Automatic "Pull Mirroring" [1] but Codeberg has disabled it [2] so instead we use plain old git cli.
+    # [1]: https://forgejo.org/docs/latest/user/repo-mirror/#pulling-from-a-remote-repository
+    # [2]: https://blog.codeberg.org/mirror-repos-easily-created-consuming-resources-forever.html
+
+    steps:
+      - name: 'Checkout'
+        # Using "git clone --mirror" rather than actions/checkout so that all branches will be mirrored
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone --mirror "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo.git
+
+      - name: 'Prepare'
+        run: |
+          cd repo.git
+          echo "Deleting refs/pull/* in local checkout because Codeberg will not allow them to be pushed ..."
+          git for-each-ref --format="%(refname)" refs/pull/ | xargs -L 1 -r -t git update-ref -d
+
+      - name: 'Push'
+        env:
+          # CODEBERG_MIRROR_CREDENTIALS should contain CODEBERG_USERNAME:CODEBERG_ACCESS_TOKEN
+          CODEBERG_MIRROR_CREDENTIALS: ${{ secrets.CODEBERG_MIRROR_CREDENTIALS }}
+        run: |
+          cd repo.git
+          git push --mirror "https://${CODEBERG_MIRROR_CREDENTIALS}@codeberg.org/${GITHUB_REPOSITORY}.git"
+          echo "[Codeberg Mirror](https://codeberg.org/${GITHUB_REPOSITORY}) updated" >> $GITHUB_STEP_SUMMARY
