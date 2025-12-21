@@ -1,4 +1,4 @@
-name: 'Mirror to other repos'
+name: 'Mirror repos to other systems'
 
 on:
   schedule:
@@ -17,13 +17,51 @@ defaults:
     shell: bash
 
 jobs:
+  prepare:
+    name: 'Prepare'
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: |
+          env | sort
+      - name: Check CODEBERG_MIRROR_CREDENTIALS secret is set
+        #if: ${{ secrets.CODEBERG_MIRROR_CREDENTIALSX == '' }}
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          🛑 CODEBERG_MIRROR_CREDENTIALS secret is not set.
+
+          Make a [Codeberg access token](https://codeberg.org/user/settings/applications) with these options:
+          - Public only
+          - Select Permissions
+            - repository = Read and Write
+            - all other permission = No access
+
+          ⚠️ Note these permissions are less than those needed by tools/create-codeberg-repo.sh.
+
+          Add the secret in [Github](${GITHUB_REPOSITORY_URL}/settings/secrets) using the format
+          CODEBERG_USERNAME:CODEBERG_ACCESS_TOKEN
+          EOF
+          exit 1
+
   mirror_to_codeberg:
     name: 'Mirror to Codeberg'
     runs-on: ubuntu-latest
 
-    # Forgejo has Automatic "Pull Mirroring" [1] but Codeberg has disabled it [2] so instead we use plain old git cli.
+    # Forgejo has automatic "Pull Mirroring" [1] but Codeberg has disabled it [2] so instead we use plain old git cli.
     # [1]: https://forgejo.org/docs/latest/user/repo-mirror/#pulling-from-a-remote-repository
     # [2]: https://blog.codeberg.org/mirror-repos-easily-created-consuming-resources-forever.html
+
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          # Before adding a repo to this list, you should run tools/create-codeberg-repo.sh to create the repo in Codeberg.
+          - language-grammar
+          - plantuml
+
+    env:
+      REPO: ${{ matrix.repo }}
+      OWNER_AND_REPO: ${{ github.repository_owner }}/${{ matrix.repo }}
 
     steps:
       - name: 'Checkout'
@@ -31,19 +69,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git clone --mirror "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo.git
+          git clone --mirror "https://x-access-token:${GITHUB_TOKEN}@github.com/${OWNER_AND_REPO}.git"
 
-      - name: 'Prepare'
+      - name: 'Edit'
         run: |
-          cd repo.git
+          cd "${REPO}.git"
           echo "Deleting refs/pull/* in local checkout because Codeberg will not allow them to be pushed ..."
           git for-each-ref --format="%(refname)" refs/pull/ | xargs -L 1 -r -t git update-ref -d
 
       - name: 'Push'
         env:
-          # CODEBERG_MIRROR_CREDENTIALS should contain CODEBERG_USERNAME:CODEBERG_ACCESS_TOKEN
           CODEBERG_MIRROR_CREDENTIALS: ${{ secrets.CODEBERG_MIRROR_CREDENTIALS }}
         run: |
-          cd repo.git
-          git push --mirror "https://${CODEBERG_MIRROR_CREDENTIALS}@codeberg.org/${GITHUB_REPOSITORY}.git"
-          echo "[Codeberg Mirror](https://codeberg.org/${GITHUB_REPOSITORY}) updated" >> $GITHUB_STEP_SUMMARY
+          cd "${REPO}.git"
+          git push --mirror "https://${CODEBERG_MIRROR_CREDENTIALS}@codeberg.org/${OWNER_AND_REPO}.git"
