@@ -1,0 +1,103 @@
+name: 'Mirror repos to other systems'
+
+on:
+  schedule:
+    # Triggered by cron and not by pushes etc to avoid race conditions when several pushes happen close together.
+    # This time is arbitrarily chosen.
+    # As recommended in [1] the minutes are not on the hour so the event is less likely to be dropped.
+    # [1]: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule
+    - cron: "37 1 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: mirror-repo
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  prepare:
+    name: 'Prepare'
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_SETTINGS_URL: ${{ github.server_url }}/${{ github.repository }}/settings
+    steps:
+      - name: Ensure CODEBERG_MIRROR_TOKEN secret is set
+        if: ${{ always() }}
+        env:
+          CODEBERG_MIRROR_TOKEN: ${{ secrets.CODEBERG_MIRROR_TOKEN }}
+        run: |
+          [ -n "${CODEBERG_MIRROR_TOKEN}" ] && exit 0
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          🛑 CODEBERG_MIRROR_TOKEN is not set, add it as a [Repository Secret](${GITHUB_SETTINGS_URL}/secrets/actions).
+
+          You need a [Codeberg access token](https://codeberg.org/user/settings/applications) with these options:
+          - Public only
+          - Select Permissions
+            - repository = Read and Write
+            - all other permissions = No access
+            - ⚠️ Note these permissions are less than those needed by tools/create-codeberg-repo.sh.
+          EOF
+          exit 1
+
+      - name: Ensure CODEBERG_MIRROR_USERNAME variable is set
+        if: ${{ always() }}
+        env:
+          CODEBERG_MIRROR_USERNAME: ${{ vars.CODEBERG_MIRROR_USERNAME }}
+        run: |
+          [ -n "${CODEBERG_MIRROR_USERNAME}" ] && exit 0
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          🛑 CODEBERG_MIRROR_USERNAME is not set, add it as a [Repository variable](${GITHUB_SETTINGS_URL}/variables/actions).
+          EOF
+          exit 1
+
+  mirror_to_codeberg:
+    name: 'Mirror to Codeberg'
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    # Forgejo has automatic "Pull Mirroring" [1] but Codeberg has disabled it [2] so instead we use plain old git cli.
+    # [1]: https://forgejo.org/docs/latest/user/repo-mirror/#pulling-from-a-remote-repository
+    # [2]: https://blog.codeberg.org/mirror-repos-easily-created-consuming-resources-forever.html
+
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          # Before adding a repo to this list, you should run tools/create-codeberg-repo.sh (on your dev machine)
+          # to create the repo in Codeberg.
+          #
+          # We do not auto create repos in this workflow because it:
+          # - almost never happens.
+          # - would make the workflow more complicated.
+          # - requires a "user = Read and Write" Codeberg permission that is not necessary while mirroring,
+          #   so following the Principle of Least Privilege we should not make that permission available here.
+          - language-grammar
+          - plantuml
+
+    env:
+      REPO: ${{ matrix.repo }}
+      OWNER_AND_REPO: ${{ github.repository_owner }}/${{ matrix.repo }}
+
+    steps:
+      - name: 'Checkout'
+        # Using "git clone --mirror" rather than actions/checkout so that all branches will be mirrored
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone --mirror "https://x-access-token:${GITHUB_TOKEN}@github.com/${OWNER_AND_REPO}.git"
+
+      - name: 'Edit'
+        run: |
+          cd "${REPO}.git"
+          echo "Deleting refs/pull/* in local checkout because Codeberg will not allow them to be pushed ..."
+          git for-each-ref --format="%(refname)" refs/pull/ | xargs -L 1 -r -t git update-ref -d
+
+      - name: 'Push'
+        env:
+          CODEBERG_MIRROR_TOKEN: ${{ secrets.CODEBERG_MIRROR_TOKEN }}
+          CODEBERG_MIRROR_USERNAME: ${{ vars.CODEBERG_MIRROR_USERNAME }}
+        run: |
+          cd "${REPO}.git"
+          git push --mirror "https://${CODEBERG_MIRROR_USERNAME}:${CODEBERG_MIRROR_TOKEN}@codeberg.org/${OWNER_AND_REPO}.git"
