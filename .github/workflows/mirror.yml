@@ -30,15 +30,14 @@ jobs:
         run: |
           [ -n "${CODEBERG_MIRROR_TOKEN}" ] && exit 0
           cat >> $GITHUB_STEP_SUMMARY <<EOF
-          🛑 CODEBERG_MIRROR_TOKEN is not set, add it as a [Repository Secret](${GITHUB_SETTINGS_URL}/secrets/actions)
+          🛑 CODEBERG_MIRROR_TOKEN is not set, add it as a [Repository Secret](${GITHUB_SETTINGS_URL}/secrets/actions).
 
           You need a [Codeberg access token](https://codeberg.org/user/settings/applications) with these options:
           - Public only
           - Select Permissions
             - repository = Read and Write
             - all other permissions = No access
-
-          ⚠️ Note these permissions are less than those needed by tools/create-codeberg-repo.sh.
+            - ⚠️ Note these permissions are less than those needed by tools/create-codeberg-repo.sh.
           EOF
           exit 1
 
@@ -49,7 +48,7 @@ jobs:
         run: |
           [ -n "${CODEBERG_MIRROR_USERNAME}" ] && exit 0
           cat >> $GITHUB_STEP_SUMMARY <<EOF
-          🛑 CODEBERG_MIRROR_USERNAME is not set, add it as a [Repository variable](${GITHUB_SETTINGS_URL}/variables/actions)
+          🛑 CODEBERG_MIRROR_USERNAME is not set, add it as a [Repository variable](${GITHUB_SETTINGS_URL}/variables/actions).
           EOF
           exit 1
 
