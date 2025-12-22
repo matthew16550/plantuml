@@ -65,7 +65,8 @@ jobs:
       fail-fast: false
       matrix:
         repo:
-          # Before adding a repo to this list, you should run tools/create-codeberg-repo.sh to create the repo in Codeberg.
+          # Before adding a repo to this list, you should run tools/create-codeberg-repo.sh (on your dev machine)
+          # to create the repo in Codeberg.
           #
           # We do not auto create repos in this workflow because it:
           # - almost never happens.
