@@ -34,11 +34,11 @@ jobs:
           - Public only
           - Select Permissions
             - repository = Read and Write
-            - all other permission = No access
+            - all other permissions = No access
 
           ⚠️ Note these permissions are less than those needed by tools/create-codeberg-repo.sh.
 
-          Add the secret in [Github](${GITHUB_REPOSITORY_URL}/settings/secrets) using the format
+          Add the secret in [Github](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/settings/secrets) using the format
           CODEBERG_USERNAME:CODEBERG_ACCESS_TOKEN
           EOF
           exit 1
@@ -46,6 +46,7 @@ jobs:
   mirror_to_codeberg:
     name: 'Mirror to Codeberg'
     runs-on: ubuntu-latest
+    needs: prepare
 
     # Forgejo has automatic "Pull Mirroring" [1] but Codeberg has disabled it [2] so instead we use plain old git cli.
     # [1]: https://forgejo.org/docs/latest/user/repo-mirror/#pulling-from-a-remote-repository
