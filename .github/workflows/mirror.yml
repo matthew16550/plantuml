@@ -22,13 +22,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: |
-          env | sort
-      - name: Check CODEBERG_MIRROR_CREDENTIALS secret is set
-        #if: ${{ secrets.CODEBERG_MIRROR_CREDENTIALSX == '' }}
+      - name: Ensure CODEBERG_MIRROR_TOKEN secret is set
+        if: ${{ always() }}
+        env:
+          CODEBERG_MIRROR_TOKEN: ${{ secrets.CODEBERG_MIRROR_TOKEN }}
         run: |
+          [ -n "${CODEBERG_MIRROR_TOKEN}" ] && exit 0
           cat >> $GITHUB_STEP_SUMMARY <<EOF
-          🛑 CODEBERG_MIRROR_CREDENTIALS secret is not set.
+          🛑 CODEBERG_MIRROR_TOKEN secret is not set.
 
           Make a [Codeberg access token](https://codeberg.org/user/settings/applications) with these options:
           - Public only
@@ -38,9 +39,18 @@ jobs:
 
           ⚠️ Note these permissions are less than those needed by tools/create-codeberg-repo.sh.
 
-          Add the secret in [Github](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/settings/secrets) using the format
-          CODEBERG_USERNAME:CODEBERG_ACCESS_TOKEN
+          Add the token as a [Repository Secret](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/settings/secrets/actions)
           EOF
+          exit 1
+
+      - name: Ensure CODEBERG_MIRROR_USERNAME variable is set
+        if: ${{ always() }}
+        env:
+          CODEBERG_MIRROR_USERNAME: ${{ vars.CODEBERG_MIRROR_USERNAME }}
+        run: |
+          [ -n "${CODEBERG_MIRROR_USERNAME}" ] && exit 0
+          echo "🛑 CODEBERG_MIRROR_USERNAME variable is not set." >> $GITHUB_STEP_SUMMARY
+          echo "Add it as a [Repository variables](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/settings/variables/actions)" >> $GITHUB_STEP_SUMMARY
           exit 1
 
   mirror_to_codeberg:
@@ -80,7 +90,8 @@ jobs:
 
       - name: 'Push'
         env:
-          CODEBERG_MIRROR_CREDENTIALS: ${{ secrets.CODEBERG_MIRROR_CREDENTIALS }}
+          CODEBERG_MIRROR_TOKEN: ${{ secrets.CODEBERG_MIRROR_TOKEN }}
+          CODEBERG_MIRROR_USERNAME: ${{ vars.CODEBERG_MIRROR_USERNAME }}
         run: |
           cd "${REPO}.git"
-          git push --mirror "https://${CODEBERG_MIRROR_CREDENTIALS}@codeberg.org/${OWNER_AND_REPO}.git"
+          git push --mirror "https://${CODEBERG_MIRROR_USERNAME}:${CODEBERG_MIRROR_TOKEN}@codeberg.org/${OWNER_AND_REPO}.git"
